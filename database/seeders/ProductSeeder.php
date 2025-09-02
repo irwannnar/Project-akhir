@@ -18,7 +18,7 @@ class ProductSeeder extends Seeder
             //     'name' => 'Sablon baju Putih',
             //     'type' => 'Sablon',
             //     'price_per_unit' => 30000,
-            //     'cost_per_unit' => 10000,
+            //     'cost_per_unit' => 25000,
             //     'descriptions' => 'Sablon baju putih '
             // ],
             // [
@@ -53,7 +53,7 @@ class ProductSeeder extends Seeder
             //     'name' => 'Sablon baju one piece Hitam',
             //     'type' => 'Sablon',
             //     'price_per_unit' => 30000,
-            //     'cost_per_unit' => 10000,
+            //     'cost_per_unit' => 25000,
             //     'descriptions' => 'Sablon baju one piece Hitam'
             // ],
             // [

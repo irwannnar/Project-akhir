@@ -2,131 +2,60 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Order extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
+        'order_code',
         'customer_name',
-        'service_id',
-        'order_details',
+        'customer_phone',
+        'customer_email',
+        'customer_address',
+        'printing_type',
+        'material',
         'quantity',
+        'width',
+        'height',
+        'notes',
+        'file_path',
         'total_price',
-        'status',
-        'notes'
+        'status'
     ];
 
     protected $casts = [
-        'total_price' => 'decimal:2',
         'quantity' => 'integer',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'width' => 'decimal:2',
+        'height' => 'decimal:2',
+        'total_price' => 'decimal:2'
     ];
 
-    const STATUS_PENDING = 'pending';
-    const STATUS_PROCESSING = 'processing';
-    const STATUS_COMPLETED = 'completed';
-    const STATUS_CANCELLED = 'cancelled';
-
     /**
-     * Get available statuses with translations
+     * Scope a query to filter by status.
      */
-    public static function getStatuses(): array
+    public function scopeStatus($query, $status)
     {
-        return [
-            self::STATUS_PENDING => 'Menunggu',
-            self::STATUS_PROCESSING => 'Diproses',
-            self::STATUS_COMPLETED => 'Selesai',
-            self::STATUS_CANCELLED => 'Dibatalkan',
-        ];
+        return $query->where('status', $status);
     }
 
     /**
-     * Get the status text in Indonesian
+     * Scope a query to filter by printing type.
      */
-    public function getStatusTextAttribute(): string
+    public function scopePrintingType($query, $type)
     {
-        return self::getStatuses()[$this->status] ?? 'Tidak Diketahui';
+        return $query->where('printing_type', $type);
     }
 
     /**
-     * Format total price for display
+     * Scope a query to search orders.
      */
-    public function getFormattedTotalPriceAttribute(): string
+    public function scopeSearch($query, $search)
     {
-        return 'Rp ' . number_format($this->total_price, 0, ',', '.');
-    }
-
-    /**
-     * Scope for pending orders
-     */
-    public function scopePending($query)
-    {
-        return $query->where('status', self::STATUS_PENDING);
-    }
-
-    /**
-     * Scope for processing orders
-     */
-    public function scopeProcessing($query)
-    {
-        return $query->where('status', self::STATUS_PROCESSING);
-    }
-
-    /**
-     * Scope for completed orders
-     */
-    public function scopeCompleted($query)
-    {
-        return $query->where('status', self::STATUS_COMPLETED);
-    }
-
-    /**
-     * Scope for cancelled orders
-     */
-    public function scopeCancelled($query)
-    {
-        return $query->where('status', self::STATUS_CANCELLED);
-    }
-
-    /**
-     * Check if order is pending
-     */
-    public function isPending(): bool
-    {
-        return $this->status === self::STATUS_PENDING;
-    }
-
-    /**
-     * Check if order is processing
-     */
-    public function isProcessing(): bool
-    {
-        return $this->status === self::STATUS_PROCESSING;
-    }
-
-    /**
-     * Check if order is completed
-     */
-    public function isCompleted(): bool
-    {
-        return $this->status === self::STATUS_COMPLETED;
-    }
-
-    /**
-     * Check if order is cancelled
-     */
-    public function isCancelled(): bool
-    {
-        return $this->status === self::STATUS_CANCELLED;
-    }
-
-    /**
-     * Relationship to PrintingService
-     */
-    public function service(): BelongsTo
-    {
-        return $this->belongsTo(PrintingService::class);
+        return $query->where('order_code', 'like', "%{$search}%")
+                    ->orWhere('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_email', 'like', "%{$search}%");
     }
 }

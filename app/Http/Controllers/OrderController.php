@@ -2,130 +2,244 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
-use App\Models\PrintingService;
 use Illuminate\Http\Request;
+use App\Models\Order;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
-    // Menampilkan semua pesanan
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        $orders = Order::with('service')->latest()->get();
+        $orders = Order::latest()->paginate(10);
+        $statuses = ['pending', 'processing', 'completed', 'cancelled'];
+        $printingTypes = ['digital', 'screen', 'offset', 'sublimation'];
         
-        return view('orders.index', compact('orders')); // Perbaiki: 'order' -> 'orders'
+        return view('order.index', compact('orders', 'statuses', 'printingTypes'));
     }
 
-    // Menampilkan form pembuatan pesanan
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
-        $services = PrintingService::where('is_available', true)->get();
+        $printingTypes = ['digital' => 'Digital Printing', 'screen' => 'Screen Printing', 
+                         'offset' => 'Offset Printing', 'sublimation' => 'Sublimation Printing'];
+        $materials = ['kertas' => 'Kertas', 'plastik' => 'Plastik', 'kain' => 'Kain', 'vinyl' => 'Vinyl'];
         
-        return view('orders.create', compact('services'));
+        return view('order.create', compact('printingTypes', 'materials'));
     }
 
-    // Menyimpan pesanan baru
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'customer_name' => 'required|string|max:255',
-            'service_id' => 'required|exists:printing_services,id',
-            'order_details' => 'required|string',
+            'customer_phone' => 'required|string|max:15',
+            'customer_email' => 'required|email|max:255',
+            'customer_address' => 'required|string',
+            'printing_type' => 'required|in:digital,screen,offset,sublimation',
+            'material' => 'required|string',
             'quantity' => 'required|integer|min:1',
-            'notes' => 'nullable|string'
+            'width' => 'required|numeric|min:1',
+            'height' => 'required|numeric|min:1',
+            'notes' => 'nullable|string',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,ai,eps,cdr,psd|max:10240'
         ]);
-
-        $service = PrintingService::findOrFail($validated['service_id']);
         
-        // Validasi quantity
-        if ($validated['quantity'] < $service->min_order) {
-            return back()->withErrors([
-                'quantity' => 'Jumlah pesanan minimal ' . $service->min_order
-            ])->withInput();
+        // Hitung harga
+        $totalPrice = $this->calculatePrice(
+            $validated['printing_type'],
+            $validated['material'],
+            $validated['quantity'],
+            $validated['width'],
+            $validated['height']
+        );
+        
+        // Simpan file jika ada
+        $filePath = null;
+        if ($request->hasFile('file')) {
+            $filePath = $request->file('file')->store('order-files', 'public');
         }
         
-        if ($validated['quantity'] > $service->max_order) {
-            return back()->withErrors([
-                'quantity' => 'Jumlah pesanan maksimal ' . $service->max_order
-            ])->withInput();
-        }
-
-        $totalPrice = $service->base_price + ($service->price_per_page * $validated['quantity']);
-        
-        Order::create([
+        // Buat order
+        $order = Order::create([
+            'order_code' => 'PRINT' . now()->format('YmdHis') . Str::random(4),
             'customer_name' => $validated['customer_name'],
-            'service_id' => $validated['service_id'],
-            'order_details' => $validated['order_details'],
+            'customer_phone' => $validated['customer_phone'],
+            'customer_email' => $validated['customer_email'],
+            'customer_address' => $validated['customer_address'],
+            'printing_type' => $validated['printing_type'],
+            'material' => $validated['material'],
             'quantity' => $validated['quantity'],
+            'width' => $validated['width'],
+            'height' => $validated['height'],
+            'notes' => $validated['notes'],
+            'file_path' => $filePath,
             'total_price' => $totalPrice,
-            'notes' => $validated['notes'] ?? null,
-            'status' => Order::STATUS_PENDING
+            'status' => 'pending'
         ]);
-
-        return redirect()->route('orders.index')
-            ->with('success', 'Pesanan berhasil dibuat!');
+        
+        return redirect()->route('order.show', $order->id)
+                         ->with('success', 'Order berhasil dibuat! Kode order: ' . $order->order_code);
     }
 
-    // Menampilkan detail pesanan
+    /**
+     * Display the specified resource.
+     */
     public function show(Order $order)
     {
-        $order->load('service'); // Eager load relationship
-        return view('orders.show', compact('order'));
+        return view('order.show', compact('order'));
     }
 
-    // Menampilkan form edit pesanan
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function edit(Order $order)
     {
-        $services = PrintingService::where('is_available', true)->get();
-        $statuses = Order::getStatuses();
+        $printingTypes = ['digital' => 'Digital Printing', 'screen' => 'Screen Printing', 
+                         'offset' => 'Offset Printing', 'sublimation' => 'Sublimation Printing'];
+        $materials = ['kertas' => 'Kertas', 'plastik' => 'Plastik', 'kain' => 'Kain', 'vinyl' => 'Vinyl'];
+        $statuses = ['pending' => 'Pending', 'processing' => 'Processing', 
+                    'completed' => 'Completed', 'cancelled' => 'Cancelled'];
         
-        return view('orders.edit', compact('order', 'services', 'statuses'));
+        return view('order.edit', compact('order', 'printingTypes', 'materials', 'statuses'));
     }
 
-    // Update pesanan
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, Order $order)
     {
         $validated = $request->validate([
             'customer_name' => 'required|string|max:255',
-            'service_id' => 'required|exists:printing_services,id',
-            'order_details' => 'required|string',
+            'customer_phone' => 'required|string|max:15',
+            'customer_email' => 'required|email|max:255',
+            'customer_address' => 'required|string',
+            'printing_type' => 'required|in:digital,screen,offset,sublimation',
+            'material' => 'required|string',
             'quantity' => 'required|integer|min:1',
+            'width' => 'required|numeric|min:1',
+            'height' => 'required|numeric|min:1',
+            'notes' => 'nullable|string',
             'status' => 'required|in:pending,processing,completed,cancelled',
-            'notes' => 'nullable|string'
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,ai,eps,cdr,psd|max:10240'
         ]);
-
-        $service = PrintingService::findOrFail($validated['service_id']);
         
-        // Validasi quantity
-        if ($validated['quantity'] < $service->min_order) {
-            return back()->withErrors([
-                'quantity' => 'Jumlah pesanan minimal ' . $service->min_order
-            ])->withInput();
+        // Hitung harga
+        $totalPrice = $this->calculatePrice(
+            $validated['printing_type'],
+            $validated['material'],
+            $validated['quantity'],
+            $validated['width'],
+            $validated['height']
+        );
+        
+        // Update file jika ada
+        if ($request->hasFile('file')) {
+            // Hapus file lama jika ada
+            if ($order->file_path) {
+                Storage::disk('public')->delete($order->file_path);
+            }
+            
+            $filePath = $request->file('file')->store('order-files', 'public');
+            $validated['file_path'] = $filePath;
         }
         
-        if ($validated['quantity'] > $service->max_order) {
-            return back()->withErrors([
-                'quantity' => 'Jumlah pesanan maksimal ' . $service->max_order
-            ])->withInput();
-        }
-
-        // Hitung ulang harga jika service atau quantity berubah
-        if ($order->service_id != $validated['service_id'] || $order->quantity != $validated['quantity']) {
-            $validated['total_price'] = $service->base_price + ($service->price_per_page * $validated['quantity']);
-        }
-
+        $validated['total_price'] = $totalPrice;
+        
         $order->update($validated);
-
-        return redirect()->route('orders.index')
-            ->with('success', 'Pesanan berhasil diperbarui!');
+        
+        return redirect()->route('order.show', $order->id)
+                         ->with('success', 'Order berhasil diperbarui!');
     }
 
-    // Hapus pesanan
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy(Order $order)
     {
+        // Hapus file jika ada
+        if ($order->file_path) {
+            Storage::disk('public')->delete($order->file_path);
+        }
+        
         $order->delete();
+        
+        return redirect()->route('order.index')
+                         ->with('success', 'Order berhasil dihapus!');
+    }
 
-        return redirect()->route('orders.index') // Perbaiki: 'order.index' -> 'orders.index'
-            ->with('success', 'Pesanan berhasil dihapus!');
+    /**
+     * Calculate order price based on various factors
+     */
+    private function calculatePrice($printingType, $material, $quantity, $width, $height)
+    {
+        // Harga dasar per cm2 untuk setiap jenis printing
+        $basePrices = [
+            'digital' => 0.05,
+            'screen' => 0.08,
+            'offset' => 0.03,
+            'sublimation' => 0.12
+        ];
+        
+        // Faktor material
+        $materialFactors = [
+            'kertas' => 1.0,
+            'plastik' => 1.5,
+            'kain' => 2.0,
+            'vinyl' => 1.8
+        ];
+        
+        // Hitung luas dalam cm2
+        $area = $width * $height;
+        
+        // Hitung harga dasar
+        $basePrice = $basePrices[$printingType] * $area;
+        
+        // Terapkan faktor material
+        $materialPrice = $basePrice * $materialFactors[$material];
+        
+        // Hitung harga total dengan kuantitas
+        $total = $materialPrice * $quantity;
+        
+        // Diskon untuk jumlah besar
+        if ($quantity > 100) {
+            $total *= 0.9; // Diskon 10%
+        } elseif ($quantity > 50) {
+            $total *= 0.95; // Diskon 5%
+        }
+        
+        return round($total, 2);
+    }
+
+    /**
+     * Filter orders by status
+     */
+    public function filterByStatus($status)
+    {
+        $orders = Order::status($status)->latest()->paginate(10);
+        $statuses = ['pending', 'processing', 'completed', 'cancelled'];
+        $printingTypes = ['digital', 'screen', 'offset', 'sublimation'];
+        
+        return view('order.index', compact('orders', 'statuses', 'printingTypes', 'status'));
+    }
+
+    /**
+     * Search orders
+     */
+    public function search(Request $request)
+    {
+        $search = $request->input('search');
+        $orders = Order::search($search)->latest()->paginate(10);
+        $statuses = ['pending', 'processing', 'completed', 'cancelled'];
+        $printingTypes = ['digital', 'screen', 'offset', 'sublimation'];
+        
+        return view('order.index', compact('orders', 'statuses', 'printingTypes', 'search'));
     }
 }

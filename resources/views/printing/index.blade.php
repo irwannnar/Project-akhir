@@ -50,9 +50,9 @@
                     <i class="fas fa-print text-blue-500 text-5xl"></i>
                 </div>
                 <div class="p-6">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Digital Printing</h3>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Print Digital</h3>
                     <p class="text-gray-600 mb-4">Cetak digital berkualitas tinggi dengan waktu pengerjaan cepat dan harga kompetitif.</p>
-                    <a href="/create?type=digital" class="btn-select block w-full bg-blue-500 hover:bg-blue-600 text-white text-center py-2 rounded-lg font-medium">
+                    <a href="/printing/create?type=digital" class="btn-select block w-full bg-blue-500 hover:bg-blue-600 text-white text-center py-2 rounded-lg font-medium">
                         Pilih Layanan
                     </a>
                 </div>
@@ -64,9 +64,9 @@
                     <i class="fas fa-layer-group text-green-500 text-5xl"></i>
                 </div>
                 <div class="p-6">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Screen Printing</h3>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Sablon</h3>
                     <p class="text-gray-600 mb-4">Cetak saring untuk media yang beragam dengan hasil yang tahan lama dan warna yang tajam.</p>
-                    <a href="/create?type=screen" class="btn-select block w-full bg-green-500 hover:bg-green-600 text-white text-center py-2 rounded-lg font-medium">
+                    <a href="/printing/create?type=sablon" class="btn-select block w-full bg-green-500 hover:bg-green-600 text-white text-center py-2 rounded-lg font-medium">
                         Pilih Layanan
                     </a>
                 </div>
@@ -78,9 +78,9 @@
                     <i classfas fa-copy text-red-500 text-5xl"></i>
                 </div>
                 <div class="p-6">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Offset Printing</h3>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Print Offset</h3>
                     <p class="text-gray-600 mb-4">Cetak offset untuk kebutuhan cetak dalam jumlah besar dengan kualitas tinggi dan konsisten.</p>
-                    <a href="/create?type=offset" class="btn-select block w-full bg-red-500 hover:bg-red-600 text-white text-center py-2 rounded-lg font-medium">
+                    <a href="/printing/create?type=offset" class="btn-select block w-full bg-red-500 hover:bg-red-600 text-white text-center py-2 rounded-lg font-medium">
                         Pilih Layanan
                     </a>
                 </div>
@@ -92,9 +92,9 @@
                     <i class="fas fa-tshirt text-purple-500 text-5xl"></i>
                 </div>
                 <div class="p-6">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Sublimation Printing</h3>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Print Sublimasi</h3>
                     <p class="text-gray-600 mb-4">Cetak sublimasi untuk material khusus seperti kain dan keramik dengan hasil yang awet.</p>
-                    <a href="/create?type=sublimation" class="btn-select block w-full bg-purple-500 hover:bg-purple-600 text-white text-center py-2 rounded-lg font-medium">
+                    <a href="/printing/create?type=sublimasi" class="btn-select block w-full bg-purple-500 hover:bg-purple-600 text-white text-center py-2 rounded-lg font-medium">
                         Pilih Layanan
                     </a>
                 </div>

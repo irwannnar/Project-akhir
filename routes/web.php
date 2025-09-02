@@ -9,6 +9,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SpendingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductController;
 
 // Route untuk guest (yang belum login)
 Route::middleware('guest')->group(function () {
@@ -39,9 +40,27 @@ Route::get('/home', function () {
     return view('welcome');
 });
 
-Route::resource('printing', PrintingController::class);
+//printing
+// Route::resource('printing', PrintingController::class);
+
+Route::get('/printing', [PrintingController::class, 'index']);
+
+// Halaman create order
+Route::get('/printing/create', [PrintingController::class, 'create']);
+
+// Menyimpan order baru
+Route::post('/order', [PrintingController::class, 'store']);
+
+// Menampilkan daftar order
+Route::get('/order', [PrintingController::class, 'orderList']);
+
+// Menampilkan detail order
+Route::get('/order/{id}', [PrintingController::class, 'orderDetail']);
 
 Route::resource('order', OrderController::class);
+
+Route::get('order/status/{status}', [OrderController::class, 'filterByStatus'])->name('order.status');
+Route::get('order/search', [OrderController::class, 'search'])->name('order.search');
 
 Route::resource('sale', SaleController::class);
 
@@ -50,3 +69,5 @@ Route::resource('finance', FinanceController::class);
 Route::resource('spending', SpendingController::class);
 
 Route::resource('invoice', InvoiceController::class);
+
+Route::resource('product', ProductController::class);
