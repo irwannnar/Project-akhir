@@ -11,6 +11,7 @@ class product extends Model
         'price_per_unit',
         'cost_per_unit',
         'type',
+        'description',
     ];
 
     public function transactions() {
