@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\sale;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SaleController extends Controller
 {
@@ -12,7 +14,47 @@ class SaleController extends Controller
      */
     public function index()
     {
-        return view('sale.index');
+        $monthlySales = Transaction::select(
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('SUM(quantity) as total_sales'),
+            DB::raw('SUM(total_price) as total_revenue'),
+            DB::raw('SUM(profit) as total_profit'),
+        )
+        ->whereYear('created_at', date('Y'))
+        ->groupBy(DB::raw('MONTH(created_at'))
+        ->orderBy('month')
+        ->get();
+
+        $formattedSales = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $monthData = $monthlySales->firstWhere('month', $i);
+            $formattedSales[] = [
+                'month' => $i,
+                'total_sales' => $monthData ? $monthData->total_sales : 0,
+                'total_revenue' => $monthData ? $monthData->total_revenue : 0,
+                'total_profit' => $monthData ? $monthData->total_profit : 0,
+            ];
+        }
+
+        $totalSales = Transaction::whereYear('created_at', date('Y'))->sum('quantity');
+        $totalRevenue = Transaction::whereYear('created_at', date('Y'))->sum('total_price');
+        $totalProfit= Transaction::whereYear('created_at', date('Y'))->sum('profit');
+        return view('sale.index', compact('monthlySales', 'fromattedSales', 'totalSales', 'totalRevenue', 'totalProfit'));
+    }
+
+    public function getSalesData(Request $request) {
+        $year = $request->get('year', date('Y'));
+
+        $monthlySales = TRansaction::select(
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('SUMquantity) as total_sales'),
+        )
+        ->whereYear('created_at', $year)
+        ->groupBy(DB::raw('MONTH(created_at)'))
+        ->orderBy('month')
+        ->get();
+
+        return response()->json($monthlySales);
     }
 
     /**
