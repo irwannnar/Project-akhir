@@ -21,7 +21,7 @@ class SaleController extends Controller
             DB::raw('SUM(profit) as total_profit'),
         )
         ->whereYear('created_at', date('Y'))
-        ->groupBy(DB::raw('MONTH(created_at'))
+        ->groupBy(DB::raw('MONTH(created_at)'))
         ->orderBy('month')
         ->get();
 
@@ -39,15 +39,15 @@ class SaleController extends Controller
         $totalSales = Transaction::whereYear('created_at', date('Y'))->sum('quantity');
         $totalRevenue = Transaction::whereYear('created_at', date('Y'))->sum('total_price');
         $totalProfit= Transaction::whereYear('created_at', date('Y'))->sum('profit');
-        return view('sale.index', compact('monthlySales', 'fromattedSales', 'totalSales', 'totalRevenue', 'totalProfit'));
+        return view('sale.index', compact('monthlySales', 'formattedSales', 'totalSales', 'totalRevenue', 'totalProfit'));
     }
 
     public function getSalesData(Request $request) {
         $year = $request->get('year', date('Y'));
 
-        $monthlySales = TRansaction::select(
+        $monthlySales = Transaction::select(
             DB::raw('MONTH(created_at) as month'),
-            DB::raw('SUMquantity) as total_sales'),
+            DB::raw('SUM(quantity) as total_sales'),
         )
         ->whereYear('created_at', $year)
         ->groupBy(DB::raw('MONTH(created_at)'))
