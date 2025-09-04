@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('printings', function (Blueprint $table) {
             $table->id();
+            $table->string('nama_layanan');
+            $table->decimal('biaya');
+            $table->string('hitungan');
             $table->timestamps();
         });
     }
