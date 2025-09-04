@@ -3,14 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Order;
+use App\Models\printing;
 
 class PrintingController extends Controller
 {
     // Menampilkan halaman utama dengan pilihan printing
     public function index()
     {
-        return view('printing.index');
+        $printing = Printing::paginate(10);
+        return view('printing.index', compact('printing'));
     }
 
     // Menampilkan halaman create order berdasarkan jenis printing
@@ -22,6 +23,34 @@ class PrintingController extends Controller
     // Menyimpan order baru
     public function store(Request $request)
     {
-        return redirect('printing.index')->with('success', 'layanan berhasil dibuat!');
+        $request->validate([
+            'nama_layanan',
+            'biaya',
+            'hitungan',
+        ]);
+
+        Printing::create($request->all());
+        return redirect('printing.index')->with('success', 'layanan berhasil ditambah!');
+    }
+
+    public function edit(Printing $printing)
+    {
+        return view('printing.edit', compact('printing'));
+    }
+
+    public function update(Request $request, Printing $printing)
+    {
+        $request->validate([
+            'nama_layanan',
+            'biaya',
+            'hitungan',
+        ]);
+
+        $printing->update($request->all());
+    }
+
+    public function destroy(Printing $printing) {
+        $printing->delete();
+        return redirect()->route('printing.index')->with('layanan berhasil dihapus!');
     }
 }
