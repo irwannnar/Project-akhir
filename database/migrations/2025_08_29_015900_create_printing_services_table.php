@@ -16,8 +16,7 @@ class CreatePrintingServicesTable extends Migration
             $table->decimal('base_price', 10, 2)->default(0);
             $table->decimal('price_per_page', 10, 2)->default(0);
             $table->integer('min_order')->default(1);
-            $table->integer('max_order')->default(1000);
-            $table->boolean('is_available')->default(true);
+            $table->integer('max_order')->default(100);
             $table->timestamps();
         });
     }
