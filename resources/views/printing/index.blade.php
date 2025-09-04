@@ -5,7 +5,9 @@
                 <div class="bg-blue-100 rounded">
                     <label for="printing" name="printing" id="printing">Printing</label>
                     <select name="service" id="service">
-                        
+                        @foreach($service as $key => $layanan)
+                            <option value="{{  }}"></option>
+                        @endforeach
                     </select>
                 </div>
             </div>
