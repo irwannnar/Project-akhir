@@ -4,13 +4,20 @@
             <p class="text-lg font-semibold">Statistik Penjualan Tahunan {{ date('Y') }}</p>
         </div>
 
+        <div class="lg:col-span-2 bg-white rounded-lg shadow p-6 mb-8">
+            <h3 class="text-gray-800 text-xl font-semibold mb-4">Grafik Penjualan Tahunan</h3>
+            <div class="h-80">
+                <canvas id="saleChart"></canvas>
+            </div>
+        </div>
+
         <!-- Perbaikan layout grid -->
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
             <!-- Grafik - 3 kolom -->
-            <div class="lg:col-span-3 bg-white rounded-lg shadow p-6">
-                <h3 class="text-gray-800 text-xl font-semibold mb-4">Grafik Penjualan Tahunan</h3>
-                <div class="h-80">
-                    <canvas id="saleChart"></canvas>
+            <div class="bg-white rounded-lg shadow p-6 lg:col-span-3">
+                <h3>a</h3>
+                <div class="h-60">
+                    <canvas id="statistik"></canvas>
                 </div>
             </div>
 
@@ -19,14 +26,15 @@
                 <div class="bg-white rounded-lg shadow p-6">
                     <div class="flex items-center">
                         <div class="p-3 rounded-full bg-green-100">
-                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                             </svg>
                         </div>
                         <div class="ml-4">
-                            <p class="text-gray-600">Total Penjualan</p>
-                            <p class="text-2xl font-bold text-gray-800">{{ number_format($totalSales) }} item</p>
+                            <p class="text-gray-600 text-sm">Total Penjualan</p>
+                            <p class="text-sm font-bold text-gray-800">{{ number_format($totalSales) }} item</p>
                         </div>
                     </div>
                 </div>
@@ -86,7 +94,8 @@
                                 tooltip: {
                                     callbacks: {
                                         label: function(context) {
-                                            return context.dataset.label + ': ' + context.raw.toLocaleString('id-ID') + ' item';
+                                            return context.dataset.label + ': ' + context.raw.toLocaleString(
+                                                'id-ID') + ' item';
                                         }
                                     }
                                 }
@@ -103,6 +112,19 @@
                             }
                         }
                     });
+                }
+            }
+        }
+
+        function statistik() {
+            return {
+                init() {
+                    this.initChart()
+                },
+
+                initChart() {
+                    const ctx = document.getElementById('statistik').getContext('2d');
+                    const data = $json()
                 }
             }
         }
