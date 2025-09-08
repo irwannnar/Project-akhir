@@ -30,7 +30,7 @@ class PrintingController extends Controller
         ]);
 
         Printing::create($request->all());
-        return redirect('printing.index')->with('success', 'layanan berhasil ditambah!');
+        return redirect()->route('printing.index')->with('success', 'layanan berhasil ditambah!');
     }
 
     public function edit(Printing $printing)
