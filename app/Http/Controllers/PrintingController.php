@@ -24,33 +24,41 @@ class PrintingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_layanan',
-            'biaya',
-            'hitungan',
+            'nama_layanan'=>'required|string|max:255',
+            'biaya'=>"required|numeric|min:0",
+            'hitungan'=>'required|string|max:50',
         ]);
 
         Printing::create($request->all());
         return redirect()->route('printing.index')->with('success', 'layanan berhasil ditambah!');
     }
 
-    public function edit(Printing $printing)
+    public function show(Printing $printing)
     {
+        // return view('printing.show', compact('printing'));
+    }
+
+    public function edit(Request $request, Printing $printing)
+    {
+        // dd($request->all(), $printing);
         return view('printing.edit', compact('printing'));
     }
 
     public function update(Request $request, Printing $printing)
     {
         $request->validate([
-            'nama_layanan',
-            'biaya',
-            'hitungan',
+            'nama_layanan'=> 'required|string|max:255',
+            'biaya'=>'required|numeric|min:0',
+            'hitungan'=>'required|string|max:50',
         ]);
 
         $printing->update($request->all());
+        return redirect()->route('printing.index')->with('success', 'data berhasil diubah');
     }
 
-    public function destroy(Printing $printing) {
+    public function destroy(Printing $printing)
+    {
         $printing->delete();
-        return redirect()->route('printing.index')->with('layanan berhasil dihapus!');
+        return redirect()->route('printing.index')->with('success','data berhasil dihapus!');
     }
 }

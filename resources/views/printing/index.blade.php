@@ -31,7 +31,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($printing as $key => $layanan)
+                        @foreach ($printing as $layanan)
                             <tr>
                                 <td class="px-6 py-5 text-sm font-medium text-gray-600">{{ $layanan->nama_layanan }}
                                 </td>
@@ -39,16 +39,16 @@
                                     {{ number_format($layanan->biaya) }}</td>
                                 <td class="px-6 py-5 text-sm font-medium text-gray-600">{{ $layanan->hitungan }}</td>
                                 <td class="px-6 py-5 text-sm font-medium text-gray-600">
-                                    <div>
-                                        <a href="{{ route('printing.edit') }}">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <a href="{{ route('printing.edit', $layanan->id) }}" >
+                                            <svg class="w-5 h-5 text-blue-600 hover:text-blue-900" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
                                                 </path>
                                             </svg>
                                         </a>
-                                        <form action="" method="POST" class="inline">
+                                        <form action="{{ route('printing.destroy', $layanan->id) }}" method="POST" class="inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" onclick="return confirm('yakin?')"
