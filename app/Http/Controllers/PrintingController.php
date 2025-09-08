@@ -35,7 +35,7 @@ class PrintingController extends Controller
 
     public function edit(Printing $printing)
     {
-        return view('printing.edit');
+        return view('printing.edit', compact('printing'));
     }
 
     public function update(Request $request, Printing $printing)
