@@ -1,7 +1,7 @@
 <x-layout.default>
     <div class="containermx-auto px-4 py-6">
-        <div class="flex flex-col sm:flex-row items-center justify-between mb-6 gap-6">
-            <div>
+        <div>
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
                 <h1>jasa Printing</h1>
                 <a href="/"
                     class="border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-1 py-1 rounded hover:animate-bounce active:scale-95">Tambah
