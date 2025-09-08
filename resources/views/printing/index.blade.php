@@ -3,7 +3,7 @@
         <div>
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
                 <h1>jasa Printing</h1>
-                <a href="/"
+                <a href="{{ route('printing.create') }}"
                     class="border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-1 py-1 rounded hover:animate-bounce active:scale-95">Tambah
                     Layanan</a>
             </div>

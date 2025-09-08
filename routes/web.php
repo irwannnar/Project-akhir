@@ -41,12 +41,7 @@ Route::get('/home', function () {
 });
 
 //printing
-// Route::resource('printing', PrintingController::class);
-
-Route::get('/printing', [PrintingController::class, 'index']);
-
-// Halaman create order
-Route::get('/printing/create', [PrintingController::class, 'create']);
+Route::resource('printing', PrintingController::class);
 
 // Menyimpan order baru
 Route::post('/order', [PrintingController::class, 'store']);
