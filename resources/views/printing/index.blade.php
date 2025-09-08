@@ -4,8 +4,11 @@
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
                 <h1>jasa Printing</h1>
                 <a href="{{ route('printing.create') }}"
-                    class="border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-1 py-1 rounded active:scale-95">Tambah
-                    Layanan</a>
+                   class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center gap-2 active:scale-95">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg> Tambah Layanan
+            </a>
             </div>
         </div>
         <div>

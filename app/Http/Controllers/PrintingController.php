@@ -17,7 +17,7 @@ class PrintingController extends Controller
     // Menampilkan halaman create order berdasarkan jenis printing
     public function create(Request $request)
     {
-        return view('printing.create', compact('printingType'));
+        return view('printing.create');
     }
 
     // Menyimpan order baru
