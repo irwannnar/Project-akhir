@@ -23,6 +23,9 @@
                                 Biaya</th>
                             <th class="px-6 py-5 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Perhitungan</th>
+                            <th class="px-6 py-5 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                                Aksi
+                                </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -30,7 +33,7 @@
                             <tr>
                                 <td class="px-6 py-5 text-sm font-medium text-gray-600">{{ $layanan->nama_layanan }}
                                 </td>
-                                <td class="px-6 py-5 text-sm font-medium text-gray-600">{{ $layanan->biaya }}</td>
+                                <td class="px-6 py-5 text-sm font-medium text-gray-600">{{ number_format($layanan->biaya) }}</td>
                                 <td class="px-6 py-5 text-sm font-medium text-gray-600">{{ $layanan->hitungan }}</td>
                                 <td class="px-6 py-5 text-sm font-medium text-gray-600">
                                     <div>
