@@ -14,6 +14,20 @@
             </div>
         </div>
         <div>
+
+            @if (session('success'))
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6" role="alert">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                </div>
+            @endif
+
             <div class="bg-white shadow-lg rounded-xl overflow-hidden">
                 <div class=""></div>
                 <table class="min-w-full divide-y divide-gray-200">
@@ -40,15 +54,17 @@
                                 <td class="px-6 py-5 text-sm font-medium text-gray-600">{{ $layanan->hitungan }}</td>
                                 <td class="px-6 py-5 text-sm font-medium text-gray-600">
                                     <div class="flex items-center justify-center space-x-2">
-                                        <a href="{{ route('printing.edit', $layanan->id) }}" >
-                                            <svg class="w-5 h-5 text-blue-600 hover:text-blue-900" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <a href="{{ route('printing.edit', $layanan->id) }}">
+                                            <svg class="w-5 h-5 text-blue-600 hover:text-blue-900" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24"
+                                                xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
                                                 </path>
                                             </svg>
                                         </a>
-                                        <form action="{{ route('printing.destroy', $layanan->id) }}" method="POST" class="inline">
+                                        <form action="{{ route('printing.destroy', $layanan->id) }}" method="POST"
+                                            class="inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" onclick="return confirm('yakin?')"
