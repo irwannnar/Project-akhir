@@ -10,6 +10,12 @@ use App\Http\Controllers\SpendingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
+use Illuminate\Support\Facades\Auth;
+
+// Redirect root ke dashboard jika sudah login, atau ke login jika belum
+Route::get('/', function () {
+    return Auth::check() ? redirect('dashboard') : redirect('login');
+});
 
 // Route untuk guest (yang belum login)
 Route::middleware('guest')->group(function () {
@@ -19,50 +25,54 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
 });
 
-// Route yang memerlukan authentication
+// Route yang memerlukan authentication - SEMUA HARUS DIMASUKKAN DI SINI
 Route::middleware('auth')->group(function () {
+    // Route view
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
 
+    Route::get('/printing', function () {
+        return view('printing');
+    })->name('printing');
+
+    Route::get('/product', function () {
+        return view('product');
+    })->name('product');
+
+    Route::get('/order', function () {
+        return view('order');
+    })->name('order');
+
+    Route::get('/sale', function () {
+        return view('sale');
+    })->name('sale');
+
+    Route::get('/finance', function () {
+        return view('finance');
+    })->name('finance');
+
+    Route::get('/spending', function () {
+        return view('spending');
+    })->name('spending');
+
+    // Route resource controllers - SEMUA resource HARUS ada di dalam middleware
+    Route::resource('dashboard', DashboardController::class);
+    Route::resource('printing', PrintingController::class);
+    Route::resource('order', OrderController::class);
+    Route::resource('sale', SaleController::class);
+    Route::resource('finance', FinanceController::class);
+    Route::resource('spending', SpendingController::class);
+    Route::resource('invoice', InvoiceController::class);
+    Route::resource('product', ProductController::class);
+    Route::resource('order', OrderController::class);
+    // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
-// Redirect root ke login
-
-Route::get('/', function () {
-    return view('components.auth.login');
+// Fallback untuk menangani semua URL yang tidak terdaftar
+Route::fallback(function () {
+    return Auth::check()
+        ? redirect('/dashboard')->with('error', 'Halaman tidak ditemukan.')
+        : redirect('/login')->with('error', 'Silakan login terlebih dahulu.');
 });
-
-Route::resource('dashboard', DashboardController::class);
-
-Route::get('/home', function () {
-    return view('welcome');
-});
-
-//printing
-Route::resource('printing', PrintingController::class);
-
-// Menyimpan order baru
-Route::post('/order', [PrintingController::class, 'store']);
-
-// Menampilkan daftar order
-Route::get('/order', [PrintingController::class, 'orderList']);
-
-// Menampilkan detail order
-Route::get('/order/{id}', [PrintingController::class, 'orderDetail']);
-
-Route::resource('order', OrderController::class);
-
-Route::get('order/status/{status}', [OrderController::class, 'filterByStatus'])->name('order.status');
-Route::get('order/search', [OrderController::class, 'search'])->name('order.search');
-
-Route::resource('sale', SaleController::class);
-
-Route::resource('finance', FinanceController::class);
-
-Route::resource('spending', SpendingController::class);
-
-Route::resource('invoice', InvoiceController::class);
-
-Route::resource('product', ProductController::class);
