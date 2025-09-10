@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\OrderController;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use PhpParser\Node\Expr\Cast;
 
 class printing extends Model
@@ -12,4 +14,8 @@ class printing extends Model
         'biaya',
         'hitungan'
     ];
+
+    public function order() {
+        return $this->HasMany(Order::class);
+    }
 }

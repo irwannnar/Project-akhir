@@ -1,10 +1,8 @@
-@extends('layouts.app')
-
-@section('content')
-    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
+<x-layout.default>
+    <div class="container max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md m-8">
         <h1 class="text-2xl font-bold mb-6">Edit Pesanan</h1>
 
-        <form action="{{ route('orders.update', $order) }}" method="POST">
+        <form action="{{ route('order.update', $order) }}" method="POST">
             @csrf
             @method('PUT')
 
@@ -16,14 +14,14 @@
             </div>
 
             <div class="mb-4">
-                <label for="service_id" class="block text-gray-700 mb-2">Jenis Layanan</label>
-                <select name="service_id" id="service_id"
+                <label for="printing_id" class="block text-gray-700 mb-2">Jenis Layanan</label>
+                <select name="printing_id" id="printing_id"
                     class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                     <option value="">Pilih Layanan</option>
-                    @foreach ($services as $service)
-                        <option value="{{ $service->id }}"
-                            {{ old('service_id', $order->service_id) == $service->id ? 'selected' : '' }}>
-                            {{ $service->name }} ({{ $service->type }})
+                    @foreach ($printing as $pesanan)
+                        <option value="{{ $pesanan->id }}"
+                            {{ old('printing_id', $order->printing_id) == $pesanan->id ? 'selected' : '' }}>
+                            {{ $pesanan->nama_layanan }} ({{ $pesanan->biaya }})
                         </option>
                     @endforeach
                 </select>
@@ -45,9 +43,9 @@
                 <label for="status" class="block text-gray-700 mb-2">Status</label>
                 <select name="status" id="status"
                     class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    @foreach ($statuses as $value => $label)
-                        <option value="{{ $value }}" {{ old('status', $order->status) == $value ? 'selected' : '' }}>
-                            {{ $label }}
+                    @foreach ($order as $pesanan)
+                        <option value="{{ $pesanan }}" {{ old('status', $order->status) == $pesanan ? 'selected' : '' }}>
+                            {{ $pesanan }}
                         </option>
                     @endforeach
                 </select>
@@ -60,7 +58,7 @@
             </div>
 
             <div class="flex justify-between items-center">
-                <a href="{{ route('orders.index') }}" class="text-blue-600 hover:underline">Kembali</a>
+                <a href="{{ route('order.index') }}" class="text-blue-600 hover:underline">Kembali</a>
                 <button type="submit"
                     class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors">
                     Update Pesanan
@@ -68,4 +66,4 @@
             </div>
         </form>
     </div>
-@endsection
+</x-layout.default>

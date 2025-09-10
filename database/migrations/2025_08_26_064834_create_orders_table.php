@@ -13,12 +13,11 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('order_code')->unique();
             $table->string('customer_name');
             $table->string('customer_phone');
             $table->string('customer_email');
             $table->text('customer_address');
-            $table->enum('printing_type', ['digital', 'sablon', 'offset', 'sublimasi']);
+            $table->foreignId('printing_id')->constrained();
             $table->string('material');
             $table->integer('quantity');
             $table->decimal('width', 8, 2);
@@ -28,7 +27,6 @@ return new class extends Migration
             $table->decimal('total_price', 12, 2);
             $table->enum('status', ['pending', 'processing', 'completed', 'cancelled'])->default('pending');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 

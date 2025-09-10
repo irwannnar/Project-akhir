@@ -26,38 +26,50 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
-                    @foreach ($orders as $order)
+                    @foreach ($order as $pesanan)
                         <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ $order->customer_name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ $order->service->name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ $order->quantity }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ $pesanan->customer_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ $pesanan->printing->nama_layanan }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ $pesanan->quantity }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">Rp
-                                {{ number_format($order->total_price, 0, ',', '.') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @php
-                                    $statusColors = [
-                                        'pending' => 'bg-yellow-100 text-yellow-800',
-                                        'processing' => 'bg-blue-100 text-blue-800',
-                                        'completed' => 'bg-green-100 text-green-800',
-                                        'cancelled' => 'bg-red-100 text-red-800',
-                                    ];
-                                @endphp
-                                <span
-                                    class="px-2 py-1 rounded-full text-xs font-semibold {{ $statusColors[$order->status] }}">
-                                    {{ Order::getStatuses()[$order->status] }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <a href="{{ route('orders.show', $order) }}"
-                                    class="text-blue-600 hover:underline mr-2">Detail</a>
-                                <a href="{{ route('orders.edit', $order) }}"
-                                    class="text-green-600 hover:underline mr-2">Edit</a>
-                                <form action="{{ route('orders.destroy', $order) }}" method="POST"
+                                {{ number_format($pesanan->total_price, 0, ',', '.') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">{{ $pesanan->status }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap flex items-center">
+                                <a href="{{ route('order.show', $pesanan) }}"
+                                    class="text-blue-600 hover:underline mr-2">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M9 4.45962C9.91153 4.16968 10.9104 4 12 4C16.1819 4 19.028 6.49956 20.7251 8.70433C21.575 9.80853 22 10.3606 22 12C22 13.6394 21.575 14.1915 20.7251 15.2957C19.028 17.5004 16.1819 20 12 20C7.81811 20 4.97196 17.5004 3.27489 15.2957C2.42496 14.1915 2 13.6394 2 12C2 10.3606 2.42496 9.80853 3.27489 8.70433C3.75612 8.07914 4.32973 7.43025 5 6.82137"
+                                            stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" />
+                                        <path
+                                            d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z"
+                                            stroke="#1C274C" stroke-width="1.5" />
+                                    </svg>
+
+                                </a>
+                                <a href="{{ route('order.edit', $pesanan) }}"
+                                    class="text-green-600 hover:underline mr-2"><svg
+                                        class="w-5 h-5 text-green-600 hover:underline" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                        </path>
+                                    </svg></a>
+                                <form action="{{ route('order.destroy', $pesanan) }}" method="POST"
                                     class="inline-block">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:underline"
-                                        onclick="return confirm('Apakah Anda yakin ingin menghapus pesanan ini?')">Hapus</button>
+                                        onclick="return confirm('Apakah Anda yakin ingin menghapus pesanan ini?')">
+                                        <svg class="w-5 h-5 text-red-600 hover:text-red-900 " fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                            </path>
+                                        </svg>
+                                    </button>
                                 </form>
                             </td>
                         </tr>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\PrintingController;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,12 +11,11 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        'order_code',
         'customer_name',
         'customer_phone',
         'customer_email',
         'customer_address',
-        'printing_type',
+        'printing_id',
         'material',
         'quantity',
         'width',
@@ -32,6 +32,20 @@ class Order extends Model
         'height' => 'decimal:2',
         'total_price' => 'decimal:2'
     ];
+
+     public static function getStatuses()
+    {
+        return [
+            'pending' => 'Pending',
+            'processing' => 'Processing',
+            'completed' => 'Completed',
+            'cancelled' => 'Cancelled',
+        ];
+    }
+
+    public function printing() {
+        return $this->belongsTo(Printing::class);
+    }
 
     /**
      * Scope a query to filter by status.
