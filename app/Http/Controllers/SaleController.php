@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\sale;
 use App\Models\Transaction;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -36,10 +37,23 @@ class SaleController extends Controller
             ];
         }
 
+        $topProducts = Product::withCount('sales')
+        ->orderBy('sales_count', 'desc')
+        ->take(5)
+        ->get();
+
+        $product = Product::all();
+
+        $productSales = Transaction::selectRaw('product_id, SUM(quantity) as total_sold')
+        ->with('product')
+        ->groupBy('product_id')
+        ->orderByDesc('total_sold')
+        ->get();
+
         $totalSales = Transaction::whereYear('created_at', date('Y'))->sum('quantity');
         $totalRevenue = Transaction::whereYear('created_at', date('Y'))->sum('total_price');
         $totalProfit= Transaction::whereYear('created_at', date('Y'))->sum('profit');
-        return view('sale.index', compact('monthlySales', 'formattedSales', 'totalSales', 'totalRevenue', 'totalProfit'));
+        return view('sale.index', compact('monthlySales', 'formattedSales', 'totalSales', 'totalRevenue', 'totalProfit', 'product', 'productSales'));
     }
 
     public function getSalesData(Request $request) {
