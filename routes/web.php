@@ -10,6 +10,7 @@ use App\Http\Controllers\SpendingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PurchaseController;
 use Illuminate\Support\Facades\Auth;
 
 // Redirect root ke dashboard jika sudah login, atau ke login jika belum
@@ -66,6 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('invoice', InvoiceController::class);
     Route::resource('product', ProductController::class);
     Route::resource('order', OrderController::class);
+    Route::resource('purchase', PurchaseController::class);
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
