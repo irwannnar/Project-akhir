@@ -8,7 +8,10 @@
         </div>
 
         @if (session('success'))
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6" role="alert">
+            <div x-data="{ show: true }" x-show="show" x-transition:leave="transition ease-in duration-300"
+                x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6 relative"
+                role="alert">
                 <div class="flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg">
@@ -17,6 +20,13 @@
                     </svg>
                     <span>{{ session('success') }}</span>
                 </div>
+                <button @click="show = false" class="absolute top-3 right-3 text-green-700 hover:text-green-900"
+                    aria-label="Tutup notifikasi">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
             </div>
         @endif
 

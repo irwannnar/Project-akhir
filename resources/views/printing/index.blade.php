@@ -13,10 +13,11 @@
                 </a>
             </div>
         </div>
-        
+
         <!-- Notifikasi Success dengan Alpine.js -->
         <template x-if="showSuccess">
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6" role="alert">
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6 relative"
+                role="alert">
                 <div class="flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg">
@@ -25,6 +26,13 @@
                     </svg>
                     <span x-text="successMessage"></span>
                 </div>
+                <button @click="showSuccess = false" class="absolute top-3 right-3 text-green-700 hover:text-green-900"
+                    aria-label="Tutup notifikasi">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
             </div>
         </template>
 
@@ -67,14 +75,12 @@
                                         class="inline" x-ref="deleteForm-{{ $layanan->id }}">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="button" 
-                                            @click="confirmDelete({{ $layanan->id }})"
+                                        <button type="button" @click="confirmDelete({{ $layanan->id }})"
                                             class="inline active:scale-95 rounded transition duration-200 px-1 py-1">
                                             <svg class="w-5 h-5 text-red-600 hover:text-red-900 " fill="none"
                                                 stroke="currentColor" viewBox="0 0 24 24"
                                                 xmlns="http://www.w3.org/2000/svg">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    stroke-width="2"
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                                                 </path>
                                             </svg>
@@ -94,24 +100,24 @@
             return {
                 showSuccess: false,
                 successMessage: '',
-                
+
                 init() {
                     // Cek jika ada flash session success dari Laravel
                     @if (session('success'))
                         this.showSuccessMessage("{{ session('success') }}");
                     @endif
                 },
-                
+
                 showSuccessMessage(message) {
                     this.successMessage = message;
                     this.showSuccess = true;
-                    
+
                     // Sembunyikan notifikasi setelah 5 detik
                     setTimeout(() => {
                         this.showSuccess = false;
                     }, 5000);
                 },
-                
+
                 confirmDelete(id) {
                     if (confirm('Apakah Anda yakin ingin menghapus layanan ini?')) {
                         // Submit form jika konfirmasi diterima
