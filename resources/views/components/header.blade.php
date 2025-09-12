@@ -1,7 +1,7 @@
 <header class="flex justify-center items-center shadow-md bg-gray-100 w-full-auto border h-16">
     <div>
         <div>
-            <h1 class="text-black text-2xl">Jasa print Yahaha Hayyuk</h1>
+            <h1 class="text-black text-2xl">Lep Print</h1>
         </div>
         <div class="flex absolute top-0 right-0">
             <form method="POST" action="{{ route('logout') }}">
