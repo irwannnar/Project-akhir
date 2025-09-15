@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\sale;
+use App\Models\Sale;
 use App\Models\Transaction;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -37,23 +37,44 @@ class SaleController extends Controller
             ];
         }
 
-        $topProducts = Product::withCount('sales')
-        ->orderBy('sales_count', 'desc')
-        ->take(5)
-        ->get();
-
-        $product = Product::all();
-
-        $productSales = Transaction::selectRaw('product_id, SUM(quantity) as total_sold')
-        ->with('product')
-        ->groupBy('product_id')
-        ->orderByDesc('total_sold')
-        ->get();
+        // Ambil produk terlaris untuk ditampilkan di halaman utama
+        $bestSellingProduct = Transaction::selectRaw('product_id, SUM(quantity) as total_sold')
+            ->with('product')
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('product_id')
+            ->orderByDesc('total_sold')
+            ->first();
 
         $totalSales = Transaction::whereYear('created_at', date('Y'))->sum('quantity');
         $totalRevenue = Transaction::whereYear('created_at', date('Y'))->sum('total_price');
-        $totalProfit= Transaction::whereYear('created_at', date('Y'))->sum('profit');
-        return view('sale.index', compact('monthlySales', 'formattedSales', 'totalSales', 'totalRevenue', 'totalProfit', 'product', 'productSales'));
+        $totalProfit = Transaction::whereYear('created_at', date('Y'))->sum('profit');
+        
+        return view('sale.index', compact(
+            'monthlySales', 
+            'formattedSales', 
+            'totalSales', 
+            'totalRevenue', 
+            'totalProfit',
+            'bestSellingProduct'
+        ));
+    }
+
+    /**
+     * Halaman statistik produk
+     */
+    public function product()
+    {
+        $productSales = Transaction::selectRaw('product_id, SUM(quantity) as total_sold, SUM(total_price) as total_revenue')
+            ->with('product')
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('product_id')
+            ->orderByDesc('total_sold')
+            ->get();
+
+        $totalProductsSold = $productSales->sum('total_sold');
+        $totalRevenue = $productSales->sum('total_revenue');
+
+        return view('sale.product', compact('productSales', 'totalProductsSold', 'totalRevenue'));
     }
 
     public function getSalesData(Request $request) {
@@ -90,7 +111,7 @@ class SaleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(sale $sale)
+    public function show(Sale $sale)
     {
         //
     }
@@ -98,7 +119,7 @@ class SaleController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(sale $sale)
+    public function edit(Sale $sale)
     {
         //
     }
@@ -106,7 +127,7 @@ class SaleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, sale $sale)
+    public function update(Request $request, Sale $sale)
     {
         //
     }
@@ -114,7 +135,7 @@ class SaleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(sale $sale)
+    public function destroy(Sale $sale)
     {
         //
     }

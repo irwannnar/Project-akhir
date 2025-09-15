@@ -62,6 +62,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('printing', PrintingController::class);
     Route::resource('order', OrderController::class);
     Route::resource('sale', SaleController::class);
+    Route::get('/sale/product', [SaleController::class, 'product'])->name('sale.product');
+
     Route::resource('finance', FinanceController::class);
     Route::resource('spending', SpendingController::class);
     Route::resource('invoice', InvoiceController::class);
