@@ -68,7 +68,8 @@ class PurchaseController extends Controller
      */
     public function show(purchase $purchase)
     {
-        //
+        $purchase::all();
+        return view('purchase.show', compact('purchase'));
     }
 
     /**
