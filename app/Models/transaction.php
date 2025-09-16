@@ -8,16 +8,32 @@ class transaction extends Model
 {
     protected $fillable = [
         'product_id',
+        'printing_id',
+        'customer_name',
+        'customer_phone',
+        'customer_email',
+        'customer_address',
+        'material',
         'quantity',
+        'width',
+        'height',
+        'notes',
+        'file_path',
         'total_price',
         'total_cost',
         'profit',
-        'customer_name',
+        'payment_method',
+        'paid_at',
+        'status',
         'type'
     ];
 
     public function product() {
         return $this->belongsTo(Product::class);
+    }
+
+    public function Printing() {
+        return $this->belongsTo(Printing::class);
     }
 
     public function sale() {

@@ -18,4 +18,8 @@ class printing extends Model
     public function order() {
         return $this->HasMany(Order::class);
     }
+
+    public function transaction() {
+        return $this->hasMany(Transaction::class);
+    }
 }
