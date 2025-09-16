@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Dashboard;
-use App\Models\Purchase;
-use App\Models\Order;
+use App\Models\Transaction;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -16,105 +15,67 @@ class DashboardController extends Controller
     public function index()
     {
         $currentYear = date('Y');
-        
-        // Data untuk grafik profit per bulan dari Purchases
-        $monthlyProfit = Purchase::selectRaw('
-            MONTH(created_at) as month,
-            SUM(total_price) as total_profit
-        ')
-        ->whereYear('created_at', $currentYear)
-        ->where('status', 'completed')
-        ->groupBy('month')
-        ->orderBy('month')
-        ->get();
 
-        // Data untuk grafik profit per bulan dari Orders
-        $monthlyOrderProfit = Order::selectRaw('
-            MONTH(created_at) as month,
-            SUM(total_price) as total_profit
-        ')
-        ->whereYear('created_at', $currentYear)
-        ->where('status', 'completed')
-        ->groupBy('month')
-        ->orderBy('month')
-        ->get();
+//Data untuk grafik profit per bulan (semua transaksi)
+$monthlyProfit = Transaction::selectRaw('
+        MONTH(created_at) as month,
+        SUM(total_price) as total_profit
+    ')
+    ->whereYear('created_at', $currentYear)
+    ->where('status', 'completed')
+    ->groupBy('month')
+    ->orderBy('month')
+    ->get();
 
-        // Gabungkan data purchases dan orders
-        $combinedMonthlyProfit = [];
-        for ($i = 1; $i <= 12; $i++) {
-            $purchaseProfit = $monthlyProfit->firstWhere('month', $i);
-            $orderProfit = $monthlyOrderProfit->firstWhere('month', $i);
-            
-            $combinedMonthlyProfit[] = [
-                'month' => $i,
-                'total_profit' => ($purchaseProfit->total_profit ?? 0) + ($orderProfit->total_profit ?? 0)
-            ];
-        }
+// Susun array 12 bulan
+$combinedMonthlyProfit = [];
+for ($i = 1; $i <= 12; $i++) {
+    $profit = $monthlyProfit->firstWhere('month', $i);
+    $combinedMonthlyProfit[] = [
+        'month' => $i,
+        'total_profit' => $profit->total_profit ?? 0
+    ];
+}
 
-        // Data statistik
-        $totalPurchaseProfit = Purchase::whereYear('created_at', $currentYear)
-            ->where('status', 'completed')
-            ->sum('total_price');
-            
-        $totalOrderProfit = Order::whereYear('created_at', $currentYear)
-            ->where('status', 'completed')
-            ->sum('total_price');
-            
-        $totalProfit = $totalPurchaseProfit + $totalOrderProfit;
+//Data statistik
+$totalProfit = Transaction::whereYear('created_at', $currentYear)
+    ->where('status', 'completed')
+    ->sum('total_price');
 
-        $totalProductsSold = Purchase::whereYear('created_at', $currentYear)
-            ->where('status', 'completed')
-            ->sum('quantity');
+$totalProductsSold = Transaction::whereYear('created_at', $currentYear)
+    ->where('status', 'completed')
+    ->sum('quantity');
 
-        $totalOrdersCompleted = Order::whereYear('created_at', $currentYear)
-            ->where('status', 'completed')
-            ->count();
+$totalOrdersCompleted = Transaction::whereYear('created_at', $currentYear)
+    ->where('status', 'completed')
+    ->count();
 
-        // Transaksi terbaru (gabungan purchases dan orders)
-        $recentPurchases = Purchase::with('product')
-            ->where('status', 'completed')
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get()
-            ->map(function($purchase) {
-                return [
-                    'type' => 'purchase',
-                    'name' => $purchase->product->name ?? 'Produk',
-                    'quantity' => $purchase->quantity,
-                    'total_price' => $purchase->total_price,
-                    'created_at' => $purchase->created_at
-                ];
-            });
+//Transaksi terbaru
+$recentTransactions = Transaction::with(['product', 'printing'])
+    ->where('status', 'completed')
+    ->orderBy('created_at', 'desc')
+    ->take(5)
+    ->get()
+    ->map(function($trx) {
+        return [
+            'type' => $trx->type,
+            'name' => $trx->product->name 
+                        ?? $trx->printing->nama_layanan 
+                        ?? 'Item',
+            'quantity' => $trx->quantity,
+            'total_price' => $trx->total_price,
+            'created_at' => $trx->created_at
+        ];
+    });
 
-        $recentOrders = Order::with('printing')
-            ->where('status', 'completed')
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get()
-            ->map(function($order) {
-                return [
-                    'type' => 'order',
-                    'name' => $order->printing->nama_layanan ?? 'Layanan',
-                    'quantity' => $order->quantity,
-                    'total_price' => $order->total_price,
-                    'created_at' => $order->created_at
-                ];
-            });
-
-        // Gabungkan dan urutkan
-        $recentTransactions = $recentPurchases->merge($recentOrders)
-            ->sortByDesc('created_at')
-            ->take(5);
-
-        // Produk terlaris
-        $bestSellingProducts = Product::withSum(['purchases as total_sold' => function($query) use ($currentYear) {
-            $query->whereYear('created_at', $currentYear)
-                  ->where('status', 'completed');
-        }], 'quantity')
-        ->orderBy('total_sold', 'desc')
-        ->take(5)
-        ->get();
-
+//Produk terlaris
+$bestSellingProducts = Product::withSum(['transactions as total_sold' => function($query) use ($currentYear) {
+        $query->whereYear('created_at', $currentYear)
+              ->where('status', 'completed');
+    }], 'quantity')
+    ->orderBy('total_sold', 'desc')
+    ->take(5)
+    ->get();
         return view('dashboard.index', compact(
             'combinedMonthlyProfit',
             'totalProfit',
