@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Auth;
 
 // Redirect root ke dashboard jika sudah login, atau ke login jika belum
@@ -56,6 +57,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/spending', function () {
         return view('spending');
     })->name('spending');
+     Route::get('/transaction', function () {
+        return view('transaction');
+    })->name('transaction');
+
 
     // Route resource controllers - SEMUA resource HARUS ada di dalam middleware
     Route::resource('dashboard', DashboardController::class);
@@ -63,7 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('order', OrderController::class);
     Route::resource('sale', SaleController::class);
     Route::get('/sale/product', [SaleController::class, 'product'])->name('sale.product');
-
+    Route::resource('transaction', TransactionController::class);
     Route::resource('finance', FinanceController::class);
     Route::resource('spending', SpendingController::class);
     Route::resource('invoice', InvoiceController::class);
