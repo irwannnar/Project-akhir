@@ -51,7 +51,7 @@
                         <circle cx="17" cy="10" r="1" fill="#1C274C" />
                     </svg>
 
-                    Printing</a>
+                    Service</a>
             </li>
             <li>
                 <a href="/product" class="flex items-center gap-1 hover:bg-gray-200 p-2 rounded-md">
@@ -65,19 +65,6 @@
                             stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" />
                     </svg>
                     Product</a>
-            </li>
-            <li>
-                <a href="/order" class="flex items-center gap-1 hover:bg-gray-200 p-2 rounded-md">
-                    <svg width="20" height="20" viewBox="0 0 40 40" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M22 2H5.33333C3.49238 2 2 3.49238 2 5.33333V27C2 28.8409 3.49238 30.3333 5.33333 30.3333H22C23.8409 30.3333 25.3333 28.8409 25.3333 27V5.33333C25.3333 3.49238 23.8409 2 22 2Z"
-                            stroke="black" stroke-width="3.33333" />
-                        <path d="M8.66666 10.3334H18.6667M8.66666 17H18.6667M8.66666 23.6667H15.3333" stroke="black"
-                            stroke-width="3.33333" stroke-linecap="round" />
-                    </svg>
-                    Order
-                </a>
             </li>
             <li>
                 <a href="/purchase" class="flex items-center gap-1 hover:bg-gray-200 p-2 rounded-md">

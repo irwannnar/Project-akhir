@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\purchase;
 use App\Models\product;
+use App\Models\Order;
 use Illuminate\Http\Request;
 
 class PurchaseController extends Controller
@@ -28,8 +29,9 @@ class PurchaseController extends Controller
                 return $query->whereDate('paid_at', '<=', $request->end_date);
             })
             ->paginate(10);  // Pagination dengan 10 data per halaman
+        $orders = Order::with('printing')->get();
 
-        return view('purchase.index', compact('purchases'));
+        return view('purchase.index', compact('purchases', 'orders'));
     }
 
     /**
