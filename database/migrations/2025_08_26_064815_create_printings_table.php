@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nama_layanan');
             $table->decimal('biaya');
+            $table->string('ukuran');
             $table->string('hitungan');
             $table->timestamps();
         });

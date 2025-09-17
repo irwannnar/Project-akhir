@@ -17,15 +17,24 @@
                     </div>
                     <div>
                         <label for="biaya" class="font-bold">Biaya</label>
-                        <input type="text" name="biaya" id="biaya" placeholder="biaya per cm"
+                        <input type="text" name="biaya" id="biaya" placeholder="biaya"
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             required>
                     </div>
                 </div>
-                <div class="mt-2">
-                    <label for="hitungan" class="font-bold">Perhitungan</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+                    <div>
+                        <label for="biaya" class="font-bold">Ukuran</label>
+                        <input type="text" name="ukuran" id="ukuran" placeholder="ukuran"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            required>
+                    </div>
+                    <div>
+                      <label for="hitungan" class="font-bold">Perhitungan</label>
                     <input type="text" name="hitungan" id="hitungan" placeholder="hitungan"
-                    class="shadow w-full border rounded text-gray-700 py-2 px-3 appearance-none leading-tight focus:outline-none focus:shadow-outline"> 
+                    class="shadow w-full border rounded text-gray-700 py-2 px-3 appearance-none leading-tight focus:outline-none focus:shadow-outline">   
+                    </div>
+                    
                 </div>
                 <div class="flex justify-between mt-8">
                     <a href="/printing"
