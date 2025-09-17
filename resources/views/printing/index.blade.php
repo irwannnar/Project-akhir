@@ -58,7 +58,7 @@
                             <td class="px-6 py-5 text-sm font-medium text-gray-600">{{ $layanan->nama_layanan }}
                             </td>
                             <td class="px-6 py-5 text-sm font-medium text-gray-600">
-                            RP.    {{ number_format($layanan->biaya) }}/cm</td>
+                            RP.    {{ number_format($layanan->biaya) }}</td>
                             <td class="px-6 py-5 text-sm font-medium text-gray-600">{{ $layanan->hitungan }}</td>
                             <td class="px-6 py-5 text-sm font-medium text-gray-600">
                                 <div class="flex items-center justify-center space-x-2">

@@ -1,7 +1,7 @@
 <x-layout.default>
     <div class="py-6" x-data="{ activeTab: '{{ $activeTab }}' }">
         <!-- Tab Navigation -->
-        <div class="mb-6 border-b border-gray-200">
+        <div class="mb-6 border-b border-gray-200 px-10">
             <nav class="flex space-x-8" aria-label="Tabs">
                 <button
                     @click="activeTab = 'purchases'"
