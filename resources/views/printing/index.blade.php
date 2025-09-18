@@ -14,119 +14,223 @@
             </div>
         </div>
 
-        <!-- Notifikasi Success dengan Alpine.js -->
-        <template x-if="showSuccess">
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6 relative"
-                role="alert">
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <span x-text="successMessage"></span>
-                </div>
-                <button @click="showSuccess = false" class="absolute top-3 right-3 text-green-700 hover:text-green-900"
-                    aria-label="Tutup notifikasi">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                        </path>
-                    </svg>
-                </button>
-            </div>
-        </template>
-
         <div class="bg-white shadow-lg rounded-xl overflow-hidden">
-            <div class=""></div>
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-5 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
-                            Layanan</th>
-                        <th class="px-6 py-5 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
-                            Biaya</th>
-                        <th class="px-6 py-5 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
-                            ukuran</th>
-                        <th class="px-6 py-5 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
-                            Perhitungan</th>
-                        <th class="px-6 py-5 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
-                            Aksi
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($printing as $layanan)
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <td class="px-6 py-5 text-sm font-medium text-gray-600">{{ $layanan->nama_layanan }}
-                            </td>
-                            <td class="px-6 py-5 text-sm font-medium text-gray-600">
-                            RP.    {{ number_format($layanan->biaya) }}</td>
-                            <td class="px-6 py-5 text-sm font-medium text-gray-600">{{ $layanan->ukuran }}</td>
-                            <td class="px-6 py-5 text-sm font-medium text-gray-600">{{ $layanan->hitungan }}</td>
-                            <td class="px-6 py-5 text-sm font-medium text-gray-600">
-                                <div class="flex items-center justify-center space-x-2">
-                                    <a href="{{ route('printing.edit', $layanan->id) }}">
-                                        <svg class="w-5 h-5 text-blue-600 hover:text-blue-900" fill="none"
-                                            stroke="currentColor" viewBox="0 0 24 24"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                            </path>
-                                        </svg>
-                                    </a>
-                                    <form action="{{ route('printing.destroy', $layanan->id) }}" method="POST"
-                                        class="inline" x-ref="deleteForm-{{ $layanan->id }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" @click="confirmDelete({{ $layanan->id }})"
-                                            class="inline active:scale-95 rounded transition duration-200 px-1 py-1">
-                                            <svg class="w-5 h-5 text-red-600 hover:text-red-900 " fill="none"
-                                                stroke="currentColor" viewBox="0 0 24 24"
-                                                xmlns="http://www.w3.org/2000/svg">
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                                Layanan
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                                Biaya Dasar
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                                Ukuran Tersedia
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                                Perhitungan
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
+                                Aksi
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach ($printing as $layanan)
+                            <tr>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-medium text-gray-900">{{ $layanan->nama_layanan }}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900">Rp
+                                        {{ number_format($layanan->biaya, 0, ',', '.') }}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900">
+                                        @if ($layanan->ukuran && is_array($layanan->ukuran))
+                                            <div class="space-y-1">
+                                                @foreach (array_slice($layanan->ukuran, 0, 3) as $ukuran)
+                                                    <div class="flex justify-between">
+                                                        <span>{{ $ukuran['nama'] }}</span>
+                                                        <span class="text-gray-600">Rp
+                                                            {{ number_format($ukuran['harga'], 0, ',', '.') }}</span>
+                                                    </div>
+                                                @endforeach
+                                                @if (count($layanan->ukuran) > 3)
+                                                    <div class="text-xs text-blue-600 mt-1">
+                                                        +{{ count($layanan->ukuran) - 3 }} ukuran lainnya...
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @else
+                                            <span class="text-gray-500">-</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm text-gray-900">
+                                        @switch($layanan->hitungan)
+                                            @case('per_lembar')
+                                                <span
+                                                    class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">Per
+                                                    Lembar</span>
+                                            @break
+
+                                            @case('per_cm2')
+                                                <span
+                                                    class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Per
+                                                    cm²</span>
+                                            @break
+
+                                            @case('tetap')
+                                                <span
+                                                    class="px-2 py-1 text-xs font-semibold bg-purple-100 text-purple-800 rounded-full">Harga
+                                                    Tetap</span>
+                                            @break
+
+                                            @default
+                                                <span
+                                                    class="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-800 rounded-full">{{ $layanan->hitungan }}</span>
+                                        @endswitch
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <a href="{{ route('printing.edit', $layanan->id) }}"
+                                            class="text-blue-600 hover:text-blue-900 transition duration-200"
+                                            title="Edit">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                                </path>
+                                            </svg>
+                                        </a>
+                                        <form action="{{ route('printing.destroy', $layanan->id) }}" method="POST"
+                                            class="inline" x-ref="deleteForm-{{ $layanan->id }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" @click="confirmDelete({{ $layanan->id }})"
+                                                class="text-red-600 hover:text-red-900 transition duration-200"
+                                                title="Hapus">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                    </path>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                        <button type="button"
+                                            onclick="showSizes({{ $layanan->id }}, {{ json_encode($layanan->ukuran) }})"
+                                            class="text-green-600 hover:text-green-900 transition duration-200"
+                                            title="Lihat Detail Ukuran">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
                                                 </path>
                                             </svg>
                                         </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        @if ($printing->hasPages())
+            <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+                {{ $printing->links() }}
+            </div>
+        @endif
+    </div>
+
+    <!-- Modal untuk menampilkan detail ukuran -->
+    <div id="sizesModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Detail Ukuran</h3>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="mt-2">
+                    <div id="sizesList" class="space-y-2 max-h-60 overflow-y-auto">
+                        <!-- Daftar ukuran akan diisi oleh JavaScript -->
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button onclick="closeModal()"
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition duration-200">
+                        Tutup
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        function printingData() {
-            return {
-                showSuccess: false,
-                successMessage: '',
+        // Fungsi untuk menampilkan modal detail ukuran
+        function showSizes(layananId, sizes) {
+            const modal = document.getElementById('sizesModal');
+            const sizesList = document.getElementById('sizesList');
+            const modalTitle = document.getElementById('modalTitle');
 
-                init() {
-                    // Cek jika ada flash session success dari Laravel
-                    @if (session('success'))
-                        this.showSuccessMessage("{{ session('success') }}");
-                    @endif
-                },
+            // Set judul modal
+            modalTitle.textContent = `Detail Ukuran - Layanan #${layananId}`;
 
-                showSuccessMessage(message) {
-                    this.successMessage = message;
-                    this.showSuccess = true;
+            // Kosongkan dan isi daftar ukuran
+            sizesList.innerHTML = '';
 
-                    // Sembunyikan notifikasi setelah 5 detik
-                    setTimeout(() => {
-                        this.showSuccess = false;
-                    }, 5000);
-                },
+            if (sizes && sizes.length > 0) {
+                sizes.forEach((size, index) => {
+                    const sizeItem = document.createElement('div');
+                    sizeItem.className = 'flex justify-between items-center p-2 bg-gray-50 rounded';
+                    sizeItem.innerHTML = `
+                <span class="font-medium">${size.nama}</span>
+                <span class="text-green-600 font-semibold">Rp ${new Intl.NumberFormat('id-ID').format(size.harga)}</span>
+            `;
+                    sizesList.appendChild(sizeItem);
+                });
+            } else {
+                sizesList.innerHTML = '<p class="text-gray-500 text-center">Tidak ada ukuran tersedia</p>';
+            }
 
-                confirmDelete(id) {
-                    if (confirm('Apakah Anda yakin ingin menghapus layanan ini?')) {
-                        // Submit form jika konfirmasi diterima
-                        this.$refs[`deleteForm-${id}`].submit();
-                    }
-                }
+            // Tampilkan modal
+            modal.classList.remove('hidden');
+        }
+
+        // Fungsi untuk menutup modal
+        function closeModal() {
+            document.getElementById('sizesModal').classList.add('hidden');
+        }
+
+        // Fungsi untuk konfirmasi delete (jika menggunakan Alpine.js)
+        function confirmDelete(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus layanan ini?')) {
+                document.querySelector(`form[x-ref="deleteForm-${id}"]`).submit();
+            }
+        }
+
+        // Close modal ketika klik di luar area modal
+        window.onclick = function(event) {
+            const modal = document.getElementById('sizesModal');
+            if (event.target === modal) {
+                closeModal();
             }
         }
     </script>
