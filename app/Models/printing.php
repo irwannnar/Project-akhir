@@ -2,19 +2,30 @@
 
 namespace App\Models;
 
-use App\Http\Controllers\OrderController;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use PhpParser\Node\Expr\Cast;
 
-class printing extends Model
+class Printing extends Model
 {
-    protected $fillable =[ 
+    use HasFactory;
+
+    protected $fillable = [
         'nama_layanan',
         'biaya',
-        'ukuran',
-        'hitungan'
+        'hitungan',
+        'ukuran'
     ];
+
+    protected $casts = [
+        'biaya' => 'decimal:2',
+        'ukuran' => 'array'
+    ];
+
+    // Accessor untuk mendapatkan daftar ukuran
+    public function getUkuranOptionsAttribute()
+    {
+        return $this->ukuran ?? [];
+    }
 
     public function order() {
         return $this->HasMany(Order::class);

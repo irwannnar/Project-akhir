@@ -15,22 +15,31 @@ class PrintingController extends Controller
     }
 
     // Menampilkan halaman create order berdasarkan jenis printing
-    public function create(Request $request)
+    public function create()
     {
         return view('printing.create');
     }
 
-    // Menyimpan order baru
     public function store(Request $request)
     {
-        $request->validate([
-            'nama_layanan'=>'required|string|max:255',
-            'biaya'=>"required|numeric|min:0",
-            'hitungan'=>'required|string|max:50',
+        $validated = $request->validate([
+            'nama_layanan' => 'required|string|max:255',
+            'biaya' => 'required|numeric|min:0',
+            'hitungan' => 'required|in:per_lembar,per_cm2,tetap',
+            'ukuran' => 'required|json',
+            'sizes' => 'sometimes|array'
         ]);
 
-        Printing::create($request->all());
-        return redirect()->route('printing.index')->with('success', 'layanan berhasil ditambah!');
+        // Create printing service
+        $printing = Printing::create([
+            'nama_layanan' => $validated['nama_layanan'],
+            'biaya' => $validated['biaya'],
+            'hitungan' => $validated['hitungan'],
+            'ukuran' => $validated['ukuran']
+        ]);
+
+        return redirect()->route('printing.index')
+            ->with('success', 'Layanan printing berhasil ditambahkan');
     }
 
     public function show(Printing $printing)
@@ -49,6 +58,7 @@ class PrintingController extends Controller
         $request->validate([
             'nama_layanan'=> 'required|string|max:255',
             'biaya'=>'required|numeric|min:0',
+            'ukuran' => 'required|json',
             'hitungan'=>'required|string|max:50',
         ]);
 

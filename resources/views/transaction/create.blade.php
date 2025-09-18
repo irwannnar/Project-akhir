@@ -116,19 +116,20 @@
                                                 <option value="">Pilih Layanan Cetak</option>
                                                 @foreach($printings as $printing)
                                                     <option value="{{ $printing->id }}" 
-                                                            data-sizes="{{ json_encode($printing->sizes ?? []) }}"
-                                                            data-base-price="{{ $printing->base_price ?? 0 }}"
+                                                            data-sizes="{{ json_encode($printing->ukuran ?? []) }}"
+                                                            data-base-price="{{ $printing->biaya ?? 0 }}"
                                                             {{ old('printing_items.0.printing_id') == $printing->id ? 'selected' : '' }}>
-                                                        {{ $printing->nama_layanan }} - Mulai Rp {{ number_format($printing->base_price ?? 0, 0, ',', '.') }}
+                                                        {{ $printing->nama_layanan }} - Mulai Rp {{ number_format($printing->biaya ?? 0, 0, ',', '.') }}
                                                     </option>
                                                 @endforeach
                                             </select>
                                         </div>
                                         
-                                        <div class="printing-size-container hidden">
-                                            <label class="block text-sm text-gray-600 mb-1">Ukuran</label>
-                                            <select name="printing_items[0][size]" class="printing-size w-full px-3 py-2 border border-gray-300 rounded-lg">
+                                        <div class="printing-size-container">
+                                            <label class="block text-sm text-gray-600 mb-1">Ukuran *</label>
+                                            <select name="printing_items[0][size]" class="printing-size w-full px-3 py-2 border border-gray-300 rounded-lg" required>
                                                 <option value="">Pilih Ukuran</option>
+                                                <!-- Options akan diisi oleh JavaScript -->
                                             </select>
                                         </div>
                                         
@@ -140,19 +141,6 @@
                                         <div class="material-field">
                                             <label class="block text-sm text-gray-600 mb-1">Material</label>
                                             <input type="text" name="printing_items[0][material]" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Jenis material yang digunakan" value="{{ old('printing_items.0.material') }}">
-                                        </div>
-                                        
-                                        <div class="dimensions-field">
-                                            <div class="grid grid-cols-2 gap-3">
-                                                <div>
-                                                    <label class="block text-sm text-gray-600 mb-1">Lebar (cm)</label>
-                                                    <input type="number" name="printing_items[0][width]" step="0.01" class="printing-width w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="0.00" value="{{ old('printing_items.0.width') }}">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-sm text-gray-600 mb-1">Tinggi (cm)</label>
-                                                    <input type="number" name="printing_items[0][height]" step="0.01" class="printing-height w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="0.00" value="{{ old('printing_items.0.height') }}">
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -315,18 +303,19 @@
                         <option value="">Pilih Layanan Cetak</option>
                         @foreach($printings as $printing)
                             <option value="{{ $printing->id }}" 
-                                    data-sizes="{{ json_encode($printing->sizes ?? []) }}"
-                                    data-base-price="{{ $printing->base_price ?? 0 }}">
-                                {{ $printing->nama_layanan }} - Mulai Rp {{ number_format($printing->base_price ?? 0, 0, ',', '.') }}
+                                    data-sizes="{{ json_encode($printing->ukuran ?? []) }}"
+                                    data-base-price="{{ $printing->biaya ?? 0 }}">
+                                {{ $printing->nama_layanan }} - Mulai Rp {{ number_format($printing->biaya ?? 0, 0, ',', '.') }}
                             </option>
                         @endforeach
                     </select>
                 </div>
                 
-                <div class="printing-size-container hidden">
-                    <label class="block text-sm text-gray-600 mb-1">Ukuran</label>
-                    <select name="printing_items[INDEX][size]" class="printing-size w-full px-3 py-2 border border-gray-300 rounded-lg">
+                <div class="printing-size-container">
+                    <label class="block text-sm text-gray-600 mb-1">Ukuran *</label>
+                    <select name="printing_items[INDEX][size]" class="printing-size w-full px-3 py-2 border border-gray-300 rounded-lg" required>
                         <option value="">Pilih Ukuran</option>
+                        <!-- Options akan diisi oleh JavaScript -->
                     </select>
                 </div>
                 
@@ -338,19 +327,6 @@
                 <div class="material-field">
                     <label class="block text-sm text-gray-600 mb-1">Material</label>
                     <input type="text" name="printing_items[INDEX][material]" class="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Jenis material yang digunakan">
-                </div>
-                
-                <div class="dimensions-field">
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-sm text-gray-600 mb-1">Lebar (cm)</label>
-                            <input type="number" name="printing_items[INDEX][width]" step="0.01" class="printing-width w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="0.00">
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-600 mb-1">Tinggi (cm)</label>
-                            <input type="number" name="printing_items[INDEX][height]" step="0.01" class="printing-height w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="0.00">
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -440,38 +416,26 @@
             const select = newItem.querySelector('.printing-select');
             const sizeSelect = newItem.querySelector('.printing-size');
             const quantity = newItem.querySelector('.printing-quantity');
-            const widthInput = newItem.querySelector('.printing-width');
-            const heightInput = newItem.querySelector('.printing-height');
             
             select.addEventListener('change', function() {
                 const selectedOption = this.options[this.selectedIndex];
                 const sizes = selectedOption ? JSON.parse(selectedOption.getAttribute('data-sizes') || '[]') : [];
-                const sizeContainer = this.closest('.printing-item').querySelector('.printing-size-container');
                 
                 // Update size options
                 sizeSelect.innerHTML = '<option value="">Pilih Ukuran</option>';
                 sizes.forEach(size => {
                     const option = document.createElement('option');
-                    option.value = size.name;
-                    option.textContent = `${size.name} - Rp ${formatCurrency(size.price)}`;
-                    option.setAttribute('data-price', size.price);
+                    option.value = size.nama;
+                    option.textContent = `${size.nama} - Rp ${formatCurrency(size.harga)}`;
+                    option.setAttribute('data-price', size.harga);
                     sizeSelect.appendChild(option);
                 });
-                
-                // Show/hide size selector
-                if (sizes.length > 0) {
-                    sizeContainer.classList.remove('hidden');
-                } else {
-                    sizeContainer.classList.add('hidden');
-                }
                 
                 calculateTotalPrice();
             });
             
             sizeSelect.addEventListener('change', calculateTotalPrice);
             quantity.addEventListener('input', calculateTotalPrice);
-            widthInput.addEventListener('input', calculateTotalPrice);
-            heightInput.addEventListener('input', calculateTotalPrice);
             
             // Add remove functionality
             newItem.querySelector('.remove-printing').addEventListener('click', function() {
@@ -515,8 +479,6 @@
                     const select = item.querySelector('.printing-select');
                     const sizeSelect = item.querySelector('.printing-size');
                     const quantityInput = item.querySelector('.printing-quantity');
-                    const widthInput = item.querySelector('.printing-width');
-                    const heightInput = item.querySelector('.printing-height');
                     
                     if (select.value && quantityInput.value) {
                         const selectedOption = select.options[select.selectedIndex];
@@ -530,12 +492,6 @@
                             const sizePrice = sizeOption ? parseFloat(sizeOption.getAttribute('data-price')) || 0 : 0;
                             itemTotal = sizePrice * quantity;
                             itemDescription += ` - ${sizeOption.value}`;
-                        } else if (widthInput.value && heightInput.value) {
-                            const width = parseFloat(widthInput.value) || 0;
-                            const height = parseFloat(heightInput.value) || 0;
-                            const area = width * height / 10000; // Convert to m²
-                            itemTotal = basePrice * area * quantity;
-                            itemDescription += ` - ${width}cm x ${height}cm`;
                         } else {
                             itemTotal = basePrice * quantity;
                         }

@@ -9,17 +9,17 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
-    {
-        Schema::create('printings', function (Blueprint $table) {
-            $table->id();
-            $table->string('nama_layanan');
-            $table->decimal('biaya');
-            $table->string('ukuran');
-            $table->string('hitungan');
-            $table->timestamps();
-        });
-    }
+   public function up()
+{
+    Schema::create('printings', function (Blueprint $table) {
+        $table->id();
+        $table->string('nama_layanan');
+        $table->decimal('biaya', 15, 2);
+        $table->string('hitungan')->default('per_lembar');
+        $table->json('ukuran')->nullable();
+        $table->timestamps();
+    });
+}
 
     /**
      * Reverse the migrations.

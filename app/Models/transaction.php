@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class transaction extends Model
+class Transaction extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'product_id',
-        'printing_id',
         'customer_name',
         'customer_phone',
         'customer_email',
@@ -27,15 +28,25 @@ class transaction extends Model
         'type'
     ];
 
-    public function product() {
+    protected $casts = [
+        'paid_at' => 'datetime',
+        'total_price' => 'decimal:2',
+        'total_cost' => 'decimal:2',
+        'profit' => 'decimal:2'
+    ];
+
+    public function items()
+    {
+        return $this->hasMany(TransactionItem::class);
+    }
+
+    public function product()
+    {
         return $this->belongsTo(Product::class);
     }
 
-    public function Printing() {
+    public function printing()
+    {
         return $this->belongsTo(Printing::class);
-    }
-
-    public function sale() {
-        return $this->hasOne(Sale::class);
     }
 }
