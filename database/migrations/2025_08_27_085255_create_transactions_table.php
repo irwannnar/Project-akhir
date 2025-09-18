@@ -24,8 +24,7 @@ class CreateTransactionsTable extends Migration
     // Detail pesanan
     $table->string('material')->nullable();
     $table->integer('quantity');
-    $table->decimal('width', 8, 2)->nullable();
-    $table->decimal('height', 8, 2)->nullable();
+    $table->string('ukuran')->nullable();
     $table->text('notes')->nullable();
     $table->string('file_path')->nullable();
 
