@@ -23,12 +23,21 @@
                             required>
                     </div>
                 </div>
-                <div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+                    <div>
+                        <label for="biaya" class="font-bold">Ukuran</label>
+                        <input type="text" name="ukuran" id="ukuran" placeholder="ukuran"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            value="{{ $printing->ukuran }}"
+                            required>
+                    </div>
+                    <div>
                     <label for="hitungan">Perhitungan</label>
                     <input type="text" name="hitungan" id="hitungan" placeholder="hitungan"
                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         value="{{ $printing->hitungan }}"
                         required>
+                    </div>
                 </div>
                 <div class="flex justify-between mt-8">
                     <a href="{{ route('printing.index') }}" class="border border-gray-600 bg-gray-600 hover:bg-gray-800 text-white px-2 py-1 rounded active:scale-95">batal</a>
