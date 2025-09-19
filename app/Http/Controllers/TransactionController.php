@@ -81,7 +81,7 @@ class TransactionController extends Controller
             'printing_items' => 'required_if:type,order|array|min:1',
             'printing_items.*.printing_id' => 'required_if:type,order|exists:printings,id',
             'printing_items.*.quantity' => 'required_if:type,order|integer|min:1',
-            'printing_items.*.size' => 'required_if:type,order|string|max:100',
+            'printing_items.*.ukuran' => 'required_if:type,order|string|max:100',
             'printing_items.*.material' => 'nullable|string|max:255',
         ]);
 
@@ -119,13 +119,13 @@ class TransactionController extends Controller
                     $printing = Printing::find($item['printing_id']);
                     
                     // Hitung harga berdasarkan ukuran yang dipilih
-                    $sizePrice = $this->getPrintingSizePrice($printing, $item['size']);
+                    $sizePrice = $this->getPrintingSizePrice($printing, $item['ukuran']);
                     
                     TransactionItem::create([
                         'transaction_id' => $transaction->id,
                         'printing_id' => $item['printing_id'],
                         'quantity' => $item['quantity'],
-                        'size' => $item['size'],
+                        'ukuran' => $item['ukuran'],
                         'material' => $item['material'] ?? null,
                         'unit_price' => $sizePrice,
                         'subtotal' => $sizePrice * $item['quantity'],
@@ -179,7 +179,7 @@ class TransactionController extends Controller
             'printing_items' => 'required_if:type,order|array|min:1',
             'printing_items.*.printing_id' => 'required_if:type,order|exists:printings,id',
             'printing_items.*.quantity' => 'required_if:type,order|integer|min:1',
-            'printing_items.*.size' => 'required_if:type,order|string|max:100',
+            'printing_items.*.ukuran' => 'required_if:type,order|string|max:100',
             'printing_items.*.material' => 'nullable|string|max:255',
         ]);
 
@@ -225,7 +225,7 @@ class TransactionController extends Controller
                         'transaction_id' => $transaction->id,
                         'printing_id' => $item['printing_id'],
                         'quantity' => $item['quantity'],
-                        'size' => $item['size'],
+                        'ukuran' => $item['ukuran'],
                         'material' => $item['material'] ?? null,
                         'unit_price' => $sizePrice,
                         'subtotal' => $sizePrice * $item['quantity'],

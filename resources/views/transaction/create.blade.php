@@ -151,7 +151,7 @@
 
                                         <div class="printing-size-container">
                                             <label class="block text-sm text-gray-600 mb-1">Ukuran *</label>
-                                            <select name="printing_items[0][size]"
+                                            <select name="printing_items[0][ukuran]"
                                                 class="printing-size w-full px-3 py-2 border border-gray-300 rounded-lg"
                                                 required>
                                                 <option value="">Pilih Ukuran</option>
@@ -295,8 +295,8 @@
                         class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200 font-medium flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
-                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M5 13l4 4L19 7" />
                         </svg>
                         Simpan Transaksi
                     </button>
@@ -377,7 +377,7 @@
 
                 <div class="printing-size-container">
                     <label class="block text-sm text-gray-600 mb-1">Ukuran *</label>
-                    <select name="printing_items[INDEX][size]"
+                    <select name="printing_items[INDEX][ukuran]"
                         class="printing-size w-full px-3 py-2 border border-gray-300 rounded-lg" required>
                         <option value="">Pilih Ukuran</option>
                         <!-- Options akan diisi oleh JavaScript -->
@@ -418,20 +418,19 @@
                 typeInput.value = type;
 
                 if (type === 'purchase') {
-                    purchaseBtn.classList.remove('bg-gray-300', 'text-gray-700');
-                    purchaseBtn.classList.add('bg-blue-600', 'text-white');
-                    orderBtn.classList.remove('bg-blue-600', 'text-white');
-                    orderBtn.classList.add('bg-gray-300', 'text-gray-700');
                     productSection.classList.remove('hidden');
                     printingSection.classList.add('hidden');
+
+                    productSection.querySelectorAll('input, select').forEach(el => el.disabled = false);
+                    printingSection.querySelectorAll('input, select').forEach(el => el.disabled = true);
                 } else {
-                    purchaseBtn.classList.remove('bg-blue-600', 'text-white');
-                    purchaseBtn.classList.add('bg-gray-300', 'text-gray-700');
-                    orderBtn.classList.remove('bg-gray-300', 'text-gray-700');
-                    orderBtn.classList.add('bg-blue-600', 'text-white');
                     productSection.classList.add('hidden');
                     printingSection.classList.remove('hidden');
+
+                    productSection.querySelectorAll('input, select').forEach(el => el.disabled = true);
+                    printingSection.querySelectorAll('input, select').forEach(el => el.disabled = false);
                 }
+
                 calculateTotalPrice();
             }
 
@@ -507,10 +506,10 @@
             function updateSizeOptions(selectElement, sizeSelect) {
                 const selectedOption = selectElement.options[selectElement.selectedIndex];
                 const sizes = selectedOption ? JSON.parse(selectedOption.getAttribute('data-sizes') || '[]') : [];
-                
+
                 // Clear existing options
                 sizeSelect.innerHTML = '<option value="">Pilih Ukuran</option>';
-                
+
                 // Add new options
                 sizes.forEach(size => {
                     const option = document.createElement('option');
@@ -527,7 +526,7 @@
                 if (select.value) {
                     updateSizeOptions(select, sizeSelect);
                 }
-                
+
                 select.addEventListener('change', function() {
                     updateSizeOptions(this, sizeSelect);
                     calculateTotalPrice();
@@ -540,7 +539,7 @@
                 el.addEventListener('input', calculateTotalPrice);
             });
 
-            document.querySelectorAll('.printing-size, .printing-quantity').forEach(el => {
+            document.querySelectorAll('.printing-ukuran, .printing-quantity').forEach(el => {
                 el.addEventListener('change', calculateTotalPrice);
                 el.addEventListener('input', calculateTotalPrice);
             });
@@ -572,7 +571,8 @@
 
                         if (select.value && quantityInput.value) {
                             const selectedOption = select.options[select.selectedIndex];
-                            const price = selectedOption ? parseFloat(selectedOption.getAttribute('data-price')) || 0 : 0;
+                            const price = selectedOption ? parseFloat(selectedOption.getAttribute(
+                                'data-price')) || 0 : 0;
                             const quantity = parseInt(quantityInput.value) || 0;
                             const itemTotal = price * quantity;
 
@@ -595,14 +595,16 @@
 
                         if (select.value && quantityInput.value) {
                             const selectedOption = select.options[select.selectedIndex];
-                            const basePrice = selectedOption ? parseFloat(selectedOption.getAttribute('data-base-price')) || 0 : 0;
+                            const basePrice = selectedOption ? parseFloat(selectedOption.getAttribute(
+                                'data-base-price')) || 0 : 0;
                             const quantity = parseInt(quantityInput.value) || 0;
                             let itemTotal = 0;
                             let itemDescription = selectedOption.text.split(' - ')[0];
 
                             if (sizeSelect && sizeSelect.value) {
                                 const sizeOption = sizeSelect.options[sizeSelect.selectedIndex];
-                                const sizePrice = sizeOption ? parseFloat(sizeOption.getAttribute('data-price')) || 0 : 0;
+                                const sizePrice = sizeOption ? parseFloat(sizeOption.getAttribute(
+                                    'data-price')) || 0 : 0;
                                 itemTotal = sizePrice * quantity;
                                 itemDescription += ` - ${sizeOption.value}`;
                             } else {
@@ -634,28 +636,44 @@
             }
 
             // Initial calculation
-            calculateTotalPrice();
+            function toggleTransactionType(type) {
+                const productSection = document.getElementById('product-section');
+                const printingSection = document.getElementById('printing-section');
 
-            // Form validation
-            document.getElementById('transaction-form').addEventListener('submit', function(e) {
-                const type = document.getElementById('type').value;
-                
                 if (type === 'purchase') {
-                    const productItems = document.querySelectorAll('.product-item');
-                    if (productItems.length === 0) {
-                        e.preventDefault();
-                        alert('Silakan tambahkan minimal satu produk');
-                        return;
-                    }
-                } else {
-                    const printingItems = document.querySelectorAll('.printing-item');
-                    if (printingItems.length === 0) {
-                        e.preventDefault();
-                        alert('Silakan tambahkan minimal satu layanan cetak');
-                        return;
-                    }
+                    productSection.classList.remove('hidden');
+                    printingSection.classList.add('hidden');
+
+                    // hapus required dari printing inputs
+                    printingSection.querySelectorAll('select[name^="printing_items"]').forEach(el => el
+                        .removeAttribute('required'));
+                    // aktifkan required di product inputs
+                    productSection.querySelectorAll('select[name^="products"]').forEach(el => el.setAttribute(
+                        'required', true));
+
+                } else if (type === 'order') {
+                    printingSection.classList.remove('hidden');
+                    productSection.classList.add('hidden');
+
+                    // hapus required dari product inputs
+                    productSection.querySelectorAll('select[name^="products"]').forEach(el => el.removeAttribute(
+                        'required'));
+                    // aktifkan required di printing inputs
+                    printingSection.querySelectorAll('select[name^="printing_items"]').forEach(el => el
+                        .setAttribute('required', true));
                 }
-            });
+
+                // update hidden input type
+                document.getElementById('type').value = type;
+            }
+
+            // pasang event di tombol
+            document.getElementById('purchase-type').addEventListener('click', () => toggleTransactionType(
+                'purchase'));
+            document.getElementById('order-type').addEventListener('click', () => toggleTransactionType('order'));
+
+            // jalankan sekali saat load
+            toggleTransactionType(document.getElementById('type').value);
         });
     </script>
 </x-layout.default>
