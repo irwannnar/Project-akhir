@@ -48,18 +48,27 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-gray-900">
-                                        @if (!empty($layanan->ukuran) && is_array($layanan->ukuran) && count($layanan->ukuran) > 0)
+                                        @php
+                                            // Handle both array and JSON string
+                                            $ukuranData = $layanan->ukuran;
+                                            if (is_string($ukuranData)) {
+                                                $ukuranData = json_decode($ukuranData, true) ?: [];
+                                            }
+                                            $ukuranData = is_array($ukuranData) ? $ukuranData : [];
+                                        @endphp
+
+                                        @if (count($ukuranData) > 0)
                                             <div class="space-y-1">
-                                                @foreach (array_slice($layanan->ukuran, 0, 3) as $ukuran)
+                                                @foreach (array_slice($ukuranData, 0, 3) as $ukuran)
                                                     @if (isset($ukuran['nama']) && isset($ukuran['harga']))
                                                         <div class="flex justify-between">
-                                                            <span>{{ $ukuran['nama'] }}</span>
+                                                            <span>{{ $ukuran['nama']}}</span>
                                                         </div>
                                                     @endif
                                                 @endforeach
-                                                @if (count($layanan->ukuran) > 3)
+                                                @if (count($ukuranData) > 3)
                                                     <div class="text-xs text-blue-600 mt-1">
-                                                        +{{ count($layanan->ukuran) - 3 }} ukuran lainnya...
+                                                        +{{ count($ukuranData) - 3 }} ukuran lainnya...
                                                     </div>
                                                 @endif
                                             </div>
@@ -196,8 +205,18 @@
                     return;
                 }
 
-                // Pastikan sizes adalah array
-                const sizesArray = Array.isArray(sizes) ? sizes : [];
+                // Handle both array and JSON string
+                let sizesArray = [];
+                if (typeof sizes === 'string') {
+                    try {
+                        sizesArray = JSON.parse(sizes) || [];
+                    } catch (e) {
+                        console.error('Error parsing JSON:', e);
+                        sizesArray = [];
+                    }
+                } else if (Array.isArray(sizes)) {
+                    sizesArray = sizes;
+                }
 
                 modalTitle.textContent = `Detail Ukuran - Layanan #${layananId}`;
                 sizesList.innerHTML = '';
