@@ -37,7 +37,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach ($printing as $layanan)
+                        @foreach ($printings as $layanan)
                             <tr>
                                 <td class="px-6 py-4">
                                     <div class="text-sm font-medium text-gray-900">{{ $layanan->nama_layanan }}</div>
@@ -48,14 +48,14 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-gray-900">
-                                        @if ($layanan->ukuran && is_array($layanan->ukuran))
+                                        @if (!empty($layanan->ukuran) && is_array($layanan->ukuran) && count($layanan->ukuran) > 0)
                                             <div class="space-y-1">
                                                 @foreach (array_slice($layanan->ukuran, 0, 3) as $ukuran)
-                                                    <div class="flex justify-between">
-                                                        <span>{{ $ukuran['nama'] }}</span>
-                                                        <span class="text-gray-600">Rp
-                                                            {{ number_format($ukuran['harga'], 0, ',', '.') }}</span>
-                                                    </div>
+                                                    @if (isset($ukuran['nama']) && isset($ukuran['harga']))
+                                                        <div class="flex justify-between">
+                                                            <span>{{ $ukuran['nama'] }}</span>
+                                                        </div>
+                                                    @endif
                                                 @endforeach
                                                 @if (count($layanan->ukuran) > 3)
                                                     <div class="text-xs text-blue-600 mt-1">
@@ -64,7 +64,7 @@
                                                 @endif
                                             </div>
                                         @else
-                                            <span class="text-gray-500">-</span>
+                                            <span class="text-gray-500 text-sm">Tidak ada ukuran tersedia</span>
                                         @endif
                                     </div>
                                 </td>
@@ -124,7 +124,7 @@
                                             </button>
                                         </form>
                                         <button type="button"
-                                            onclick="showSizes({{ $layanan->id }}, {{ json_encode($layanan->ukuran) }})"
+                                            onclick='showSizes({{ $layanan->id }}, {!! json_encode($layanan->ukuran) !!})'
                                             class="text-green-600 hover:text-green-900 transition duration-200"
                                             title="Lihat Detail Ukuran">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor"
@@ -146,9 +146,9 @@
         </div>
 
         <!-- Pagination -->
-        @if ($printing->hasPages())
+        @if ($printings->hasPages())
             <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                {{ $printing->links() }}
+                {{ $printings->links() }}
             </div>
         @endif
     </div>
@@ -186,32 +186,42 @@
     <script>
         // Fungsi untuk menampilkan modal detail ukuran
         function showSizes(layananId, sizes) {
-            const modal = document.getElementById('sizesModal');
-            const sizesList = document.getElementById('sizesList');
-            const modalTitle = document.getElementById('modalTitle');
+            try {
+                const modal = document.getElementById('sizesModal');
+                const sizesList = document.getElementById('sizesList');
+                const modalTitle = document.getElementById('modalTitle');
 
-            // Set judul modal
-            modalTitle.textContent = `Detail Ukuran - Layanan #${layananId}`;
+                if (!modal || !sizesList || !modalTitle) {
+                    console.error('Element modal tidak ditemukan');
+                    return;
+                }
 
-            // Kosongkan dan isi daftar ukuran
-            sizesList.innerHTML = '';
+                // Pastikan sizes adalah array
+                const sizesArray = Array.isArray(sizes) ? sizes : [];
 
-            if (sizes && sizes.length > 0) {
-                sizes.forEach((size, index) => {
-                    const sizeItem = document.createElement('div');
-                    sizeItem.className = 'flex justify-between items-center p-2 bg-gray-50 rounded';
-                    sizeItem.innerHTML = `
-                <span class="font-medium">${size.nama}</span>
-                <span class="text-green-600 font-semibold">Rp ${new Intl.NumberFormat('id-ID').format(size.harga)}</span>
-            `;
-                    sizesList.appendChild(sizeItem);
-                });
-            } else {
-                sizesList.innerHTML = '<p class="text-gray-500 text-center">Tidak ada ukuran tersedia</p>';
+                modalTitle.textContent = `Detail Ukuran - Layanan #${layananId}`;
+                sizesList.innerHTML = '';
+
+                if (sizesArray.length > 0) {
+                    sizesArray.forEach((size) => {
+                        if (size && size.nama && size.harga) {
+                            const sizeItem = document.createElement('div');
+                            sizeItem.className = 'flex justify-between items-center p-2 bg-gray-50 rounded';
+                            sizeItem.innerHTML = `
+                        <span class="font-medium">${size.nama}</span>
+                        <span class="text-green-600 font-semibold">Rp ${new Intl.NumberFormat('id-ID').format(size.harga)}</span>
+                    `;
+                            sizesList.appendChild(sizeItem);
+                        }
+                    });
+                } else {
+                    sizesList.innerHTML = '<p class="text-gray-500 text-center">Tidak ada ukuran tersedia</p>';
+                }
+
+                modal.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error dalam showSizes:', error);
             }
-
-            // Tampilkan modal
-            modal.classList.remove('hidden');
         }
 
         // Fungsi untuk menutup modal

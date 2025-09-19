@@ -22,9 +22,13 @@ class Printing extends Model
     ];
 
     // Accessor untuk mendapatkan daftar ukuran
-    public function getUkuranOptionsAttribute()
+     public function getUkuranAttribute($value)
     {
-        return $this->ukuran ?? [];
+        try {
+            return json_decode($value, true) ?? [];
+        } catch (\Exception $e) {
+            return [];
+        }
     }
 
     public function order() {

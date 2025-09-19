@@ -10,8 +10,8 @@ class PrintingController extends Controller
     // Menampilkan halaman utama dengan pilihan printing
     public function index()
     {
-        $printing = Printing::paginate(10);
-        return view('printing.index', compact('printing'));
+        $printings = Printing::paginate(10);
+        return view('printing.index', compact('printings'));
     }
 
     // Menampilkan halaman create order berdasarkan jenis printing
