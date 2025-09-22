@@ -258,30 +258,6 @@
                                 class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100"
                             >
                         </div>
-                        <div>
-                            <label for="total_cost" class="block text-sm font-medium text-gray-700 mb-1">Total Biaya (Rp)</label>
-                            <input 
-                                type="number" 
-                                id="total_cost" 
-                                name="total_cost" 
-                                x-model="totalCost"
-                                @input="updateProfit()"
-                                min="0" 
-                                value="{{ old('total_cost', 0) }}" 
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            >
-                        </div>
-                        <div>
-                            <label for="profit" class="block text-sm font-medium text-gray-700 mb-1">Profit (Rp)</label>
-                            <input 
-                                type="number" 
-                                id="profit" 
-                                name="profit" 
-                                x-model="profit"
-                                readonly
-                                class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100"
-                            >
-                        </div>
                     </div>
 
                     <!-- File Upload -->

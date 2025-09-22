@@ -18,36 +18,36 @@ class TransactionController extends Controller
     {
         // Set active tab from request or default to 'purchases'
         $activeTab = $request->get('tab', 'purchases');
-        
+
         // Query untuk purchases (transaksi dengan type 'purchase')
         $purchasesQuery = Transaction::where('type', 'purchase')
             ->with('product')
-            ->when($request->status, function($query, $status) {
+            ->when($request->status, function ($query, $status) {
                 return $query->where('status', $status);
             })
-            ->when($request->payment_method, function($query, $paymentMethod) {
+            ->when($request->payment_method, function ($query, $paymentMethod) {
                 return $query->where('payment_method', $paymentMethod);
             })
-            ->when($request->start_date && $request->end_date, function($query) use ($request) {
+            ->when($request->start_date && $request->end_date, function ($query) use ($request) {
                 return $query->whereBetween('created_at', [
                     $request->start_date . ' 00:00:00',
                     $request->end_date . ' 23:59:59'
                 ]);
             });
-        
+
         // Query untuk orders (transaksi dengan type 'order')
         $ordersQuery = Transaction::where('type', 'order')
             ->with('printing')
-            ->when($request->status, function($query, $status) {
+            ->when($request->status, function ($query, $status) {
                 return $query->where('status', $status);
             });
-        
+
         $purchases = $purchasesQuery->paginate(10, ['*'], 'purchases_page')
             ->appends(['tab' => 'purchases'] + $request->except('purchases_page'));
-        
+
         $orders = $ordersQuery->paginate(10, ['*'], 'orders_page')
             ->appends(['tab' => 'orders'] + $request->except('orders_page'));
-        
+
         return view('transaction.index', compact('purchases', 'orders', 'activeTab'));
     }
 
@@ -57,10 +57,10 @@ class TransactionController extends Controller
     public function create(Request $request)
     {
         $type = $request->get('type', 'order');
-        
+
         $products = Product::all();
         $services = Printing::all();
-        
+
         return view('transaction.create', compact('type', 'products', 'services'));
     }
 
@@ -72,8 +72,8 @@ class TransactionController extends Controller
         // dd($request->all());
         $validated = $request->validate([
             'type' => 'required|in:order,purchase',
-            'product_id' => 'required_if:type,purchase|exists:products,id',
-            'printing_id' => 'required_if:type,order|exists:printings,id',
+            'product_id' => 'required_without:printing_id|nullable|exists:products,id',
+            'printing_id' => 'required_without:product_id|nullable|exists:printings,id',
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'nullable|string|max:20',
             'customer_email' => 'nullable|email|max:255',
@@ -90,34 +90,33 @@ class TransactionController extends Controller
         ]);
 
         DB::beginTransaction();
-        
+
         try {
             // Hitung profit jika total_cost diisi
             if (isset($validated['total_cost'])) {
                 $validated['profit'] = $validated['total_price'] - $validated['total_cost'];
             }
-            
+
             // Handle file upload
             if ($request->hasFile('file')) {
                 $filePath = $request->file('file')->store('transaction_files', 'public');
                 $validated['file_path'] = $filePath;
             }
-            
+
             // Set paid_at jika status completed dan payment_method bukan cash
             if ($validated['status'] === 'completed' && $validated['payment_method'] !== 'cash') {
                 $validated['paid_at'] = now();
             }
-            
+
             $transaction = Transaction::create($validated);
-            
+
             DB::commit();
-            
+
             return redirect()->route('transaction.index', ['tab' => $validated['type'] == 'purchase' ? 'purchases' : 'orders'])
                 ->with('success', 'Transaksi berhasil dibuat');
-                
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return back()->withInput()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
@@ -128,7 +127,7 @@ class TransactionController extends Controller
     public function show(Transaction $transaction)
     {
         $transaction->load(['product', 'printing']);
-        
+
         return view('transaction.show', compact('transaction'));
     }
 
@@ -139,7 +138,7 @@ class TransactionController extends Controller
     {
         $products = Product::all();
         $services = Printing::all();
-        
+
         return view('transaction.edit', compact('transaction', 'products', 'services'));
     }
 
@@ -167,7 +166,7 @@ class TransactionController extends Controller
         ]);
 
         DB::beginTransaction();
-        
+
         try {
             // Hitung profit jika total_cost diisi
             if (isset($validated['total_cost'])) {
@@ -175,35 +174,34 @@ class TransactionController extends Controller
             } else {
                 $validated['profit'] = null;
             }
-            
+
             // Handle file upload
             if ($request->hasFile('file')) {
                 // Hapus file lama jika ada
                 if ($transaction->file_path) {
                     Storage::disk('public')->delete($transaction->file_path);
                 }
-                
+
                 $filePath = $request->file('file')->store('transaction_files', 'public');
                 $validated['file_path'] = $filePath;
             }
-            
+
             // Set paid_at jika status completed dan payment_method bukan cash
             if ($validated['status'] === 'completed' && $validated['payment_method'] !== 'cash') {
                 $validated['paid_at'] = now();
             } elseif ($validated['status'] !== 'completed') {
                 $validated['paid_at'] = null;
             }
-            
+
             $transaction->update($validated);
-            
+
             DB::commit();
-            
+
             return redirect()->route('transaction.index', ['tab' => $transaction->type == 'purchase' ? 'purchases' : 'orders'])
                 ->with('success', 'Transaksi berhasil diperbarui');
-                
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return back()->withInput()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
@@ -214,23 +212,22 @@ class TransactionController extends Controller
     public function destroy(Transaction $transaction)
     {
         DB::beginTransaction();
-        
+
         try {
             // Hapus file jika ada
             if ($transaction->file_path) {
                 Storage::disk('public')->delete($transaction->file_path);
             }
-            
+
             $transaction->delete();
-            
+
             DB::commit();
-            
+
             return redirect()->route('transaction.index', ['tab' => $transaction->type == 'purchase' ? 'purchases' : 'orders'])
                 ->with('success', 'Transaksi berhasil dihapus');
-                
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
@@ -243,14 +240,14 @@ class TransactionController extends Controller
         if ($transaction->status !== 'completed') {
             return back()->with('error', 'Hanya transaksi dengan status completed yang dapat ditandai sebagai dibayar');
         }
-        
+
         $transaction->update([
             'paid_at' => now()
         ]);
-        
+
         return back()->with('success', 'Transaksi berhasil ditandai sebagai dibayar');
     }
-    
+
     /**
      * Calculate profit for a transaction.
      */
@@ -259,7 +256,7 @@ class TransactionController extends Controller
         if ($totalCost === null) {
             return null;
         }
-        
+
         return $totalPrice - $totalCost;
     }
 }
