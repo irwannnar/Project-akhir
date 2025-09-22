@@ -3,266 +3,231 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
-use App\Models\TransactionItem;
 use App\Models\Product;
 use App\Models\Printing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class TransactionController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     */
     public function index(Request $request)
     {
-        // Ambil nilai tab dari request, default 'purchases'
+        // Set active tab from request or default to 'purchases'
         $activeTab = $request->get('tab', 'purchases');
         
-        // Query untuk purchases (type = purchase)
+        // Query untuk purchases (transaksi dengan type 'purchase')
         $purchasesQuery = Transaction::where('type', 'purchase')
-            ->with(['items.product']);
-            
-        // Query untuk orders (type = order)
+            ->with('product')
+            ->when($request->status, function($query, $status) {
+                return $query->where('status', $status);
+            })
+            ->when($request->payment_method, function($query, $paymentMethod) {
+                return $query->where('payment_method', $paymentMethod);
+            })
+            ->when($request->start_date && $request->end_date, function($query) use ($request) {
+                return $query->whereBetween('created_at', [
+                    $request->start_date . ' 00:00:00',
+                    $request->end_date . ' 23:59:59'
+                ]);
+            });
+        
+        // Query untuk orders (transaksi dengan type 'order')
         $ordersQuery = Transaction::where('type', 'order')
-            ->with(['items.printing']);
+            ->with('printing')
+            ->when($request->status, function($query, $status) {
+                return $query->where('status', $status);
+            });
         
-        // Filter untuk purchases
-        if ($activeTab === 'purchases') {
-            if ($request->has('status') && $request->status != '') {
-                $purchasesQuery->where('status', $request->status);
-            }
-            
-            if ($request->has('payment_method') && $request->payment_method != '') {
-                $purchasesQuery->where('payment_method', $request->payment_method);
-            }
-            
-            if ($request->has('start_date') && $request->start_date != '') {
-                $purchasesQuery->whereDate('created_at', '>=', $request->start_date);
-            }
-            
-            if ($request->has('end_date') && $request->end_date != '') {
-                $purchasesQuery->whereDate('created_at', '<=', $request->end_date);
-            }
-        }
+        $purchases = $purchasesQuery->paginate(10, ['*'], 'purchases_page')
+            ->appends(['tab' => 'purchases'] + $request->except('purchases_page'));
         
-        // Filter untuk orders (jika diperlukan)
-        if ($activeTab === 'orders' && $request->has('status') && $request->status != '') {
-            $ordersQuery->where('status', $request->status);
-        }
-        
-        // Pagination
-        $purchases = $purchasesQuery->paginate(10, ['*'], 'purchase_page');
-        $orders = $ordersQuery->paginate(10, ['*'], 'order_page');
+        $orders = $ordersQuery->paginate(10, ['*'], 'orders_page')
+            ->appends(['tab' => 'orders'] + $request->except('orders_page'));
         
         return view('transaction.index', compact('purchases', 'orders', 'activeTab'));
     }
 
-    public function create()
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(Request $request)
     {
+        $type = $request->get('type', 'order');
+        
         $products = Product::all();
-        $printings = Printing::all();
-        return view('transaction.create', compact('products', 'printings'));
+        $services = Printing::all();
+        
+        return view('transaction.create', compact('type', 'products', 'services'));
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
-        // Validasi dasar
+        dd($request->all());
         $validated = $request->validate([
             'type' => 'required|in:order,purchase',
+            'product_id' => 'required_if:type,purchase|exists:products,id',
+            'printing_id' => 'required_if:type,order|exists:printings,id',
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'nullable|string|max:20',
             'customer_email' => 'nullable|email|max:255',
             'customer_address' => 'nullable|string',
+            'material' => 'nullable|string|max:255',
+            'quantity' => 'required|integer|min:1',
+            'ukuran' => 'nullable|string|max:100',
             'notes' => 'nullable|string',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
             'total_price' => 'required|numeric|min:0',
+            'total_cost' => 'nullable|numeric|min:0',
             'payment_method' => 'required|in:cash,transfer,credit_card',
             'status' => 'required|in:pending,processing,completed,cancelled',
-            'product_items' => 'required_if:type,purchase|array|min:1',
-            'product_items.*.product_id' => 'required_if:type,purchase|exists:products,id',
-            'product_items.*.quantity' => 'required_if:type,purchase|integer|min:1',
-            'printing_items' => 'required_if:type,order|array|min:1',
-            'printing_items.*.printing_id' => 'required_if:type,order|exists:printings,id',
-            'printing_items.*.quantity' => 'required_if:type,order|integer|min:1',
-            'printing_items.*.ukuran' => 'required_if:type,order|string|max:100',
-            'printing_items.*.material' => 'nullable|string|max:255',
         ]);
 
         DB::beginTransaction();
-
+        
         try {
-            // Buat transaksi utama
-            $transaction = Transaction::create([
-                'type' => $validated['type'],
-                'customer_name' => $validated['customer_name'],
-                'customer_phone' => $validated['customer_phone'] ?? null,
-                'customer_email' => $validated['customer_email'] ?? null,
-                'customer_address' => $validated['customer_address'] ?? null,
-                'notes' => $validated['notes'] ?? null,
-                'total_price' => $validated['total_price'],
-                'payment_method' => $validated['payment_method'],
-                'status' => $validated['status'],
-            ]);
-
-            // Simpan items berdasarkan type
-            if ($validated['type'] === 'purchase' && !empty($validated['product_items'])) {
-                foreach ($validated['product_items'] as $item) {
-                    $product = Product::find($item['product_id']);
-                    
-                    TransactionItem::create([
-                        'transaction_id' => $transaction->id,
-                        'product_id' => $item['product_id'],
-                        'quantity' => $item['quantity'],
-                        'unit_price' => $product->price_per_unit,
-                        'subtotal' => $product->price_per_unit * $item['quantity'],
-                    ]);
-                }
-            } elseif ($validated['type'] === 'order' && !empty($validated['printing_items'])) {
-                foreach ($validated['printing_items'] as $item) {
-                    $printing = Printing::find($item['printing_id']);
-                    
-                    // Hitung harga berdasarkan ukuran yang dipilih
-                    $sizePrice = $this->getPrintingSizePrice($printing, $item['ukuran']);
-                    
-                    TransactionItem::create([
-                        'transaction_id' => $transaction->id,
-                        'printing_id' => $item['printing_id'],
-                        'quantity' => $item['quantity'],
-                        'ukuran' => $item['ukuran'],
-                        'material' => $item['material'] ?? null,
-                        'unit_price' => $sizePrice,
-                        'subtotal' => $sizePrice * $item['quantity'],
-                    ]);
-                }
+            // Hitung profit jika total_cost diisi
+            if (isset($validated['total_cost'])) {
+                $validated['profit'] = $validated['total_price'] - $validated['total_cost'];
             }
-
+            
+            // Handle file upload
+            if ($request->hasFile('file')) {
+                $filePath = $request->file('file')->store('transaction_files', 'public');
+                $validated['file_path'] = $filePath;
+            }
+            
+            // Set paid_at jika status completed dan payment_method bukan cash
+            if ($validated['status'] === 'completed' && $validated['payment_method'] !== 'cash') {
+                $validated['paid_at'] = now();
+            }
+            
+            $transaction = Transaction::create($validated);
+            
             DB::commit();
-
-            return redirect()->route('transaction.index')
+            
+            return redirect()->route('transaction.index', ['tab' => $validated['type'] == 'purchase' ? 'purchases' : 'orders'])
                 ->with('success', 'Transaksi berhasil dibuat');
-
+                
         } catch (\Exception $e) {
             DB::rollBack();
             
-            return back()->withInput()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
+    /**
+     * Display the specified resource.
+     */
     public function show(Transaction $transaction)
     {
-        $transaction->load(['items.product', 'items.printing']);
+        $transaction->load(['product', 'printing']);
+        
         return view('transaction.show', compact('transaction'));
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
     public function edit(Transaction $transaction)
     {
-        $transaction->load(['items.product', 'items.printing']);
         $products = Product::all();
-        $printings = Printing::all();
+        $services = Printing::all();
         
-        return view('transaction.edit', compact('transaction', 'products', 'printings'));
+        return view('transaction.edit', compact('transaction', 'products', 'services'));
     }
 
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, Transaction $transaction)
     {
-        // Validasi untuk update
         $validated = $request->validate([
+            'product_id' => 'nullable|required_if:type,purchase|exists:products,id',
+            'printing_id' => 'nullable|required_if:type,order|exists:printings,id',
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'nullable|string|max:20',
             'customer_email' => 'nullable|email|max:255',
             'customer_address' => 'nullable|string',
+            'material' => 'nullable|string|max:255',
+            'quantity' => 'required|integer|min:1',
+            'ukuran' => 'nullable|string|max:100',
             'notes' => 'nullable|string',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
             'total_price' => 'required|numeric|min:0',
+            'total_cost' => 'nullable|numeric|min:0',
             'payment_method' => 'required|in:cash,transfer,credit_card',
             'status' => 'required|in:pending,processing,completed,cancelled',
-            'product_items' => 'required_if:type,purchase|array|min:1',
-            'product_items.*.product_id' => 'required_if:type,purchase|exists:products,id',
-            'product_items.*.quantity' => 'required_if:type,purchase|integer|min:1',
-            'printing_items' => 'required_if:type,order|array|min:1',
-            'printing_items.*.printing_id' => 'required_if:type,order|exists:printings,id',
-            'printing_items.*.quantity' => 'required_if:type,order|integer|min:1',
-            'printing_items.*.ukuran' => 'required_if:type,order|string|max:100',
-            'printing_items.*.material' => 'nullable|string|max:255',
         ]);
 
         DB::beginTransaction();
-
+        
         try {
-            // Update transaksi utama
-            $transaction->update([
-                'customer_name' => $validated['customer_name'],
-                'customer_phone' => $validated['customer_phone'] ?? null,
-                'customer_email' => $validated['customer_email'] ?? null,
-                'customer_address' => $validated['customer_address'] ?? null,
-                'notes' => $validated['notes'] ?? null,
-                'total_price' => $validated['total_price'],
-                'payment_method' => $validated['payment_method'],
-                'status' => $validated['status'],
-            ]);
-
-            // Hapus items lama
-            $transaction->items()->delete();
-
-            // Tambahkan items baru
-            if ($transaction->type === 'purchase' && !empty($validated['product_items'])) {
-                foreach ($validated['product_items'] as $item) {
-                    $product = Product::find($item['product_id']);
-                    
-                    TransactionItem::create([
-                        'transaction_id' => $transaction->id,
-                        'product_id' => $item['product_id'],
-                        'quantity' => $item['quantity'],
-                        'unit_price' => $product->price_per_unit,
-                        'subtotal' => $product->price_per_unit * $item['quantity'],
-                    ]);
-                }
-            } elseif ($transaction->type === 'order' && !empty($validated['printing_items'])) {
-                foreach ($validated['printing_items'] as $item) {
-                    $printing = Printing::find($item['printing_id']);
-                    
-                    // Hitung harga berdasarkan ukuran yang dipilih
-                    $sizePrice = $this->getPrintingSizePrice($printing, $item['size']);
-                    
-                    TransactionItem::create([
-                        'transaction_id' => $transaction->id,
-                        'printing_id' => $item['printing_id'],
-                        'quantity' => $item['quantity'],
-                        'ukuran' => $item['ukuran'],
-                        'material' => $item['material'] ?? null,
-                        'unit_price' => $sizePrice,
-                        'subtotal' => $sizePrice * $item['quantity'],
-                    ]);
-                }
+            // Hitung profit jika total_cost diisi
+            if (isset($validated['total_cost'])) {
+                $validated['profit'] = $validated['total_price'] - $validated['total_cost'];
+            } else {
+                $validated['profit'] = null;
             }
-
+            
+            // Handle file upload
+            if ($request->hasFile('file')) {
+                // Hapus file lama jika ada
+                if ($transaction->file_path) {
+                    Storage::disk('public')->delete($transaction->file_path);
+                }
+                
+                $filePath = $request->file('file')->store('transaction_files', 'public');
+                $validated['file_path'] = $filePath;
+            }
+            
+            // Set paid_at jika status completed dan payment_method bukan cash
+            if ($validated['status'] === 'completed' && $validated['payment_method'] !== 'cash') {
+                $validated['paid_at'] = now();
+            } elseif ($validated['status'] !== 'completed') {
+                $validated['paid_at'] = null;
+            }
+            
+            $transaction->update($validated);
+            
             DB::commit();
-
-            return redirect()->route('transaction.index', ['tab' => $transaction->type . 's'])
+            
+            return redirect()->route('transaction.index', ['tab' => $transaction->type == 'purchase' ? 'purchases' : 'orders'])
                 ->with('success', 'Transaksi berhasil diperbarui');
-
+                
         } catch (\Exception $e) {
             DB::rollBack();
             
-            return back()->withInput()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
+    /**
+     * Remove the specified resource from storage.
+     */
     public function destroy(Transaction $transaction)
     {
         DB::beginTransaction();
-
+        
         try {
-            // Hapus items terlebih dahulu
-            $transaction->items()->delete();
+            // Hapus file jika ada
+            if ($transaction->file_path) {
+                Storage::disk('public')->delete($transaction->file_path);
+            }
             
-            // Hapus transaksi
-            $type = $transaction->type;
             $transaction->delete();
-
+            
             DB::commit();
-
-            return redirect()->route('transaction.index', ['tab' => $type . 's'])
+            
+            return redirect()->route('transaction.index', ['tab' => $transaction->type == 'purchase' ? 'purchases' : 'orders'])
                 ->with('success', 'Transaksi berhasil dihapus');
-
+                
         } catch (\Exception $e) {
             DB::rollBack();
             
@@ -271,22 +236,30 @@ class TransactionController extends Controller
     }
 
     /**
-     * Helper function untuk mendapatkan harga berdasarkan ukuran printing
+     * Mark transaction as paid.
      */
-    private function getPrintingSizePrice($printing, $selectedSize)
+    public function markAsPaid(Transaction $transaction)
     {
-        if (!$printing->ukuran) {
-            return $printing->biaya;
+        if ($transaction->status !== 'completed') {
+            return back()->with('error', 'Hanya transaksi dengan status completed yang dapat ditandai sebagai dibayar');
         }
-
-        $sizes = json_decode($printing->ukuran, true);
         
-        foreach ($sizes as $size) {
-            if ($size['nama'] === $selectedSize) {
-                return $size['harga'];
-            }
+        $transaction->update([
+            'paid_at' => now()
+        ]);
+        
+        return back()->with('success', 'Transaksi berhasil ditandai sebagai dibayar');
+    }
+    
+    /**
+     * Calculate profit for a transaction.
+     */
+    private function calculateProfit($totalPrice, $totalCost)
+    {
+        if ($totalCost === null) {
+            return null;
         }
-
-        return $printing->biaya; // Fallback ke harga dasar
+        
+        return $totalPrice - $totalCost;
     }
 }

@@ -1,679 +1,414 @@
 <x-layout.default>
-    <div class="container mx-auto px-4 py-6">
-        <!-- Header Section -->
-        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800">Tambah Transaksi</h1>
-                <p class="text-gray-600 text-sm mt-1">Buat transaksi pembelian atau pesanan baru</p>
-            </div>
-            <a href="{{ route('transaction.index') }}"
-                class="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition duration-200">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
-                Kembali ke Daftar Transaksi
-            </a>
-        </div>
-
-        <!-- Form Section -->
-        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
-            <form action="{{ route('transaction.store') }}" method="POST" class="p-6" id="transaction-form">
-                @csrf
-
-                <!-- Hidden field untuk type -->
-                <input type="hidden" name="type" id="type" value="{{ old('type', 'purchase') }}">
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Left Column -->
-                    <div class="space-y-6">
-                        <!-- Transaction Type Toggle -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Transaksi</label>
-                            <div class="flex space-x-2">
-                                <button type="button" id="purchase-type"
-                                    class="transaction-type-btn px-4 py-2 rounded-lg font-medium transition duration-200 bg-blue-600 text-white">
-                                    Pembelian Produk
-                                </button>
-                                <button type="button" id="order-type"
-                                    class="transaction-type-btn px-4 py-2 rounded-lg font-medium transition duration-200 bg-gray-300 text-gray-700 hover:bg-gray-400">
-                                    Pesanan Cetak
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Product Selection (for purchases) -->
-                        <div id="product-section">
-                            <div class="flex justify-between items-center mb-2">
-                                <label class="block text-sm font-medium text-gray-700">Produk</label>
-                                <button type="button" id="add-product"
-                                    class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                    </svg>
-                                    Tambah Produk
-                                </button>
-                            </div>
-
-                            <div id="product-items" class="space-y-4">
-                                <!-- Product item template -->
-                                <div class="product-item border rounded-lg p-4 bg-gray-50">
-                                    <div class="flex justify-between items-start mb-3">
-                                        <span class="font-medium text-gray-700">Produk #1</span>
-                                        <button type="button" class="remove-product text-red-500 hover:text-red-700">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-
-                                    <div class="grid grid-cols-1 gap-3">
-                                        <div>
-                                            <label class="block text-sm text-gray-600 mb-1">Pilih Produk *</label>
-                                            <select name="product_items[0][product_id]"
-                                                class="product-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                required>
-                                                <option value="">Pilih Produk</option>
-                                                @foreach ($products as $product)
-                                                    <option value="{{ $product->id }}"
-                                                        data-price="{{ $product->price_per_unit }}"
-                                                        {{ old('product_items.0.product_id') == $product->id ? 'selected' : '' }}>
-                                                        {{ $product->name }} - Rp
-                                                        {{ number_format($product->price_per_unit, 0, ',', '.') }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label class="block text-sm text-gray-600 mb-1">Kuantitas *</label>
-                                            <input type="number" name="product_items[0][quantity]"
-                                                class="product-quantity w-full px-3 py-2 border border-gray-300 rounded-lg"
-                                                min="1" value="{{ old('product_items.0.quantity', 1) }}"
-                                                required>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Printing Selection (for orders) -->
-                        <div id="printing-section" class="hidden">
-                            <div class="flex justify-between items-center mb-2">
-                                <label class="block text-sm font-medium text-gray-700">Layanan Cetak</label>
-                                <button type="button" id="add-printing"
-                                    class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                    </svg>
-                                    Tambah Layanan
-                                </button>
-                            </div>
-
-                            <div id="printing-items" class="space-y-4">
-                                <!-- Printing item template -->
-                                <div class="printing-item border rounded-lg p-4 bg-gray-50">
-                                    <div class="flex justify-between items-start mb-3">
-                                        <span class="font-medium text-gray-700">Layanan #1</span>
-                                        <button type="button" class="remove-printing text-red-500 hover:text-red-700">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-
-                                    <div class="grid grid-cols-1 gap-3">
-                                        <div>
-                                            <label class="block text-sm text-gray-600 mb-1">Pilih Layanan *</label>
-                                            <select name="printing_items[0][printing_id]"
-                                                class="printing-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                                <option value="">Pilih Layanan Cetak</option>
-                                                @foreach ($printings as $printing)
-                                                    <option value="{{ $printing->id }}"
-                                                        data-sizes="{{ json_encode($printing->ukuran ?? []) }}"
-                                                        data-base-price="{{ $printing->biaya ?? 0 }}"
-                                                        {{ old('printing_items.0.printing_id') == $printing->id ? 'selected' : '' }}>
-                                                        {{ $printing->nama_layanan }} - Mulai Rp
-                                                        {{ number_format($printing->biaya ?? 0, 0, ',', '.') }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-
-                                        <div class="printing-size-container">
-                                            <label class="block text-sm text-gray-600 mb-1">Ukuran *</label>
-                                            <select name="printing_items[0][ukuran]"
-                                                class="printing-size w-full px-3 py-2 border border-gray-300 rounded-lg"
-                                                required>
-                                                <option value="">Pilih Ukuran</option>
-                                                <!-- Options akan diisi oleh JavaScript -->
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label class="block text-sm text-gray-600 mb-1">Kuantitas *</label>
-                                            <input type="number" name="printing_items[0][quantity]"
-                                                class="printing-quantity w-full px-3 py-2 border border-gray-300 rounded-lg"
-                                                min="1" value="{{ old('printing_items.0.quantity', 1) }}"
-                                                required>
-                                        </div>
-
-                                        <div class="material-field">
-                                            <label class="block text-sm text-gray-600 mb-1">Material</label>
-                                            <input type="text" name="printing_items[0][material]"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                                                placeholder="Jenis material yang digunakan"
-                                                value="{{ old('printing_items.0.material') }}">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Notes -->
-                        <div>
-                            <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Catatan</label>
-                            <textarea name="notes" id="notes" rows="3"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">{{ old('notes') }}</textarea>
-                        </div>
-                    </div>
-
-                    <!-- Right Column -->
-                    <div class="space-y-6">
-                        <!-- Customer Information -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h3 class="text-lg font-medium text-gray-800 mb-4">Informasi Pelanggan</h3>
-
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="customer_name"
-                                        class="block text-sm font-medium text-gray-700 mb-2">Nama Pelanggan *</label>
-                                    <input type="text" name="customer_name" id="customer_name"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                                        value="{{ old('customer_name') }}" required>
-                                </div>
-
-                                <div>
-                                    <label for="customer_phone"
-                                        class="block text-sm font-medium text-gray-700 mb-2">Telepon Pelanggan</label>
-                                    <input type="text" name="customer_phone" id="customer_phone"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                                        value="{{ old('customer_phone') }}">
-                                </div>
-
-                                <div>
-                                    <label for="customer_email"
-                                        class="block text-sm font-medium text-gray-700 mb-2">Email Pelanggan</label>
-                                    <input type="email" name="customer_email" id="customer_email"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                                        value="{{ old('customer_email') }}">
-                                </div>
-
-                                <div>
-                                    <label for="customer_address"
-                                        class="block text-sm font-medium text-gray-700 mb-2">Alamat Pelanggan</label>
-                                    <textarea name="customer_address" id="customer_address" rows="3"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">{{ old('customer_address') }}</textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Payment & Status -->
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h3 class="text-lg font-medium text-gray-800 mb-4">Pembayaran & Status</h3>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="payment_method"
-                                        class="block text-sm font-medium text-gray-700 mb-2">Metode Pembayaran
-                                        *</label>
-                                    <select name="payment_method" id="payment_method"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                                        required>
-                                        <option value="cash"
-                                            {{ old('payment_method') == 'cash' ? 'selected' : '' }}>Tunai</option>
-                                        <option value="transfer"
-                                            {{ old('payment_method') == 'transfer' ? 'selected' : '' }}>Transfer
-                                        </option>
-                                        <option value="credit_card"
-                                            {{ old('payment_method') == 'credit_card' ? 'selected' : '' }}>Kartu Kredit
-                                        </option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status
-                                        *</label>
-                                    <select name="status" id="status"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                                        required>
-                                        <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>
-                                            Pending</option>
-                                        <option value="processing"
-                                            {{ old('status') == 'processing' ? 'selected' : '' }}>Processing</option>
-                                        <option value="completed"
-                                            {{ old('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                                        <option value="cancelled"
-                                            {{ old('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Summary Section -->
-                        <div class="bg-blue-50 p-4 rounded-lg">
-                            <h3 class="text-lg font-medium text-gray-800 mb-4">Ringkasan Transaksi</h3>
-
-                            <div id="summary-content" class="space-y-2 text-sm text-gray-700">
-                                <p>Pilih produk atau layanan untuk melihat ringkasan</p>
-                            </div>
-
-                            <div class="mt-4 pt-3 border-t border-blue-200">
-                                <div class="flex justify-between items-center font-semibold">
-                                    <span>Total Harga:</span>
-                                    <span id="total-price">Rp 0</span>
-                                </div>
-                                <input type="hidden" name="total_price" id="total_price_input" value="0"
-                                    required>
-                            </div>
-                        </div>
-                    </div>
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-900">Tambah Transaksi Baru</h1>
+                    <a href="{{ route('transaction.index') }}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">
+                        Kembali
+                    </a>
                 </div>
+            </div>
+        </header>
 
-                <!-- Submit Button -->
-                <div class="mt-8 pt-6 border-t border-gray-200">
-                    <button type="submit"
-                        class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200 font-medium flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            @if ($errors->any())
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6" role="alert">
+                    <div class="flex">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M5 13l4 4L19 7" />
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                            </path>
                         </svg>
-                        Simpan Transaksi
-                    </button>
+                        <div>
+                            <span class="font-medium">Terdapat kesalahan:</span>
+                            <ul class="mt-1 list-disc list-inside text-sm">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-            </form>
-        </div>
+            @endif
+
+            <div class="bg-white shadow-md rounded-lg overflow-hidden p-6" x-data="transactionForm()">
+                <form action="{{ route('transaction.store') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    
+                    <input type="hidden" name="type" x-model="transactionType">
+
+                    <!-- Transaction Type Selector -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Transaksi</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div 
+                                @click="setTransactionType('purchase')" 
+                                :class="transactionType === 'purchase' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'" 
+                                class="border-2 rounded-lg p-4 cursor-pointer transition-colors"
+                            >
+                                <div class="flex items-center">
+                                    <input 
+                                        type="radio" 
+                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500" 
+                                        :checked="transactionType === 'purchase'"
+                                    >
+                                    <label class="ml-3 block text-sm font-medium text-gray-700">
+                                        Pembelian
+                                    </label>
+                                </div>
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Transaksi pembelian produk fisik
+                                </p>
+                            </div>
+                            
+                            <div 
+                                @click="setTransactionType('order')" 
+                                :class="transactionType === 'order' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'" 
+                                class="border-2 rounded-lg p-4 cursor-pointer transition-colors"
+                            >
+                                <div class="flex items-center">
+                                    <input 
+                                        type="radio" 
+                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500" 
+                                        :checked="transactionType === 'order'"
+                                    >
+                                    <label class="ml-3 block text-sm font-medium text-gray-700">
+                                        Pesanan Layanan
+                                    </label>
+                                </div>
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Transaksi pemesanan layanan cetak
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Information -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Pelanggan</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-1">Nama Pelanggan *</label>
+                                <input 
+                                    type="text" 
+                                    id="customer_name" 
+                                    name="customer_name" 
+                                    value="{{ old('customer_name') }}" 
+                                    required
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                >
+                            </div>
+                            <div>
+                                <label for="customer_phone" class="block text-sm font-medium text-gray-700 mb-1">Telepon</label>
+                                <input 
+                                    type="text" 
+                                    id="customer_phone" 
+                                    name="customer_phone" 
+                                    value="{{ old('customer_phone') }}" 
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                >
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="customer_email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input 
+                                    type="email" 
+                                    id="customer_email" 
+                                    name="customer_email" 
+                                    value="{{ old('customer_email') }}" 
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                >
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="customer_address" class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
+                                <textarea 
+                                    id="customer_address" 
+                                    name="customer_address" 
+                                    rows="2"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                >{{ old('customer_address') }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Product/Service Selection -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Detail Transaksi</h3>
+                        
+                        <div x-show="transactionType === 'purchase'">
+                            <label for="product_id" class="block text-sm font-medium text-gray-700 mb-1">Produk *</label>
+                            <select 
+                                id="product_id" 
+                                name="product_id" 
+                                x-model="productId"
+                                @change="updateProductPrice()"
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                required
+                            >
+                                <option value="">Pilih Produk</option>
+                                @foreach($products as $product)
+                                    <option 
+                                        value="{{ $product->id }}" 
+                                        data-price="{{ $product->price_per_unit }}"
+                                        {{ old('product_id') == $product->id ? 'selected' : '' }}
+                                    >
+                                        {{ $product->name }} - Rp {{ number_format($product->price_per_unit, 0, ',', '.') }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        
+                        <div x-show="transactionType === 'order'">
+                            <label for="printing_id" class="block text-sm font-medium text-gray-700 mb-1">Layanan Cetak *</label>
+                            <select 
+                                id="printing_id" 
+                                name="printing_id" 
+                                x-model="printingId"
+                                @change="updateServicePrice()"
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                required
+                            >
+                                <option value="">Pilih Layanan Cetak</option>
+                                @foreach($services as $service)
+                                    <option 
+                                        value="{{ $service->id }}" 
+                                        data-price="{{ $service->biaya }}"
+                                        {{ old('printing_id') == $service->id ? 'selected' : '' }}
+                                    >
+                                        {{ $service->nama_layanan }} - Rp {{ number_format($service->biaya, 0, ',', '.') }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Order Details -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div>
+                            <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Jumlah *</label>
+                            <input 
+                                type="number" 
+                                id="quantity" 
+                                name="quantity" 
+                                x-model="quantity"
+                                @input="updateTotalPrice()"
+                                min="1" 
+                                value="{{ old('quantity', 1) }}" 
+                                required
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            >
+                        </div>
+                        <div x-show="transactionType === 'order'">
+                            <label for="material" class="block text-sm font-medium text-gray-700 mb-1">Material</label>
+                            <input 
+                                type="text" 
+                                id="material" 
+                                name="material" 
+                                value="{{ old('material') }}" 
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            >
+                        </div>
+                        <div x-show="transactionType === 'order'">
+                            <label for="ukuran" class="block text-sm font-medium text-gray-700 mb-1">Ukuran</label>
+                            <input 
+                                type="text" 
+                                id="ukuran" 
+                                name="ukuran" 
+                                value="{{ old('ukuran') }}" 
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Pricing -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div>
+                            <label for="unit_price" class="block text-sm font-medium text-gray-700 mb-1">Harga Satuan (Rp)</label>
+                            <input 
+                                type="number" 
+                                id="unit_price" 
+                                name="unit_price" 
+                                x-model="unitPrice"
+                                @input="updateTotalPrice()"
+                                min="0" 
+                                value="{{ old('unit_price', 0) }}" 
+                                required
+                                readonly
+                                class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100"
+                            >
+                        </div>
+                        <div>
+                            <label for="total_price" class="block text-sm font-medium text-gray-700 mb-1">Total Harga (Rp) *</label>
+                            <input 
+                                type="number" 
+                                id="total_price" 
+                                name="total_price" 
+                                x-model="totalPrice"
+                                readonly
+                                required
+                                class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div class="mb-6" x-show="transactionType === 'order'">
+                        <label for="file" class="block text-sm font-medium text-gray-700 mb-1">File Desain</label>
+                        <input 
+                            type="file" 
+                            id="file" 
+                            name="file" 
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        >
+                        <p class="mt-1 text-sm text-gray-500">Format: JPG, PNG, PDF, DOC, DOCX (Maks. 5MB)</p>
+                    </div>
+
+                    <!-- Payment Information -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Pembayaran</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran *</label>
+                                <select 
+                                    id="payment_method" 
+                                    name="payment_method" 
+                                    required
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                >
+                                    <option value="">Pilih Metode Pembayaran</option>
+                                    <option value="cash" {{ old('payment_method') == 'cash' ? 'selected' : '' }}>Cash</option>
+                                    <option value="transfer" {{ old('payment_method') == 'transfer' ? 'selected' : '' }}>Transfer</option>
+                                    <option value="credit_card" {{ old('payment_method') == 'credit_card' ? 'selected' : '' }}>Kartu Kredit</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
+                                <select 
+                                    id="status" 
+                                    name="status" 
+                                    required
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                >
+                                    <option value="">Pilih Status</option>
+                                    <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="processing" {{ old('status') == 'processing' ? 'selected' : '' }}>Processing</option>
+                                    <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                                    <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-6">
+                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
+                        <textarea 
+                            id="notes" 
+                            name="notes" 
+                            rows="3"
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        >{{ old('notes') }}</textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex justify-end">
+                        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            Simpan Transaksi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
     </div>
 
-    <!-- Templates for dynamic items -->
-    <template id="product-item-template">
-        <div class="product-item border rounded-lg p-4 bg-gray-50">
-            <div class="flex justify-between items-start mb-3">
-                <span class="font-medium text-gray-700">Produk #<span class="product-index"></span></span>
-                <button type="button" class="remove-product text-red-500 hover:text-red-700">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-
-            <div class="grid grid-cols-1 gap-3">
-                <div>
-                    <label class="block text-sm text-gray-600 mb-1">Pilih Produk *</label>
-                    <select name="product_items[INDEX][product_id]"
-                        class="product-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        required>
-                        <option value="">Pilih Produk</option>
-                        @foreach ($products as $product)
-                            <option value="{{ $product->id }}" data-price="{{ $product->price_per_unit }}">
-                                {{ $product->name }} - Rp {{ number_format($product->price_per_unit, 0, ',', '.') }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm text-gray-600 mb-1">Kuantitas *</label>
-                    <input type="number" name="product_items[INDEX][quantity]"
-                        class="product-quantity w-full px-3 py-2 border border-gray-300 rounded-lg" min="1"
-                        value="1" required>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <template id="printing-item-template">
-        <div class="printing-item border rounded-lg p-4 bg-gray-50">
-            <div class="flex justify-between items-start mb-3">
-                <span class="font-medium text-gray-700">Layanan #<span class="printing-index"></span></span>
-                <button type="button" class="remove-printing text-red-500 hover:text-red-700">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-
-            <div class="grid grid-cols-1 gap-3">
-                <div>
-                    <label class="block text-sm text-gray-600 mb-1">Pilih Layanan *</label>
-                    <select name="printing_items[INDEX][printing_id]"
-                        class="printing-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        required>
-                        <option value="">Pilih Layanan Cetak</option>
-                        @foreach ($printings as $printing)
-                            <option value="{{ $printing->id }}"
-                                data-sizes="{{ json_encode($printing->ukuran ?? []) }}"
-                                data-base-price="{{ $printing->biaya ?? 0 }}">
-                                {{ $printing->nama_layanan }} - Mulai Rp
-                                {{ number_format($printing->biaya ?? 0, 0, ',', '.') }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="printing-size-container">
-                    <label class="block text-sm text-gray-600 mb-1">Ukuran *</label>
-                    <select name="printing_items[INDEX][ukuran]"
-                        class="printing-size w-full px-3 py-2 border border-gray-300 rounded-lg" required>
-                        <option value="">Pilih Ukuran</option>
-                        <!-- Options akan diisi oleh JavaScript -->
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm text-gray-600 mb-1">Kuantitas *</label>
-                    <input type="number" name="printing_items[INDEX][quantity]"
-                        class="printing-quantity w-full px-3 py-2 border border-gray-300 rounded-lg" min="1"
-                        value="1" required>
-                </div>
-
-                <div class="material-field">
-                    <label class="block text-sm text-gray-600 mb-1">Material</label>
-                    <input type="text" name="printing_items[INDEX][material]"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        placeholder="Jenis material yang digunakan">
-                </div>
-            </div>
-        </div>
-    </template>
-
+    <!-- Script Section -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize counters
-            let productCounter = 1;
-            let printingCounter = 1;
-
-            // Toggle between product and printing sections
-            const purchaseBtn = document.getElementById('purchase-type');
-            const orderBtn = document.getElementById('order-type');
-            const typeInput = document.getElementById('type');
-            const productSection = document.getElementById('product-section');
-            const printingSection = document.getElementById('printing-section');
-
-            function setTransactionType(type) {
-                typeInput.value = type;
-
-                if (type === 'purchase') {
-                    productSection.classList.remove('hidden');
-                    printingSection.classList.add('hidden');
-
-                    productSection.querySelectorAll('input, select').forEach(el => el.disabled = false);
-                    printingSection.querySelectorAll('input, select').forEach(el => el.disabled = true);
-                } else {
-                    productSection.classList.add('hidden');
-                    printingSection.classList.remove('hidden');
-
-                    productSection.querySelectorAll('input, select').forEach(el => el.disabled = true);
-                    printingSection.querySelectorAll('input, select').forEach(el => el.disabled = false);
+        function transactionForm() {
+            return {
+                transactionType: '{{ request('type', 'order') }}',
+                productId: '',
+                printingId: '',
+                quantity: 1,
+                unitPrice: 0,
+                totalPrice: 0,
+                totalCost: 0,
+                profit: 0,
+                
+                // Set transaction type and reset selections
+                setTransactionType(type) {
+                    this.transactionType = type;
+                    this.productId = '';
+                    this.printingId = '';
+                    this.unitPrice = 0;
+                    this.updateTotalPrice();
+                },
+                
+                // Update product price when product is selected
+                updateProductPrice() {
+                    if (this.productId) {
+                        const selectedOption = document.querySelector(`#product_id option[value="${this.productId}"]`);
+                        this.unitPrice = selectedOption ? parseInt(selectedOption.getAttribute('data-price')) : 0;
+                    } else {
+                        this.unitPrice = 0;
+                    }
+                    this.updateTotalPrice();
+                },
+                
+                // Update service price when service is selected
+                updateServicePrice() {
+                    if (this.printingId) {
+                        const selectedOption = document.querySelector(`#printing_id option[value="${this.printingId}"]`);
+                        this.unitPrice = selectedOption ? parseInt(selectedOption.getAttribute('data-price')) : 0;
+                    } else {
+                        this.unitPrice = 0;
+                    }
+                    this.updateTotalPrice();
+                },
+                
+                // Update total price based on quantity and unit price
+                updateTotalPrice() {
+                    this.totalPrice = this.quantity * this.unitPrice;
+                    this.updateProfit();
+                },
+                
+                // Update profit based on total price and total cost
+                updateProfit() {
+                    this.profit = this.totalPrice - this.totalCost;
+                },
+                
+                // Initialize with any existing values
+                init() {
+                    // Set initial values if they exist
+                    this.quantity = {{ old('quantity', 1) }};
+                    this.totalCost = {{ old('total_cost', 0) }};
+                    
+                    // Set product ID if it exists
+                    @if(old('product_id'))
+                        this.productId = '{{ old('product_id') }}';
+                        this.updateProductPrice();
+                    @endif
+                    
+                    // Set printing ID if it exists
+                    @if(old('printing_id'))
+                        this.printingId = '{{ old('printing_id') }}';
+                        this.updateServicePrice();
+                    @endif
+                    
+                    // Set unit price if it exists
+                    @if(old('unit_price'))
+                        this.unitPrice = {{ old('unit_price', 0) }};
+                        this.updateTotalPrice();
+                    @endif
                 }
-
-                calculateTotalPrice();
             }
-
-            purchaseBtn.addEventListener('click', () => setTransactionType('purchase'));
-            orderBtn.addEventListener('click', () => setTransactionType('order'));
-
-            // Set initial type
-            setTransactionType('{{ old('type', 'purchase') }}');
-
-            // Add product item
-            document.getElementById('add-product').addEventListener('click', function() {
-                const template = document.getElementById('product-item-template');
-                const newItem = template.content.cloneNode(true);
-                const index = productCounter++;
-
-                // Update index placeholders
-                newItem.querySelector('.product-index').textContent = index;
-                newItem.querySelectorAll('[name]').forEach(el => {
-                    el.name = el.name.replace('INDEX', index);
-                });
-
-                // Add event listeners
-                const select = newItem.querySelector('.product-select');
-                const quantity = newItem.querySelector('.product-quantity');
-
-                select.addEventListener('change', calculateTotalPrice);
-                quantity.addEventListener('input', calculateTotalPrice);
-
-                // Add remove functionality
-                newItem.querySelector('.remove-product').addEventListener('click', function() {
-                    this.closest('.product-item').remove();
-                    calculateTotalPrice();
-                });
-
-                document.getElementById('product-items').appendChild(newItem);
-            });
-
-            // Add printing item
-            document.getElementById('add-printing').addEventListener('click', function() {
-                const template = document.getElementById('printing-item-template');
-                const newItem = template.content.cloneNode(true);
-                const index = printingCounter++;
-
-                // Update index placeholders
-                newItem.querySelector('.printing-index').textContent = index;
-                newItem.querySelectorAll('[name]').forEach(el => {
-                    el.name = el.name.replace('INDEX', index);
-                });
-
-                // Add event listeners
-                const select = newItem.querySelector('.printing-select');
-                const sizeSelect = newItem.querySelector('.printing-size');
-                const quantity = newItem.querySelector('.printing-quantity');
-
-                select.addEventListener('change', function() {
-                    updateSizeOptions(this, sizeSelect);
-                    calculateTotalPrice();
-                });
-
-                sizeSelect.addEventListener('change', calculateTotalPrice);
-                quantity.addEventListener('input', calculateTotalPrice);
-
-                // Add remove functionality
-                newItem.querySelector('.remove-printing').addEventListener('click', function() {
-                    this.closest('.printing-item').remove();
-                    calculateTotalPrice();
-                });
-
-                document.getElementById('printing-items').appendChild(newItem);
-            });
-
-            // Function to update size options
-            function updateSizeOptions(selectElement, sizeSelect) {
-                const selectedOption = selectElement.options[selectElement.selectedIndex];
-                const sizes = selectedOption ? JSON.parse(selectedOption.getAttribute('data-sizes') || '[]') : [];
-
-                // Clear existing options
-                sizeSelect.innerHTML = '<option value="">Pilih Ukuran</option>';
-
-                // Add new options
-                sizes.forEach(size => {
-                    const option = document.createElement('option');
-                    option.value = size.nama;
-                    option.textContent = `${size.nama} - Rp ${formatCurrency(size.harga)}`;
-                    option.setAttribute('data-price', size.harga);
-                    sizeSelect.appendChild(option);
-                });
-            }
-
-            // Initialize size options for existing printing items
-            document.querySelectorAll('.printing-select').forEach(select => {
-                const sizeSelect = select.closest('.printing-item').querySelector('.printing-size');
-                if (select.value) {
-                    updateSizeOptions(select, sizeSelect);
-                }
-
-                select.addEventListener('change', function() {
-                    updateSizeOptions(this, sizeSelect);
-                    calculateTotalPrice();
-                });
-            });
-
-            // Add event listeners for existing elements
-            document.querySelectorAll('.product-select, .product-quantity').forEach(el => {
-                el.addEventListener('change', calculateTotalPrice);
-                el.addEventListener('input', calculateTotalPrice);
-            });
-
-            document.querySelectorAll('.printing-ukuran, .printing-quantity').forEach(el => {
-                el.addEventListener('change', calculateTotalPrice);
-                el.addEventListener('input', calculateTotalPrice);
-            });
-
-            document.querySelectorAll('.remove-product').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    this.closest('.product-item').remove();
-                    calculateTotalPrice();
-                });
-            });
-
-            document.querySelectorAll('.remove-printing').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    this.closest('.printing-item').remove();
-                    calculateTotalPrice();
-                });
-            });
-
-            // Calculate total price
-            function calculateTotalPrice() {
-                let total = 0;
-                let summaryHTML = '';
-
-                if (typeInput.value === 'purchase') {
-                    // Calculate product total
-                    document.querySelectorAll('.product-item').forEach((item, index) => {
-                        const select = item.querySelector('.product-select');
-                        const quantityInput = item.querySelector('.product-quantity');
-
-                        if (select.value && quantityInput.value) {
-                            const selectedOption = select.options[select.selectedIndex];
-                            const price = selectedOption ? parseFloat(selectedOption.getAttribute(
-                                'data-price')) || 0 : 0;
-                            const quantity = parseInt(quantityInput.value) || 0;
-                            const itemTotal = price * quantity;
-
-                            total += itemTotal;
-
-                            summaryHTML += `
-                            <div class="flex justify-between">
-                                <span>${selectedOption.text.split(' - ')[0]} (${quantity} pcs)</span>
-                                <span>Rp ${formatCurrency(itemTotal)}</span>
-                            </div>
-                        `;
-                        }
-                    });
-                } else {
-                    // Calculate printing total
-                    document.querySelectorAll('.printing-item').forEach((item, index) => {
-                        const select = item.querySelector('.printing-select');
-                        const sizeSelect = item.querySelector('.printing-size');
-                        const quantityInput = item.querySelector('.printing-quantity');
-
-                        if (select.value && quantityInput.value) {
-                            const selectedOption = select.options[select.selectedIndex];
-                            const basePrice = selectedOption ? parseFloat(selectedOption.getAttribute(
-                                'data-base-price')) || 0 : 0;
-                            const quantity = parseInt(quantityInput.value) || 0;
-                            let itemTotal = 0;
-                            let itemDescription = selectedOption.text.split(' - ')[0];
-
-                            if (sizeSelect && sizeSelect.value) {
-                                const sizeOption = sizeSelect.options[sizeSelect.selectedIndex];
-                                const sizePrice = sizeOption ? parseFloat(sizeOption.getAttribute(
-                                    'data-price')) || 0 : 0;
-                                itemTotal = sizePrice * quantity;
-                                itemDescription += ` - ${sizeOption.value}`;
-                            } else {
-                                itemTotal = basePrice * quantity;
-                            }
-
-                            total += itemTotal;
-
-                            summaryHTML += `
-                            <div class="flex justify-between">
-                                <span>${itemDescription} (${quantity} pcs)</span>
-                                <span>Rp ${formatCurrency(itemTotal)}</span>
-                            </div>
-                        `;
-                        }
-                    });
-                }
-
-                // Update summary and total
-                document.getElementById('summary-content').innerHTML = summaryHTML ||
-                    '<p>Pilih produk atau layanan untuk melihat ringkasan</p>';
-                document.getElementById('total-price').textContent = `Rp ${formatCurrency(total)}`;
-                document.getElementById('total_price_input').value = total;
-            }
-
-            // Format currency helper
-            function formatCurrency(amount) {
-                return new Intl.NumberFormat('id-ID').format(amount);
-            }
-
-            // Initial calculation
-            function toggleTransactionType(type) {
-                const productSection = document.getElementById('product-section');
-                const printingSection = document.getElementById('printing-section');
-
-                if (type === 'purchase') {
-                    productSection.classList.remove('hidden');
-                    printingSection.classList.add('hidden');
-
-                    // hapus required dari printing inputs
-                    printingSection.querySelectorAll('select[name^="printing_items"]').forEach(el => el
-                        .removeAttribute('required'));
-                    // aktifkan required di product inputs
-                    productSection.querySelectorAll('select[name^="products"]').forEach(el => el.setAttribute(
-                        'required', true));
-
-                } else if (type === 'order') {
-                    printingSection.classList.remove('hidden');
-                    productSection.classList.add('hidden');
-
-                    // hapus required dari product inputs
-                    productSection.querySelectorAll('select[name^="products"]').forEach(el => el.removeAttribute(
-                        'required'));
-                    // aktifkan required di printing inputs
-                    printingSection.querySelectorAll('select[name^="printing_items"]').forEach(el => el
-                        .setAttribute('required', true));
-                }
-
-                // update hidden input type
-                document.getElementById('type').value = type;
-            }
-
-            // pasang event di tombol
-            document.getElementById('purchase-type').addEventListener('click', () => toggleTransactionType(
-                'purchase'));
-            document.getElementById('order-type').addEventListener('click', () => toggleTransactionType('order'));
-
-            // jalankan sekali saat load
-            toggleTransactionType(document.getElementById('type').value);
+        }
+        
+        // Initialize the form when the page loads
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('transactionForm', transactionForm);
         });
     </script>
 </x-layout.default>
