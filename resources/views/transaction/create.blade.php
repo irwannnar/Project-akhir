@@ -1,7 +1,7 @@
 <x-layout.default>
     <div class="min-h-screen">
         <!-- Header -->
-        <header>
+        <header class="mt-4">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div class="flex justify-between items-center">
                     <h1 class="text-2xl font-bold text-gray-900">Tambah Transaksi Baru</h1>
@@ -36,7 +36,7 @@
             @endif
 
             <div class="bg-white shadow-md rounded-lg overflow-hidden p-6" x-data="transactionForm()">
-                <form action="{{ route('transaction.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('transaction.store') }}" method="POST" enctype="multipart/form-data" id="transactionForm">
                     @csrf
                     
                     <input type="hidden" name="type" x-model="transactionType">
@@ -53,6 +53,8 @@
                                 <div class="flex items-center">
                                     <input 
                                         type="radio" 
+                                        name="transaction_type" 
+                                        value="purchase"
                                         class="h-4 w-4 text-blue-600 focus:ring-blue-500" 
                                         :checked="transactionType === 'purchase'"
                                     >
@@ -73,6 +75,8 @@
                                 <div class="flex items-center">
                                     <input 
                                         type="radio" 
+                                        name="transaction_type" 
+                                        value="order"
                                         class="h-4 w-4 text-blue-600 focus:ring-blue-500" 
                                         :checked="transactionType === 'order'"
                                     >
@@ -138,6 +142,7 @@
                     <div class="mb-6">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Detail Transaksi</h3>
                         
+                        <!-- Product Selection (for purchases) -->
                         <div x-show="transactionType === 'purchase'">
                             <label for="product_id" class="block text-sm font-medium text-gray-700 mb-1">Produk *</label>
                             <select 
@@ -145,8 +150,8 @@
                                 name="product_id" 
                                 x-model="productId"
                                 @change="updateProductPrice()"
+                                :required="transactionType === 'purchase'"
                                 class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                required
                             >
                                 <option value="">Pilih Produk</option>
                                 @foreach($products as $product)
@@ -161,6 +166,7 @@
                             </select>
                         </div>
                         
+                        <!-- Service Selection (for orders) -->
                         <div x-show="transactionType === 'order'">
                             <label for="printing_id" class="block text-sm font-medium text-gray-700 mb-1">Layanan Cetak *</label>
                             <select 
@@ -168,8 +174,8 @@
                                 name="printing_id" 
                                 x-model="printingId"
                                 @change="updateServicePrice()"
+                                :required="transactionType === 'order'"
                                 class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                required
                             >
                                 <option value="">Pilih Layanan Cetak</option>
                                 @foreach($services as $service)
@@ -249,6 +255,30 @@
                                 x-model="totalPrice"
                                 readonly
                                 required
+                                class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100"
+                            >
+                        </div>
+                        <div>
+                            <label for="total_cost" class="block text-sm font-medium text-gray-700 mb-1">Total Biaya (Rp)</label>
+                            <input 
+                                type="number" 
+                                id="total_cost" 
+                                name="total_cost" 
+                                x-model="totalCost"
+                                @input="updateProfit()"
+                                min="0" 
+                                value="{{ old('total_cost', 0) }}" 
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            >
+                        </div>
+                        <div>
+                            <label for="profit" class="block text-sm font-medium text-gray-700 mb-1">Profit (Rp)</label>
+                            <input 
+                                type="number" 
+                                id="profit" 
+                                name="profit" 
+                                x-model="profit"
+                                readonly
                                 class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100"
                             >
                         </div>
@@ -344,13 +374,32 @@
                     this.printingId = '';
                     this.unitPrice = 0;
                     this.updateTotalPrice();
+                    
+                    // Remove required attribute from hidden fields to prevent browser validation errors
+                    setTimeout(() => {
+                        if (type === 'purchase') {
+                            document.getElementById('printing_id').removeAttribute('required');
+                            if (document.getElementById('product_id')) {
+                                document.getElementById('product_id').setAttribute('required', 'required');
+                            }
+                        } else {
+                            if (document.getElementById('product_id')) {
+                                document.getElementById('product_id').removeAttribute('required');
+                            }
+                            document.getElementById('printing_id').setAttribute('required', 'required');
+                        }
+                    }, 100);
                 },
                 
                 // Update product price when product is selected
                 updateProductPrice() {
                     if (this.productId) {
                         const selectedOption = document.querySelector(`#product_id option[value="${this.productId}"]`);
-                        this.unitPrice = selectedOption ? parseInt(selectedOption.getAttribute('data-price')) : 0;
+                        if (selectedOption) {
+                            this.unitPrice = parseInt(selectedOption.getAttribute('data-price')) || 0;
+                        } else {
+                            this.unitPrice = 0;
+                        }
                     } else {
                         this.unitPrice = 0;
                     }
@@ -361,7 +410,11 @@
                 updateServicePrice() {
                     if (this.printingId) {
                         const selectedOption = document.querySelector(`#printing_id option[value="${this.printingId}"]`);
-                        this.unitPrice = selectedOption ? parseInt(selectedOption.getAttribute('data-price')) : 0;
+                        if (selectedOption) {
+                            this.unitPrice = parseInt(selectedOption.getAttribute('data-price')) || 0;
+                        } else {
+                            this.unitPrice = 0;
+                        }
                     } else {
                         this.unitPrice = 0;
                     }
@@ -402,6 +455,21 @@
                         this.unitPrice = {{ old('unit_price', 0) }};
                         this.updateTotalPrice();
                     @endif
+                    
+                    // Set initial required attributes based on transaction type
+                    setTimeout(() => {
+                        if (this.transactionType === 'purchase') {
+                            document.getElementById('printing_id').removeAttribute('required');
+                            if (document.getElementById('product_id')) {
+                                document.getElementById('product_id').setAttribute('required', 'required');
+                            }
+                        } else {
+                            if (document.getElementById('product_id')) {
+                                document.getElementById('product_id').removeAttribute('required');
+                            }
+                            document.getElementById('printing_id').setAttribute('required', 'required');
+                        }
+                    }, 100);
                 }
             }
         }
@@ -410,5 +478,52 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('transactionForm', transactionForm);
         });
+        
+        // Custom form validation to prevent browser from validating hidden fields
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('transactionForm');
+            
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    // Remove required attribute from hidden fields before submission
+                    const purchaseSection = document.querySelector('[x-show="transactionType === \'purchase\'"]');
+                    const orderSection = document.querySelector('[x-show="transactionType === \'order\'"]');
+                    
+                    if (purchaseSection && getComputedStyle(purchaseSection).display === 'none') {
+                        const productIdField = document.getElementById('product_id');
+                        if (productIdField) {
+                            productIdField.removeAttribute('required');
+                        }
+                    }
+                    
+                    if (orderSection && getComputedStyle(orderSection).display === 'none') {
+                        const printingIdField = document.getElementById('printing_id');
+                        if (printingIdField) {
+                            printingIdField.removeAttribute('required');
+                        }
+                    }
+                });
+            }
+        });
     </script>
+    
+    <style>
+        /* Style untuk menandai field yang required */
+        select:required:invalid {
+            color: #6b7280;
+        }
+        
+        select:required:invalid option[value=""] {
+            color: #6b7280;
+        }
+        
+        select:required:invalid option:not([value=""]) {
+            color: #000;
+        }
+        
+        /* Sembunyikan pesan error default browser */
+        select:invalid {
+            box-shadow: none;
+        }
+    </style>
 </x-layout.default>

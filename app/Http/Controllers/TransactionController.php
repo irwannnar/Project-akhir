@@ -69,7 +69,7 @@ class TransactionController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        // dd($request->all());
         $validated = $request->validate([
             'type' => 'required|in:order,purchase',
             'product_id' => 'required_if:type,purchase|exists:products,id',
