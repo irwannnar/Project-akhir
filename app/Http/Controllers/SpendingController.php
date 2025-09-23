@@ -20,7 +20,7 @@ class SpendingController extends Controller
      */
     public function create()
     {
-        //
+        return view('spending.create');
     }
 
     /**
@@ -28,7 +28,18 @@ class SpendingController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name'=> 'required|string|max:255',
+            'description'=>'nullable|string|max:255',
+            'quantity'=>'required|numeric',
+            'amount'=>'required|numeric',
+            'category'=>'required|string|max:255',
+            'payment_method'=>'required|in:cash, credit_card, debit_card, transfer',
+            'spending_date'=>'required|date'
+        ]);
+
+        Spending::create($request->all());
+        return redirect()->route('spending.index')->with('success', 'data pengeluaran berhasil ditambahkan');
     }
 
     /**
@@ -36,7 +47,7 @@ class SpendingController extends Controller
      */
     public function show(spending $spending)
     {
-        //
+        return view('spending.show');
     }
 
     /**
@@ -44,7 +55,7 @@ class SpendingController extends Controller
      */
     public function edit(spending $spending)
     {
-        //
+        return view('spending.edit');
     }
 
     /**
@@ -52,7 +63,18 @@ class SpendingController extends Controller
      */
     public function update(Request $request, spending $spending)
     {
-        //
+         $request->validate([
+            'name'=> 'required|string|max:255',
+            'description'=>'nullable|string|max:255',
+            'quantity'=>'required|numeric',
+            'amount'=>'required|numeric',
+            'category'=>'required|string|max:255',
+            'payment_method'=>'required|in:cash, credit_card, debit_card, transfer',
+            'spending_date'=>'required|date'
+        ]);
+
+        $spending->update($request->all());
+        return redirect()->route('spending.index')->with('success', 'data pengeluaran berhasil diupdate');
     }
 
     /**
@@ -60,6 +82,7 @@ class SpendingController extends Controller
      */
     public function destroy(spending $spending)
     {
-        //
+        $spending->delete();
+       return redirect()->route('spending.index')->with('success', 'data pengeluaran berhasil dihapus');
     }
 }
