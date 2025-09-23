@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->integer('quantity');
             $table->decimal('amount', 15, 2);
-            $table->enum('category', ['operational', 'mantenance', 'salary', 'inventory', 'other']);
+            $table->string('category');
             $table->string('payment_method')->default('cash');
             $table->timestamp('spending_date');
             $table->timestamps();
