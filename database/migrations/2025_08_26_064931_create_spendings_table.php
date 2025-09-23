@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('spendings', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->string('description')->nullable();
+            $table->integer('quantity');
+            $table->decimal('amount', 15, 2);
+            $table->enum('category', ['operational', 'mantenance', 'salary', 'inventory', 'other']);
+            $table->string('payment_method')->default('cash');
+            $table->timestamp('spending_date');
             $table->timestamps();
         });
     }
