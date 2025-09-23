@@ -16,69 +16,97 @@ class DashboardController extends Controller
     {
         $currentYear = date('Y');
 
-//Data untuk grafik profit per bulan (semua transaksi)
-$monthlyProfit = Transaction::selectRaw('
-        MONTH(created_at) as month,
-        SUM(total_price) as total_profit
-    ')
-    ->whereYear('created_at', $currentYear)
-    ->where('status', 'completed')
-    ->groupBy('month')
-    ->orderBy('month')
-    ->get();
+        // Data untuk grafik profit per bulan (semua transaksi)
+        $monthlyProfit = Transaction::selectRaw('
+                MONTH(created_at) as month,
+                SUM(total_price) as total_profit
+            ')
+            ->whereYear('created_at', $currentYear)
+            ->where('status', 'completed')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
 
-// Susun array 12 bulan
-$combinedMonthlyProfit = [];
-for ($i = 1; $i <= 12; $i++) {
-    $profit = $monthlyProfit->firstWhere('month', $i);
-    $combinedMonthlyProfit[] = [
-        'month' => $i,
-        'total_profit' => $profit->total_profit ?? 0
-    ];
-}
+        // Estimasi pengeluaran berdasarkan 30% dari pendapatan (contoh)
+        // Anda bisa menyesuaikan rumus ini sesuai kebutuhan bisnis
+        $monthlyExpenses = Transaction::selectRaw('
+                MONTH(created_at) as month,
+                SUM(total_price * 0.3) as total_expense
+            ')
+            ->whereYear('created_at', $currentYear)
+            ->where('status', 'completed')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
 
-//Data statistik
-$totalProfit = Transaction::whereYear('created_at', $currentYear)
-    ->where('status', 'completed')
-    ->sum('total_price');
+        // Susun array 12 bulan untuk profit
+        $combinedMonthlyProfit = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $profit = $monthlyProfit->firstWhere('month', $i);
+            $combinedMonthlyProfit[] = [
+                'month' => $i,
+                'total_profit' => $profit->total_profit ?? 0
+            ];
+        }
 
-$totalProductsSold = Transaction::whereYear('created_at', $currentYear)
-    ->where('status', 'completed')
-    ->sum('quantity');
+        // Susun array 12 bulan untuk pengeluaran
+        $combinedMonthlyExpenses = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $expense = $monthlyExpenses->firstWhere('month', $i);
+            $combinedMonthlyExpenses[] = [
+                'month' => $i,
+                'total_expense' => $expense->total_expense ?? 0
+            ];
+        }
 
-$totalOrdersCompleted = Transaction::whereYear('created_at', $currentYear)
-    ->where('status', 'completed')
-    ->count();
+        // Data statistik
+        $totalProfit = Transaction::whereYear('created_at', $currentYear)
+            ->where('status', 'completed')
+            ->sum('total_price');
 
-//Transaksi terbaru
-$recentTransactions = Transaction::with(['product', 'printing'])
-    ->where('status', 'completed')
-    ->orderBy('created_at', 'desc')
-    ->take(5)
-    ->get()
-    ->map(function($trx) {
-        return [
-            'type' => $trx->type,
-            'name' => $trx->product->name 
-                        ?? $trx->printing->nama_layanan 
-                        ?? 'Item',
-            'quantity' => $trx->quantity,
-            'total_price' => $trx->total_price,
-            'created_at' => $trx->created_at
-        ];
-    });
+        // Estimasi total pengeluaran (30% dari total pendapatan)
+        $estimatedExpenses = $totalProfit * 0.3;
 
-//Produk terlaris
-$bestSellingProducts = Product::withSum(['transactions as total_sold' => function($query) use ($currentYear) {
-        $query->whereYear('created_at', $currentYear)
-              ->where('status', 'completed');
-    }], 'quantity')
-    ->orderBy('total_sold', 'desc')
-    ->take(5)
-    ->get();
+        $totalProductsSold = Transaction::whereYear('created_at', $currentYear)
+            ->where('status', 'completed')
+            ->sum('quantity');
+
+        $totalOrdersCompleted = Transaction::whereYear('created_at', $currentYear)
+            ->where('status', 'completed')
+            ->count();
+
+        // Transaksi terbaru
+        $recentTransactions = Transaction::with(['product', 'printing'])
+            ->where('status', 'completed')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get()
+            ->map(function($trx) {
+                return [
+                    'type' => $trx->type,
+                    'name' => $trx->product->name 
+                                ?? $trx->printing->nama_layanan 
+                                ?? 'Item',
+                    'quantity' => $trx->quantity,
+                    'total_price' => $trx->total_price,
+                    'created_at' => $trx->created_at
+                ];
+            });
+
+        // Produk terlaris
+        $bestSellingProducts = Product::withSum(['transactions as total_sold' => function($query) use ($currentYear) {
+                $query->whereYear('created_at', $currentYear)
+                      ->where('status', 'completed');
+            }], 'quantity')
+            ->orderBy('total_sold', 'desc')
+            ->take(5)
+            ->get();
+
         return view('dashboard.index', compact(
             'combinedMonthlyProfit',
+            'combinedMonthlyExpenses',
             'totalProfit',
+            'estimatedExpenses',
             'totalProductsSold',
             'totalOrdersCompleted',
             'recentTransactions',
