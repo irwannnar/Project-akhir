@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('finances', function (Blueprint $table) {
+        Schema::create('finance_transactions', function (Blueprint $table) {
             $table->id();
-            $table->decimal('balance', 15, 2)->default(0);
-            $table->decimal('initial_balance', 15, 2)->default(0);
-            $table->text('description')->nullable();
+            $table->foreignId('finance_id')->constrained()->onDelete('cascade');
+            $table->morphs('sourceable'); // polymorphic relation
+            $table->decimal('amount', 15, 2);
+            $table->enum('type', ['income', 'expense']);
+            $table->string('description');
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('finances');
+        Schema::dropIfExists('finance_transactions');
     }
 };
