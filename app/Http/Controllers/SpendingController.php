@@ -15,8 +15,8 @@ class SpendingController extends Controller
     {
         // Ambil data spending dengan pagination
         $spendings = Spending::orderBy('spending_date', 'desc')
-                            ->orderBy('created_at', 'desc')
-                            ->paginate(10);
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
 
         // Hitung statistik
         $statistics = $this->getSpendingStatistics();
@@ -31,13 +31,9 @@ class SpendingController extends Controller
     {
         // Data untuk dropdown kategori
         $categories = [
-            'Makanan' => 'Makanan',
-            'Transportasi' => 'Transportasi',
-            'Tagihan' => 'Tagihan',
+            'bayar gaji' => 'bayar gaji',
             'Belanja' => 'Belanja',
-            'Hiburan' => 'Hiburan',
-            'Kesehatan' => 'Kesehatan',
-            'Pendidikan' => 'Pendidikan',
+            'maintenance' => 'maintenance',
             'Lainnya' => 'Lainnya'
         ];
 
@@ -57,25 +53,25 @@ class SpendingController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:500',
-            'quantity' => 'required|numeric|min:0.01',
-            'amount' => 'required|numeric|min:0.01',
+            'quantity' => 'required|numeric|min:1',
+            'amount' => 'required|numeric|min:1',
             'category' => 'required|string|max:255',
             'payment_method' => 'required|in:cash,credit_card,debit_card,transfer',
             'spending_date' => 'required|date'
         ]);
 
         try {
-            Spending::create($request->all());
-            
+            Spending::create($validated);
+
             return redirect()->route('spending.index')
-                            ->with('success', 'Data pengeluaran berhasil ditambahkan');
+                ->with('success', 'Data pengeluaran berhasil ditambahkan');
         } catch (\Exception $e) {
             return redirect()->back()
-                            ->withInput()
-                            ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
@@ -94,13 +90,9 @@ class SpendingController extends Controller
     {
         // Data untuk dropdown kategori
         $categories = [
-            'Makanan' => 'Makanan',
-            'Transportasi' => 'Transportasi',
-            'Tagihan' => 'Tagihan',
+            'bayar gaji' => 'bayar gaji',
             'Belanja' => 'Belanja',
-            'Hiburan' => 'Hiburan',
-            'Kesehatan' => 'Kesehatan',
-            'Pendidikan' => 'Pendidikan',
+            'maintenance' => 'maintenance',
             'Lainnya' => 'Lainnya'
         ];
 
@@ -123,8 +115,8 @@ class SpendingController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:500',
-            'quantity' => 'required|numeric|min:0.01',
-            'amount' => 'required|numeric|min:0.01',
+            'quantity' => 'required|numeric|min:1',
+            'amount' => 'required|numeric|min:1',
             'category' => 'required|string|max:255',
             'payment_method' => 'required|in:cash,credit_card,debit_card,transfer',
             'spending_date' => 'required|date'
@@ -132,13 +124,13 @@ class SpendingController extends Controller
 
         try {
             $spending->update($request->all());
-            
+
             return redirect()->route('spending.index')
-                            ->with('success', 'Data pengeluaran berhasil diupdate');
+                ->with('success', 'Data pengeluaran berhasil diupdate');
         } catch (\Exception $e) {
             return redirect()->back()
-                            ->withInput()
-                            ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
@@ -149,12 +141,12 @@ class SpendingController extends Controller
     {
         try {
             $spending->delete();
-            
+
             return redirect()->route('spending.index')
-                            ->with('success', 'Data pengeluaran berhasil dihapus');
+                ->with('success', 'Data pengeluaran berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()
-                            ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
@@ -164,10 +156,10 @@ class SpendingController extends Controller
     private function getSpendingStatistics()
     {
         $currentMonth = now()->format('Y-m');
-        
+
         // Total pengeluaran bulan ini
         $totalSpending = Spending::where('spending_date', 'like', $currentMonth . '%')
-                                ->sum('amount');
+            ->sum('amount');
 
         // Rata-rata per hari
         $daysInMonth = now()->daysInMonth;
@@ -175,17 +167,17 @@ class SpendingController extends Controller
 
         // Kategori dengan pengeluaran terbanyak
         $topCategory = Spending::where('spending_date', 'like', $currentMonth . '%')
-                                ->select('category', DB::raw('SUM(amount) as total'))
-                                ->groupBy('category')
-                                ->orderBy('total', 'desc')
-                                ->first();
+            ->select('category', DB::raw('SUM(amount) as total'))
+            ->groupBy('category')
+            ->orderBy('total', 'desc')
+            ->first();
 
         // Metode pembayaran paling sering digunakan
         $topPaymentMethod = Spending::where('spending_date', 'like', $currentMonth . '%')
-                                    ->select('payment_method', DB::raw('COUNT(*) as count'))
-                                    ->groupBy('payment_method')
-                                    ->orderBy('count', 'desc')
-                                    ->first();
+            ->select('payment_method', DB::raw('COUNT(*) as count'))
+            ->groupBy('payment_method')
+            ->orderBy('count', 'desc')
+            ->first();
 
         return [
             'total_spending' => $totalSpending,
@@ -201,21 +193,21 @@ class SpendingController extends Controller
     public function apiIndex()
     {
         $spendings = Spending::orderBy('spending_date', 'desc')
-                            ->get()
-                            ->map(function ($spending) {
-                                return [
-                                    'id' => $spending->id,
-                                    'name' => $spending->name,
-                                    'description' => $spending->description,
-                                    'amount' => $spending->amount,
-                                    'quantity' => $spending->quantity,
-                                    'category' => $spending->category,
-                                    'payment_method' => $spending->payment_method,
-                                    'spending_date' => $spending->spending_date,
-                                    'formatted_date' => $spending->spending_date->format('d M Y'),
-                                    'formatted_amount' => 'Rp ' . number_format($spending->amount, 0, ',', '.')
-                                ];
-                            });
+            ->get()
+            ->map(function ($spending) {
+                return [
+                    'id' => $spending->id,
+                    'name' => $spending->name,
+                    'description' => $spending->description,
+                    'amount' => $spending->amount,
+                    'quantity' => $spending->quantity,
+                    'category' => $spending->category,
+                    'payment_method' => $spending->payment_method,
+                    'spending_date' => $spending->spending_date,
+                    'formatted_date' => $spending->spending_date->format('d M Y'),
+                    'formatted_amount' => 'Rp ' . number_format($spending->amount, 0, ',', '.')
+                ];
+            });
 
         return response()->json($spendings);
     }
@@ -244,7 +236,7 @@ class SpendingController extends Controller
         }
 
         $spendings = $query->orderBy('spending_date', 'desc')
-                          ->paginate(10);
+            ->paginate(10);
 
         return view('spending.index', compact('spendings'));
     }
@@ -263,7 +255,7 @@ class SpendingController extends Controller
             'Content-Disposition' => "attachment; filename=$fileName",
         ];
 
-        $callback = function() use ($spendings) {
+        $callback = function () use ($spendings) {
             $file = fopen('php://output', 'w');
 
             // Header CSV

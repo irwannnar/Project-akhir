@@ -1,0 +1,245 @@
+<x-layout.default>
+    <div class="container mx-auto px-4 py-6">
+        <div class="max-w-2xl mx-auto">
+            <!-- Alert Messages -->
+            @if(session('success'))
+                <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                    <strong class="font-bold">Sukses!</strong>
+                    <span class="block sm:inline">{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    <strong class="font-bold">Error!</strong>
+                    <span class="block sm:inline">{{ session('error') }}</span>
+                </div>
+            @endif
+
+            <!-- Header -->
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">Tambah Pengeluaran Baru</h1>
+                <p class="text-gray-600">Isi form berikut untuk menambahkan data pengeluaran baru</p>
+            </div>
+
+            <!-- Form -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <form action="{{ route('spending.store') }}" method="POST" id="spendingForm">
+                    @csrf
+                    
+                    <!-- Nama Pengeluaran -->
+                    <div class="mb-6">
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Nama Pengeluaran <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               name="name" 
+                               id="name"
+                               value="{{ old('name') }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('name')  @enderror"
+                               placeholder="Contoh: perbaikan mesin, restock barang, dll."
+                               required>
+                        @error('name')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Kategori -->
+                    <div class="mb-6">
+                        <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
+                            Kategori <span class="text-red-500">*</span>
+                        </label>
+                        <select name="category" 
+                                id="category"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('category')  @enderror"
+                                required>
+                            <option value="">Pilih Kategori</option>
+                            @foreach($categories as $key => $value)
+                                <option value="{{ $key }}" {{ old('category') == $key ? 'selected' : '' }}>
+                                    {{ $value }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('category')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Jumlah dan Kuantitas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <!-- Jumlah -->
+                        <div>
+                            <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
+                                Jumlah (Rp) <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2.5 text-gray-500">Rp</span>
+                                <input type="number" 
+                                       name="amount" 
+                                       id="amount"
+                                       value="{{ old('amount') }}"
+                                       step="0.01"
+                                       min="0.01"
+                                       class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('amount')  @enderror"
+                                       placeholder="0.00"
+                                       required>
+                            </div>
+                            @error('amount')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Kuantitas -->
+                        <div>
+                            <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">
+                                Kuantitas <span class="text-red-500">*</span>
+                            </label>
+                            <input type="number" 
+                                   name="quantity" 
+                                   id="quantity"
+                                   value="{{ old('quantity', 1) }}"
+                                   step="0.01"
+                                   min="0.01"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('quantity')  @enderror"
+                                   placeholder="1"
+                                   required>
+                            @error('quantity')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- Metode Pembayaran dan Tanggal -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <!-- Metode Pembayaran -->
+                        <div>
+                            <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-2">
+                                Metode Pembayaran <span class="text-red-500">*</span>
+                            </label>
+                            <select name="payment_method" 
+                                    id="payment_method"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('payment_method')  @enderror"
+                                    required>
+                                <option value="">Pilih Metode</option>
+                                @foreach($paymentMethods as $key => $value)
+                                    <option value="{{ $key }}" {{ old('payment_method') == $key ? 'selected' : '' }}>
+                                        {{ $value }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('payment_method')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Tanggal Pengeluaran -->
+                        <div>
+                            <label for="spending_date" class="block text-sm font-medium text-gray-700 mb-2">
+                                Tanggal Pengeluaran <span class="text-red-500">*</span>
+                            </label>
+                            <input type="date" 
+                                   name="spending_date" 
+                                   id="spending_date"
+                                   value="{{ old('spending_date', date('Y-m-d')) }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('spending_date')  @enderror"
+                                   required>
+                            @error('spending_date')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- Deskripsi -->
+                    <div class="mb-6">
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                            Deskripsi (Opsional)
+                        </label>
+                        <textarea name="description" 
+                                  id="description"
+                                  rows="4"
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('description')  @enderror"
+                                  placeholder="Tambahkan deskripsi atau catatan tentang pengeluaran ini">{{ old('description') }}</textarea>
+                        @error('description')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Tombol Aksi -->
+                    <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+                        <button type="submit"
+                                class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Simpan Pengeluaran
+                        </button>
+                        
+                        <a href="{{ route('spending.index') }}"
+                           class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Batal
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Info -->
+            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                        <h3 class="font-medium text-blue-800">Tips Pengisian</h3>
+                        <ul class="mt-1 text-sm text-blue-700 list-disc list-inside space-y-1">
+                            <li>Isi nama pengeluaran yang jelas dan deskriptif</li>
+                            <li>Pilih kategori yang sesuai untuk memudahkan analisis</li>
+                            <li>Pastikan jumlah dan kuantitas diisi dengan benar</li>
+                            <li>Tanggal pengeluaran akan digunakan untuk laporan bulanan</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set tanggal maksimum ke hari ini
+        document.getElementById('spending_date').max = new Date().toISOString().split('T')[0];
+        
+        // Format input jumlah
+        document.getElementById('amount').addEventListener('blur', function(e) {
+            let value = parseFloat(e.target.value);
+            if (!isNaN(value)) {
+                e.target.value = value.toFixed(2);
+            }
+        });
+
+        // Validasi form sebelum submit
+        document.getElementById('spendingForm').addEventListener('submit', function(e) {
+            const amount = document.getElementById('amount').value;
+            const quantity = document.getElementById('quantity').value;
+            
+            if (parseFloat(amount) <= 0) {
+                e.preventDefault();
+                alert('Jumlah harus lebih besar dari 0');
+                document.getElementById('amount').focus();
+                return false;
+            }
+            
+            if (parseFloat(quantity) <= 0) {
+                e.preventDefault();
+                alert('Kuantitas harus lebih besar dari 0');
+                document.getElementById('quantity').focus();
+                return false;
+            }
+        });
+
+        // Auto-focus pada input pertama
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('name').focus();
+        });
+    </script>
+</x-layout.default>
