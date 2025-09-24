@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\spending;
+use App\Models\Spending;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SpendingController extends Controller
 {
@@ -12,7 +13,15 @@ class SpendingController extends Controller
      */
     public function index()
     {
-        return view('spending.index');
+        // Ambil data spending dengan pagination
+        $spendings = Spending::orderBy('spending_date', 'desc')
+                            ->orderBy('created_at', 'desc')
+                            ->paginate(10);
+
+        // Hitung statistik
+        $statistics = $this->getSpendingStatistics();
+
+        return view('spending.index', compact('spendings', 'statistics'));
     }
 
     /**
@@ -20,7 +29,27 @@ class SpendingController extends Controller
      */
     public function create()
     {
-        return view('spending.create');
+        // Data untuk dropdown kategori
+        $categories = [
+            'Makanan' => 'Makanan',
+            'Transportasi' => 'Transportasi',
+            'Tagihan' => 'Tagihan',
+            'Belanja' => 'Belanja',
+            'Hiburan' => 'Hiburan',
+            'Kesehatan' => 'Kesehatan',
+            'Pendidikan' => 'Pendidikan',
+            'Lainnya' => 'Lainnya'
+        ];
+
+        // Data untuk metode pembayaran
+        $paymentMethods = [
+            'cash' => 'Cash',
+            'credit_card' => 'Kartu Kredit',
+            'debit_card' => 'Kartu Debit',
+            'transfer' => 'Transfer'
+        ];
+
+        return view('spending.create', compact('categories', 'paymentMethods'));
     }
 
     /**
@@ -29,60 +58,241 @@ class SpendingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'=> 'required|string|max:255',
-            'description'=>'nullable|string|max:255',
-            'quantity'=>'required|numeric',
-            'amount'=>'required|numeric',
-            'category'=>'required|string|max:255',
-            'payment_method'=>'required|in:cash, credit_card, debit_card, transfer',
-            'spending_date'=>'required|date'
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
+            'quantity' => 'required|numeric|min:0.01',
+            'amount' => 'required|numeric|min:0.01',
+            'category' => 'required|string|max:255',
+            'payment_method' => 'required|in:cash,credit_card,debit_card,transfer',
+            'spending_date' => 'required|date'
         ]);
 
-        Spending::create($request->all());
-        return redirect()->route('spending.index')->with('success', 'data pengeluaran berhasil ditambahkan');
+        try {
+            Spending::create($request->all());
+            
+            return redirect()->route('spending.index')
+                            ->with('success', 'Data pengeluaran berhasil ditambahkan');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                            ->withInput()
+                            ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(spending $spending)
+    public function show(Spending $spending)
     {
-        return view('spending.show');
+        return view('spending.show', compact('spending'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(spending $spending)
+    public function edit(Spending $spending)
     {
-        return view('spending.edit');
+        // Data untuk dropdown kategori
+        $categories = [
+            'Makanan' => 'Makanan',
+            'Transportasi' => 'Transportasi',
+            'Tagihan' => 'Tagihan',
+            'Belanja' => 'Belanja',
+            'Hiburan' => 'Hiburan',
+            'Kesehatan' => 'Kesehatan',
+            'Pendidikan' => 'Pendidikan',
+            'Lainnya' => 'Lainnya'
+        ];
+
+        // Data untuk metode pembayaran
+        $paymentMethods = [
+            'cash' => 'Cash',
+            'credit_card' => 'Kartu Kredit',
+            'debit_card' => 'Kartu Debit',
+            'transfer' => 'Transfer'
+        ];
+
+        return view('spending.edit', compact('spending', 'categories', 'paymentMethods'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, spending $spending)
+    public function update(Request $request, Spending $spending)
     {
-         $request->validate([
-            'name'=> 'required|string|max:255',
-            'description'=>'nullable|string|max:255',
-            'quantity'=>'required|numeric',
-            'amount'=>'required|numeric',
-            'category'=>'required|string|max:255',
-            'payment_method'=>'required|in:cash, credit_card, debit_card, transfer',
-            'spending_date'=>'required|date'
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
+            'quantity' => 'required|numeric|min:0.01',
+            'amount' => 'required|numeric|min:0.01',
+            'category' => 'required|string|max:255',
+            'payment_method' => 'required|in:cash,credit_card,debit_card,transfer',
+            'spending_date' => 'required|date'
         ]);
 
-        $spending->update($request->all());
-        return redirect()->route('spending.index')->with('success', 'data pengeluaran berhasil diupdate');
+        try {
+            $spending->update($request->all());
+            
+            return redirect()->route('spending.index')
+                            ->with('success', 'Data pengeluaran berhasil diupdate');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                            ->withInput()
+                            ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(spending $spending)
+    public function destroy(Spending $spending)
     {
-        $spending->delete();
-       return redirect()->route('spending.index')->with('success', 'data pengeluaran berhasil dihapus');
+        try {
+            $spending->delete();
+            
+            return redirect()->route('spending.index')
+                            ->with('success', 'Data pengeluaran berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                            ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get spending statistics for the current month
+     */
+    private function getSpendingStatistics()
+    {
+        $currentMonth = now()->format('Y-m');
+        
+        // Total pengeluaran bulan ini
+        $totalSpending = Spending::where('spending_date', 'like', $currentMonth . '%')
+                                ->sum('amount');
+
+        // Rata-rata per hari
+        $daysInMonth = now()->daysInMonth;
+        $averagePerDay = $daysInMonth > 0 ? $totalSpending / $daysInMonth : 0;
+
+        // Kategori dengan pengeluaran terbanyak
+        $topCategory = Spending::where('spending_date', 'like', $currentMonth . '%')
+                                ->select('category', DB::raw('SUM(amount) as total'))
+                                ->groupBy('category')
+                                ->orderBy('total', 'desc')
+                                ->first();
+
+        // Metode pembayaran paling sering digunakan
+        $topPaymentMethod = Spending::where('spending_date', 'like', $currentMonth . '%')
+                                    ->select('payment_method', DB::raw('COUNT(*) as count'))
+                                    ->groupBy('payment_method')
+                                    ->orderBy('count', 'desc')
+                                    ->first();
+
+        return [
+            'total_spending' => $totalSpending,
+            'average_per_day' => $averagePerDay,
+            'top_category' => $topCategory ? $topCategory->category : 'Tidak ada data',
+            'top_payment_method' => $topPaymentMethod ? $topPaymentMethod->payment_method : 'Tidak ada data'
+        ];
+    }
+
+    /**
+     * API endpoint untuk mendapatkan data spending (optional)
+     */
+    public function apiIndex()
+    {
+        $spendings = Spending::orderBy('spending_date', 'desc')
+                            ->get()
+                            ->map(function ($spending) {
+                                return [
+                                    'id' => $spending->id,
+                                    'name' => $spending->name,
+                                    'description' => $spending->description,
+                                    'amount' => $spending->amount,
+                                    'quantity' => $spending->quantity,
+                                    'category' => $spending->category,
+                                    'payment_method' => $spending->payment_method,
+                                    'spending_date' => $spending->spending_date,
+                                    'formatted_date' => $spending->spending_date->format('d M Y'),
+                                    'formatted_amount' => 'Rp ' . number_format($spending->amount, 0, ',', '.')
+                                ];
+                            });
+
+        return response()->json($spendings);
+    }
+
+    /**
+     * Filter spending by date range
+     */
+    public function filter(Request $request)
+    {
+        $query = Spending::query();
+
+        if ($request->has('start_date') && $request->start_date) {
+            $query->where('spending_date', '>=', $request->start_date);
+        }
+
+        if ($request->has('end_date') && $request->end_date) {
+            $query->where('spending_date', '<=', $request->end_date);
+        }
+
+        if ($request->has('category') && $request->category) {
+            $query->where('category', $request->category);
+        }
+
+        if ($request->has('payment_method') && $request->payment_method) {
+            $query->where('payment_method', $request->payment_method);
+        }
+
+        $spendings = $query->orderBy('spending_date', 'desc')
+                          ->paginate(10);
+
+        return view('spending.index', compact('spendings'));
+    }
+
+    /**
+     * Export data to CSV
+     */
+    public function exportCsv()
+    {
+        $spendings = Spending::orderBy('spending_date', 'desc')->get();
+
+        $fileName = 'spending_' . date('Y-m-d') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=$fileName",
+        ];
+
+        $callback = function() use ($spendings) {
+            $file = fopen('php://output', 'w');
+
+            // Header CSV
+            fputcsv($file, [
+                'Nama',
+                'Deskripsi',
+                'Kategori',
+                'Jumlah',
+                'Kuantitas',
+                'Metode Pembayaran',
+                'Tanggal Pengeluaran'
+            ]);
+
+            // Data
+            foreach ($spendings as $spending) {
+                fputcsv($file, [
+                    $spending->name,
+                    $spending->description,
+                    $spending->category,
+                    $spending->amount,
+                    $spending->quantity,
+                    $spending->payment_method,
+                    $spending->spending_date
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }
