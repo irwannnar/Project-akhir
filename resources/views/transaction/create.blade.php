@@ -35,7 +35,7 @@
                 </div>
             @endif
 
-            <div class="bg-white shadow-md rounded-lg overflow-hidden p-6" x-data="transactionForm()">
+            <div class="bg-white shadow-md rounded-lg overflow-hidden p-6" x-data="transactionForm()" x-init="init()">
                 <form action="{{ route('transaction.store') }}" method="POST" enctype="multipart/form-data" id="transactionForm">
                     @csrf
                     
@@ -150,8 +150,8 @@
                                 name="product_id" 
                                 x-model="productId"
                                 @change="updateProductPrice()"
-                                :required="transactionType === 'purchase'"
                                 class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                :required="transactionType === 'purchase'"
                             >
                                 <option value="">Pilih Produk</option>
                                 @foreach($products as $product)
@@ -174,8 +174,8 @@
                                 name="printing_id" 
                                 x-model="printingId"
                                 @change="updateServicePrice()"
-                                :required="transactionType === 'order'"
                                 class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                :required="transactionType === 'order'"
                             >
                                 <option value="">Pilih Layanan Cetak</option>
                                 @foreach($services as $service)
@@ -332,18 +332,30 @@
 
     <!-- Script Section -->
     <script>
-        function transactionForm() {
-            return {
-                transactionType: '{{ request('type', 'order') }}',
-                productId: '',
-                printingId: '',
-                quantity: 1,
-                unitPrice: 0,
-                totalPrice: 0,
-                totalCost: 0,
-                profit: 0,
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('transactionForm', () => ({
+                transactionType: @json(request('type', 'order')),
+                productId: @json(old('product_id', '')),
+                printingId: @json(old('printing_id', '')),
+                quantity: {{ old('quantity', 1) }},
+                unitPrice: {{ old('unit_price', 0) }},
+                totalPrice: {{ old('total_price', 0) }},
+                totalCost: {{ old('total_cost', 0) }},
+                profit: {{ old('profit', 0) }},
                 
-                // Set transaction type and reset selections
+                init() {
+                    console.log('Form initialized with type:', this.transactionType);
+                    
+                    // Update harga berdasarkan data old() jika ada
+                    if (this.transactionType === 'purchase' && this.productId) {
+                        this.updateProductPrice();
+                    } else if (this.transactionType === 'order' && this.printingId) {
+                        this.updateServicePrice();
+                    }
+                    
+                    this.updateTotalPrice();
+                },
+                
                 setTransactionType(type) {
                     this.transactionType = type;
                     this.productId = '';
@@ -351,30 +363,26 @@
                     this.unitPrice = 0;
                     this.updateTotalPrice();
                     
-                    // Remove required attribute from hidden fields to prevent browser validation errors
+                    // Handle required attributes dengan delay
                     setTimeout(() => {
+                        const productField = document.getElementById('product_id');
+                        const printingField = document.getElementById('printing_id');
+                        
                         if (type === 'purchase') {
-                            document.getElementById('printing_id').removeAttribute('required');
-                            if (document.getElementById('product_id')) {
-                                document.getElementById('product_id').setAttribute('required', 'required');
-                            }
+                            if (printingField) printingField.removeAttribute('required');
+                            if (productField) productField.setAttribute('required', 'required');
                         } else {
-                            if (document.getElementById('product_id')) {
-                                document.getElementById('product_id').removeAttribute('required');
-                            }
-                            document.getElementById('printing_id').setAttribute('required', 'required');
+                            if (productField) productField.removeAttribute('required');
+                            if (printingField) printingField.setAttribute('required', 'required');
                         }
-                    }, 100);
+                    }, 50);
                 },
                 
-                // Update product price when product is selected
                 updateProductPrice() {
                     if (this.productId) {
                         const selectedOption = document.querySelector(`#product_id option[value="${this.productId}"]`);
                         if (selectedOption) {
-                            this.unitPrice = parseInt(selectedOption.getAttribute('data-price')) || 0;
-                        } else {
-                            this.unitPrice = 0;
+                            this.unitPrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
                         }
                     } else {
                         this.unitPrice = 0;
@@ -382,14 +390,11 @@
                     this.updateTotalPrice();
                 },
                 
-                // Update service price when service is selected
                 updateServicePrice() {
                     if (this.printingId) {
                         const selectedOption = document.querySelector(`#printing_id option[value="${this.printingId}"]`);
                         if (selectedOption) {
-                            this.unitPrice = parseInt(selectedOption.getAttribute('data-price')) || 0;
-                        } else {
-                            this.unitPrice = 0;
+                            this.unitPrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
                         }
                     } else {
                         this.unitPrice = 0;
@@ -397,109 +402,60 @@
                     this.updateTotalPrice();
                 },
                 
-                // Update total price based on quantity and unit price
                 updateTotalPrice() {
                     this.totalPrice = this.quantity * this.unitPrice;
-                    this.updateProfit();
                 },
                 
-                // Update profit based on total price and total cost
                 updateProfit() {
                     this.profit = this.totalPrice - this.totalCost;
-                },
-                
-                // Initialize with any existing values
-                init() {
-                    // Set initial values if they exist
-                    this.quantity = {{ old('quantity', 1) }};
-                    this.totalCost = {{ old('total_cost', 0) }};
-                    
-                    // Set product ID if it exists
-                    @if(old('product_id'))
-                        this.productId = '{{ old('product_id') }}';
-                        this.updateProductPrice();
-                    @endif
-                    
-                    // Set printing ID if it exists
-                    @if(old('printing_id'))
-                        this.printingId = '{{ old('printing_id') }}';
-                        this.updateServicePrice();
-                    @endif
-                    
-                    // Set unit price if it exists
-                    @if(old('unit_price'))
-                        this.unitPrice = {{ old('unit_price', 0) }};
-                        this.updateTotalPrice();
-                    @endif
-                    
-                    // Set initial required attributes based on transaction type
-                    setTimeout(() => {
-                        if (this.transactionType === 'purchase') {
-                            document.getElementById('printing_id').removeAttribute('required');
-                            if (document.getElementById('product_id')) {
-                                document.getElementById('product_id').setAttribute('required', 'required');
-                            }
-                        } else {
-                            if (document.getElementById('product_id')) {
-                                document.getElementById('product_id').removeAttribute('required');
-                            }
-                            document.getElementById('printing_id').setAttribute('required', 'required');
-                        }
-                    }, 100);
                 }
-            }
-        }
-        
-        // Initialize the form when the page loads
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('transactionForm', transactionForm);
+            }));
         });
-        
-        // Custom form validation to prevent browser from validating hidden fields
+
+        // Custom form validation
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('transactionForm');
             
             if (form) {
                 form.addEventListener('submit', function(e) {
-                    // Remove required attribute from hidden fields before submission
+                    console.log('Form submitted');
+                    
+                    // Cari section yang aktif
                     const purchaseSection = document.querySelector('[x-show="transactionType === \'purchase\'"]');
                     const orderSection = document.querySelector('[x-show="transactionType === \'order\'"]');
                     
+                    // Hapus required attribute dari field yang tersembunyi
                     if (purchaseSection && getComputedStyle(purchaseSection).display === 'none') {
-                        const productIdField = document.getElementById('product_id');
-                        if (productIdField) {
-                            productIdField.removeAttribute('required');
-                        }
+                        const productField = document.getElementById('product_id');
+                        if (productField) productField.removeAttribute('required');
                     }
                     
                     if (orderSection && getComputedStyle(orderSection).display === 'none') {
-                        const printingIdField = document.getElementById('printing_id');
-                        if (printingIdField) {
-                            printingIdField.removeAttribute('required');
-                        }
+                        const printingField = document.getElementById('printing_id');
+                        if (printingField) printingField.removeAttribute('required');
                     }
+                    
+                    // Validasi basic
+                    const quantity = document.getElementById('quantity');
+                    const unitPrice = document.getElementById('unit_price');
+                    
+                    if (quantity && parseFloat(quantity.value) <= 0) {
+                        e.preventDefault();
+                        alert('Jumlah harus lebih besar dari 0');
+                        quantity.focus();
+                        return false;
+                    }
+                    
+                    if (unitPrice && parseFloat(unitPrice.value) < 0) {
+                        e.preventDefault();
+                        alert('Harga satuan tidak boleh negatif');
+                        unitPrice.focus();
+                        return false;
+                    }
+                    
+                    return true;
                 });
             }
         });
     </script>
-    
-    <style>
-        /* Style untuk menandai field yang required */
-        select:required:invalid {
-            color: #6b7280;
-        }
-        
-        select:required:invalid option[value=""] {
-            color: #6b7280;
-        }
-        
-        select:required:invalid option:not([value=""]) {
-            color: #000;
-        }
-        
-        /* Sembunyikan pesan error default browser */
-        select:invalid {
-            box-shadow: none;
-        }
-    </style>
 </x-layout.default>

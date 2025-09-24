@@ -175,7 +175,7 @@
                         </button>
                         
                         <a href="{{ route('spending.index') }}"
-                           class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+                           class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-6 rounded-lg transition duration-200 flex items-center justify-center gap-2 text-center">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
@@ -207,39 +207,93 @@
 
     <script>
         // Set tanggal maksimum ke hari ini
-        document.getElementById('spending_date').max = new Date().toISOString().split('T')[0];
-        
-        // Format input jumlah
-        document.getElementById('amount').addEventListener('blur', function(e) {
-            let value = parseFloat(e.target.value);
-            if (!isNaN(value)) {
-                e.target.value = value.toFixed(2);
-            }
-        });
-
-        // Validasi form sebelum submit
-        document.getElementById('spendingForm').addEventListener('submit', function(e) {
-            const amount = document.getElementById('amount').value;
-            const quantity = document.getElementById('quantity').value;
-            
-            if (parseFloat(amount) <= 0) {
-                e.preventDefault();
-                alert('Jumlah harus lebih besar dari 0');
-                document.getElementById('amount').focus();
-                return false;
-            }
-            
-            if (parseFloat(quantity) <= 0) {
-                e.preventDefault();
-                alert('Kuantitas harus lebih besar dari 0');
-                document.getElementById('quantity').focus();
-                return false;
-            }
-        });
-
-        // Auto-focus pada input pertama
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('name').focus();
+            console.log('DOM loaded, initializing form...');
+            
+            // Set max date for spending_date
+            const spendingDateElement = document.getElementById('spending_date');
+            if (spendingDateElement) {
+                spendingDateElement.max = new Date().toISOString().split('T')[0];
+                console.log('Spending date max set to:', spendingDateElement.max);
+            } else {
+                console.warn('Element with id "spending_date" not found');
+            }
+            
+            // Auto-focus pada input pertama
+            const nameInput = document.getElementById('name');
+            if (nameInput) {
+                nameInput.focus();
+                console.log('Auto-focused on name input');
+            } else {
+                console.warn('Element with id "name" not found');
+            }
+            
+            // Format input jumlah saat kehilangan fokus
+            const amountInput = document.getElementById('amount');
+            if (amountInput) {
+                amountInput.addEventListener('blur', function(e) {
+                    const value = parseFloat(e.target.value);
+                    console.log('Amount blur event, value:', value);
+                    if (!isNaN(value) && value > 0) {
+                        e.target.value = value.toFixed(2);
+                        console.log('Formatted amount to:', e.target.value);
+                    }
+                });
+            } else {
+                console.warn('Element with id "amount" not found');
+            }
+            
+            // Validasi form sebelum submit
+            const spendingForm = document.getElementById('spendingForm');
+            if (spendingForm) {
+                spendingForm.addEventListener('submit', function(e) {
+                    console.log('Form submit event triggered');
+                    
+                    const amountElement = document.getElementById('amount');
+                    const quantityElement = document.getElementById('quantity');
+                    const spendingDateElement = document.getElementById('spending_date');
+                    
+                    if (!amountElement || !quantityElement || !spendingDateElement) {
+                        console.error('Required form elements not found');
+                        return true; // Biarkan server yang handle validation
+                    }
+                    
+                    const amount = amountElement.value;
+                    const quantity = quantityElement.value;
+                    const spendingDate = spendingDateElement.value;
+                    
+                    console.log('Validating - Amount:', amount, 'Quantity:', quantity, 'Date:', spendingDate);
+                    
+                    // Validasi amount
+                    if (!amount || parseFloat(amount) <= 0) {
+                        e.preventDefault();
+                        alert('Jumlah harus lebih besar dari 0');
+                        amountElement.focus();
+                        return false;
+                    }
+                    
+                    // Validasi quantity
+                    if (!quantity || parseFloat(quantity) <= 0) {
+                        e.preventDefault();
+                        alert('Kuantitas harus lebih besar dari 0');
+                        quantityElement.focus();
+                        return false;
+                    }
+                    
+                    // Validasi tanggal
+                    if (!spendingDate) {
+                        e.preventDefault();
+                        alert('Tanggal pengeluaran harus diisi');
+                        spendingDateElement.focus();
+                        return false;
+                    }
+                    
+                    console.log('Form validation passed');
+                    return true;
+                });
+            } else {
+                console.warn('Element with id "spendingForm" not found');
+            }
         });
     </script>
 </x-layout.default>
