@@ -21,10 +21,10 @@ class SaleController extends Controller
             DB::raw('SUM(total_price) as total_revenue'),
             DB::raw('SUM(profit) as total_profit'),
         )
-        ->whereYear('created_at', date('Y'))
-        ->groupBy(DB::raw('MONTH(created_at)'))
-        ->orderBy('month')
-        ->get();
+            ->whereYear('created_at', date('Y'))
+            ->groupBy(DB::raw('MONTH(created_at)'))
+            ->orderBy('month')
+            ->get();
 
         $formattedSales = [];
         for ($i = 1; $i <= 12; $i++) {
@@ -48,14 +48,22 @@ class SaleController extends Controller
         $totalSales = Transaction::whereYear('created_at', date('Y'))->sum('quantity');
         $totalRevenue = Transaction::whereYear('created_at', date('Y'))->sum('total_price');
         $totalProfit = Transaction::whereYear('created_at', date('Y'))->sum('profit');
-        
+
+        $productSales = Transaction::selectRaw('product_id, SUM(quantity) as total_sold, SUM(total_price) as total_revenue')
+            ->with('product')
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('product_id')
+            ->orderByDesc('total_sold')
+            ->get();
+
         return view('sale.index', compact(
-            'monthlySales', 
-            'formattedSales', 
-            'totalSales', 
-            'totalRevenue', 
+            'monthlySales',
+            'formattedSales',
+            'totalSales',
+            'totalRevenue',
             'totalProfit',
-            'bestSellingProduct'
+            'bestSellingProduct',
+            'productSales'
         ));
     }
 
@@ -77,17 +85,18 @@ class SaleController extends Controller
         return view('sale.product', compact('productSales', 'totalProductsSold', 'totalRevenue'));
     }
 
-    public function getSalesData(Request $request) {
+    public function getSalesData(Request $request)
+    {
         $year = $request->get('year', date('Y'));
 
         $monthlySales = Transaction::select(
             DB::raw('MONTH(created_at) as month'),
             DB::raw('SUM(quantity) as total_sales'),
         )
-        ->whereYear('created_at', $year)
-        ->groupBy(DB::raw('MONTH(created_at)'))
-        ->orderBy('month')
-        ->get();
+            ->whereYear('created_at', $year)
+            ->groupBy(DB::raw('MONTH(created_at)'))
+            ->orderBy('month')
+            ->get();
 
         return response()->json($monthlySales);
     }
