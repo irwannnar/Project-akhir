@@ -244,56 +244,56 @@
             }
             
             // Validasi form sebelum submit
-            const spendingForm = document.getElementById('spendingForm');
-            if (spendingForm) {
-                spendingForm.addEventListener('submit', function(e) {
-                    console.log('Form submit event triggered');
+            // const spendingForm = document.getElementById('spendingForm');
+            // if (spendingForm) {
+            //     spendingForm.addEventListener('submit', function(e) {
+            //         console.log('Form submit event triggered');
                     
-                    const amountElement = document.getElementById('amount');
-                    const quantityElement = document.getElementById('quantity');
-                    const spendingDateElement = document.getElementById('spending_date');
+            //         const amountElement = document.getElementById('amount');
+            //         const quantityElement = document.getElementById('quantity');
+            //         const spendingDateElement = document.getElementById('spending_date');
                     
-                    if (!amountElement || !quantityElement || !spendingDateElement) {
-                        console.error('Required form elements not found');
-                        return true; // Biarkan server yang handle validation
-                    }
+            //         if (!amountElement || !quantityElement || !spendingDateElement) {
+            //             console.error('Required form elements not found');
+            //             return true; // Biarkan server yang handle validation
+            //         }
                     
-                    const amount = amountElement.value;
-                    const quantity = quantityElement.value;
-                    const spendingDate = spendingDateElement.value;
+            //         const amount = amountElement.value;
+            //         const quantity = quantityElement.value;
+            //         const spendingDate = spendingDateElement.value;
                     
-                    console.log('Validating - Amount:', amount, 'Quantity:', quantity, 'Date:', spendingDate);
+            //         console.log('Validating - Amount:', amount, 'Quantity:', quantity, 'Date:', spendingDate);
                     
-                    // Validasi amount
-                    if (!amount || parseFloat(amount) <= 0) {
-                        e.preventDefault();
-                        alert('Jumlah harus lebih besar dari 0');
-                        amountElement.focus();
-                        return false;
-                    }
+            //         // Validasi amount
+            //         if (!amount || parseFloat(amount) <= 0) {
+            //             e.preventDefault();
+            //             alert('Jumlah harus lebih besar dari 0');
+            //             amountElement.focus();
+            //             return false;
+            //         }
                     
-                    // Validasi quantity
-                    if (!quantity || parseFloat(quantity) <= 0) {
-                        e.preventDefault();
-                        alert('Kuantitas harus lebih besar dari 0');
-                        quantityElement.focus();
-                        return false;
-                    }
+            //         // Validasi quantity
+            //         if (!quantity || parseFloat(quantity) <= 0) {
+            //             e.preventDefault();
+            //             alert('Kuantitas harus lebih besar dari 0');
+            //             quantityElement.focus();
+            //             return false;
+            //         }
                     
-                    // Validasi tanggal
-                    if (!spendingDate) {
-                        e.preventDefault();
-                        alert('Tanggal pengeluaran harus diisi');
-                        spendingDateElement.focus();
-                        return false;
-                    }
+            //         // Validasi tanggal
+            //         if (!spendingDate) {
+            //             e.preventDefault();
+            //             alert('Tanggal pengeluaran harus diisi');
+            //             spendingDateElement.focus();
+            //             return false;
+            //         }
                     
-                    console.log('Form validation passed');
-                    return true;
-                });
-            } else {
-                console.warn('Element with id "spendingForm" not found');
-            }
+            //         console.log('Form validation passed');
+            //         return true;
+            //     });
+            // } else {
+            //     console.warn('Element with id "spendingForm" not found');
+            // }
         });
     </script>
 </x-layout.default>
