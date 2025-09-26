@@ -1,4 +1,5 @@
-<x-layout.default><!DOCTYPE html>
+<x-layout.default>
+    <!DOCTYPE html>
     <!-- Main Content -->
     <main class="container mx-auto p-4 md:p-6" x-data="dashboard()" x-init="init()">
         <!-- Header dan Statistik Utama -->
@@ -10,7 +11,7 @@
         <!-- Statistik Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             <!-- Total Pendapatan -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
                 <div class="flex items-center">
                     <div class="p-3 bg-green-100 rounded-full">
                         <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,7 +30,7 @@
             </div>
 
             <!-- Estimasi Pengeluaran -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
                 <div class="flex items-center">
                     <div class="p-3 bg-red-100 rounded-full">
                         <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,7 +49,7 @@
             </div>
 
             <!-- Total Produk Terjual -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
                 <div class="flex items-center">
                     <div class="p-3 bg-blue-100 rounded-full">
                         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,7 +68,7 @@
             </div>
 
             <!-- Total Pesanan Selesai -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-purple-100">
                         <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,7 +92,7 @@
             <!-- Grafik Perbandingan Pendapatan & Pengeluaran -->
             <div class="lg:col-span-2 bg-white rounded-lg shadow p-6">
                 <h2 class="text-gray-800 text-xl font-semibold mb-4">Perbandingan Pendapatan & Pengeluaran Tahunan</h2>
-                <div class="h-100">
+                <div class="h-80">
                     <canvas id="profitExpenseChart"></canvas>
                 </div>
             </div>
@@ -99,7 +100,7 @@
             <!-- Chart Pembelian vs Pesanan -->
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="text-gray-800 text-xl font-semibold mb-4">Pembelian vs Pesanan</h3>
-                <div class="h-100">
+                <div class="h-80">
                     <canvas id="purchaseOrderChart"></canvas>
                 </div>
             </div>
@@ -110,7 +111,7 @@
             <!-- Donut Chart Pembelian (Produk) -->
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="text-gray-800 text-xl font-semibold mb-4">Distribusi Pembelian Produk</h3>
-                <div class="h-80 relative">
+                <div class="h-80 relative py-8">
                     <canvas id="purchaseDonutChart"></canvas>
                     <div class="donut-center">
                         <div class="text-center">
@@ -126,16 +127,15 @@
             <!-- Donut Chart Pesanan (Layanan) -->
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="text-gray-800 text-xl font-semibold mb-4">Distribusi Pesanan Layanan</h3>
-                <div class="h-80 relative">
-                    <canvas id="orderDonutChart"></canvas>
-                    <div class="donut-center">
-                        <div class="text-center">
-                            <div class="text-2xl font-bold text-gray-800" id="orderDonutTotal">
-                                {{ number_format($totalOrdersCompleted, 0, ',', '.') }}
+                <div class="h-80 relative py-8">
+                    <canvas id="orderDonutChart"></canvas><div class="donut-center">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-gray-800" id="orderDonutTotal">
+                                    {{ number_format($totalOrdersCompleted, 0, ',', '.') }}
+                                </div>
+                                <div class="text-sm text-gray-600">Total Pesanan</div>
                             </div>
-                            <div class="text-sm text-gray-600">Total Pesanan</div>
                         </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -160,15 +160,18 @@
                             @foreach ($recentTransactions as $transaction)
                                 <tr class="border-b">
                                     <td class="px-4 py-2 text-sm">
-                                        <span class="px-2 py-1 text-xs rounded-full 
+                                        <span
+                                            class="px-2 py-1 text-xs rounded-full 
                                             {{ $transaction['type'] === 'purchase' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
                                             {{ $transaction['type'] === 'purchase' ? 'Produk' : 'Layanan' }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-2 text-sm">{{ $transaction['name'] }}</td>
                                     <td class="px-4 py-2 text-sm">{{ $transaction['quantity'] }}</td>
-                                    <td class="px-4 py-2 text-sm">RP {{ number_format($transaction['total_price'], 0, ',', '.') }}</td>
-                                    <td class="px-4 py-2 text-sm">{{ $transaction['created_at']->format('d/m/Y H:i') }}</td>
+                                    <td class="px-4 py-2 text-sm">RP
+                                        {{ number_format($transaction['total_price'], 0, ',', '.') }}</td>
+                                    <td class="px-4 py-2 text-sm">
+                                        {{ $transaction['created_at']->format('d/m/Y H:i') }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -179,7 +182,7 @@
             <!-- Produk & Layanan Terpopuler -->
             <div class="bg-white rounded-lg shadow p-6">
                 <h2 class="text-gray-800 text-xl font-semibold mb-4">Produk & Layanan Terpopuler</h2>
-                
+
                 <div class="mb-6">
                     <h3 class="text-md font-semibold text-gray-700 mb-3">Produk Terlaris</h3>
                     <div class="space-y-3">
@@ -199,10 +202,12 @@
                     <div class="space-y-3">
                         @php
                             // Data layanan dari recent transactions
-                            $serviceTransactions = array_filter($recentTransactions->toArray(), function($transaction) {
+                            $serviceTransactions = array_filter($recentTransactions->toArray(), function (
+                                $transaction,
+                            ) {
                                 return $transaction['type'] !== 'purchase';
                             });
-                            
+
                             $popularServices = [];
                             foreach ($serviceTransactions as $transaction) {
                                 $serviceName = $transaction['name'];
@@ -211,12 +216,12 @@
                                 }
                                 $popularServices[$serviceName] += $transaction['quantity'];
                             }
-                            
+
                             // Urutkan berdasarkan jumlah terbanyak
                             arsort($popularServices);
                             $popularServices = array_slice($popularServices, 0, 4);
                         @endphp
-                        
+
                         @foreach ($popularServices as $serviceName => $count)
                             <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
                                 <span class="font-medium text-sm">{{ $serviceName }}</span>
@@ -225,7 +230,7 @@
                                 </span>
                             </div>
                         @endforeach
-                        
+
                         @if (count($popularServices) === 0)
                             <div class="text-center text-gray-500 py-4">
                                 Belum ada data layanan
@@ -284,8 +289,7 @@
                             type: 'line',
                             data: {
                                 labels: monthNames,
-                                datasets: [
-                                    {
+                                datasets: [{
                                         label: 'Pendapatan (Rp)',
                                         data: incomeData,
                                         borderColor: '#10B981',
@@ -315,7 +319,8 @@
                                     tooltip: {
                                         callbacks: {
                                             label: function(context) {
-                                                return context.dataset.label + ': Rp ' + context.raw.toLocaleString('id-ID');
+                                                return context.dataset.label + ': Rp ' + context.raw
+                                                    .toLocaleString('id-ID');
                                             }
                                         }
                                     }
@@ -354,8 +359,7 @@
                             type: 'bar',
                             data: {
                                 labels: monthNames,
-                                datasets: [
-                                    {
+                                datasets: [{
                                         label: 'Pembelian (Produk)',
                                         data: purchaseData,
                                         backgroundColor: 'rgba(59, 130, 246, 0.7)',
@@ -442,7 +446,8 @@
                                             label: function(context) {
                                                 const label = context.label || '';
                                                 const value = context.raw;
-                                                const percentage = totalSold > 0 ? ((value / totalSold) * 100).toFixed(1) : 0;
+                                                const percentage = totalSold > 0 ? ((value / totalSold) * 100)
+                                                    .toFixed(1) : 0;
                                                 return `${label}: ${value.toLocaleString('id-ID')} item (${percentage}%)`;
                                             }
                                         }
@@ -483,7 +488,9 @@
                                 labels: serviceNames,
                                 datasets: [{
                                     data: serviceCounts,
-                                    backgroundColor: ['#10B981', '#059669', '#047857', '#065F46', '#064E3B', '#022C22'],
+                                    backgroundColor: ['#10B981', '#059669', '#047857', '#065F46', '#064E3B',
+                                        '#022C22'
+                                    ],
                                     borderColor: '#ffffff',
                                     borderWidth: 2,
                                     hoverOffset: 15
@@ -508,7 +515,8 @@
                                             label: function(context) {
                                                 const label = context.label || '';
                                                 const value = context.raw;
-                                                const percentage = totalServices > 0 ? ((value / totalServices) * 100).toFixed(1) : 0;
+                                                const percentage = totalServices > 0 ? ((value /
+                                                    totalServices) * 100).toFixed(1) : 0;
                                                 return `${label}: ${value} pesanan (${percentage}%)`;
                                             }
                                         }
@@ -526,12 +534,13 @@
             console.log('Dashboard initialized with server data');
         });
     </script>
-        <style>
+    <style>
         .chart-container {
             position: relative;
             height: 300px;
             width: 100%;
         }
+
         #donutChartCenter {
             pointer-events: none;
         }
