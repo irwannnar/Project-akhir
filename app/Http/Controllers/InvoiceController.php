@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
 {
-    /**
+    /**zz
      * Display a listing of the resource.
      */
     public function index()

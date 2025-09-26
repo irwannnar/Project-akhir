@@ -31,9 +31,9 @@ class SpendingController extends Controller
     {
         // Data untuk dropdown kategori
         $categories = [
-            'bayar gaji' => 'bayar gaji',
-            'Belanja' => 'Belanja',
-            'maintenance' => 'maintenance',
+            'Bayar gaji' => 'Bayar gaji',
+            'Inventory' => 'Inventory',
+            'Maintenance' => 'Maintenance',
             'Lainnya' => 'Lainnya'
         ];
 
@@ -90,9 +90,9 @@ class SpendingController extends Controller
     {
         // Data untuk dropdown kategori
         $categories = [
-            'bayar gaji' => 'bayar gaji',
-            'Belanja' => 'Belanja',
-            'maintenance' => 'maintenance',
+            'Bayar gaji' => 'Bayar gaji',
+            'Inventory' => 'Inventory',
+            'Maintenance' => 'Maintenance',
             'Lainnya' => 'Lainnya'
         ];
 
