@@ -1,5 +1,4 @@
 <x-layout.default>
-    <!DOCTYPE html>
     <!-- Main Content -->
     <main class="container mx-auto p-4 md:p-6" x-data="dashboard()" x-init="init()">
         <!-- Header dan Statistik Utama -->
@@ -9,7 +8,7 @@
         </div>
 
         <!-- Statistik Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             <!-- Total Pendapatan -->
             <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
                 <div class="flex items-center">
@@ -48,30 +47,11 @@
                 </div>
             </div>
 
-            <!-- Total Produk Terjual -->
+            <!-- Total Pesanan Selesai -->
             <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
                 <div class="flex items-center">
-                    <div class="p-3 bg-blue-100 rounded-full">
+                    <div class="p-3 rounded-full bg-blue-100">
                         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
-                            </path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <h2 class="text-gray-600 text-sm font-semibold">Total Produk Terjual</h2>
-                        <div class="text-xl font-bold text-blue-600" id="totalProductsSold">
-                            {{ number_format($totalProductsSold, 0, ',', '.') }} item
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Total Pesanan Selesai -->
-            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-purple-100">
-                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z">
                             </path>
@@ -88,7 +68,7 @@
         </div>
 
         <!-- Grafik Utama -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div class="mb-6">
             <!-- Grafik Perbandingan Pendapatan & Pengeluaran -->
             <div class="lg:col-span-2 bg-white rounded-lg shadow p-6">
                 <h2 class="text-gray-800 text-xl font-semibold mb-4">Perbandingan Pendapatan & Pengeluaran Tahunan</h2>
@@ -96,36 +76,19 @@
                     <canvas id="profitExpenseChart"></canvas>
                 </div>
             </div>
+        </div>
 
+        <!-- Chart Terpisah untuk Pembelian dan Pesanan -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
             <!-- Chart Pembelian vs Pesanan -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-6 col-span-3">
                 <h3 class="text-gray-800 text-xl font-semibold mb-4">Pembelian vs Pesanan</h3>
                 <div class="h-80">
                     <canvas id="purchaseOrderChart"></canvas>
                 </div>
             </div>
-        </div>
 
-        <!-- Chart Terpisah untuk Pembelian dan Pesanan -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <!-- Donut Chart Pembelian (Produk) -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-gray-800 text-xl font-semibold mb-4">Distribusi Pembelian Produk</h3>
-                <div class="h-80 relative py-8">
-                    <canvas id="purchaseDonutChart"></canvas>
-                    <div class="donut-center">
-                        <div class="text-center">
-                            <div class="text-2xl font-bold text-gray-800" id="purchaseDonutTotal">
-                                {{ number_format($totalProductsSold, 0, ',', '.') }}
-                            </div>
-                            <div class="text-sm text-gray-600">Total Item Terjual</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Donut Chart Pesanan (Layanan) -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-6 col-span-2">
                 <h3 class="text-gray-800 text-xl font-semibold mb-4">Distribusi Pesanan Layanan</h3>
                 <div class="h-80 relative py-8">
                     <canvas id="orderDonutChart"></canvas><div class="donut-center">
@@ -257,8 +220,8 @@
                     const recentTransactions = @json($recentTransactions);
 
                     // Bulan dalam format Indonesia
-                    const monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+                        'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
                     ];
 
                     // Warna untuk chart
@@ -399,56 +362,6 @@
                                                 } else {
                                                     return `${label}: ${value} pesanan`;
                                                 }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                    }
-
-                    // Donut Chart 1: Pembelian (Produk)
-                    const purchaseDonutCtx = document.getElementById('purchaseDonutChart');
-                    if (purchaseDonutCtx) {
-                        const topProducts = bestSellingProducts.slice(0, 6);
-                        const productNames = topProducts.map(item => item.name || 'Produk Tidak Dikenal');
-                        const quantitiesSold = topProducts.map(item => item.total_sold || 0);
-                        const totalSold = quantitiesSold.reduce((sum, quantity) => sum + quantity, 0);
-
-                        new Chart(purchaseDonutCtx, {
-                            type: 'doughnut',
-                            data: {
-                                labels: productNames,
-                                datasets: [{
-                                    data: quantitiesSold,
-                                    backgroundColor: chartColors.slice(0, topProducts.length),
-                                    borderColor: '#ffffff',
-                                    borderWidth: 2,
-                                    hoverOffset: 15
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                cutout: '65%',
-                                plugins: {
-                                    legend: {
-                                        position: 'right',
-                                        labels: {
-                                            boxWidth: 12,
-                                            font: {
-                                                size: 10
-                                            }
-                                        }
-                                    },
-                                    tooltip: {
-                                        callbacks: {
-                                            label: function(context) {
-                                                const label = context.label || '';
-                                                const value = context.raw;
-                                                const percentage = totalSold > 0 ? ((value / totalSold) * 100)
-                                                    .toFixed(1) : 0;
-                                                return `${label}: ${value.toLocaleString('id-ID')} item (${percentage}%)`;
                                             }
                                         }
                                     }
