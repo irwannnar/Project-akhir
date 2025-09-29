@@ -39,7 +39,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <h2 class="text-gray-600 text-sm font-semibold">Estimasi Pengeluaran</h2>
+                        <h2 class="text-gray-600 text-sm font-semibold">Total Pengeluaran</h2>
                         <div class="text-xl font-bold text-red-600" id="estimatedExpenses">
                             RP {{ number_format($estimatedExpenses, 0, ',', '.') }}
                         </div>
@@ -58,7 +58,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-gray-600">Pesanan Selesai</p>
+                        <p class="text-gray-600">Total Pesanan</p>
                         <p class="text-2xl font-bold text-gray-800" id="totalOrdersCompleted">
                             {{ number_format($totalOrdersCompleted, 0, ',', '.') }} pesanan
                         </p>
