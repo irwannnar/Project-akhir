@@ -116,7 +116,7 @@
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 >
                             </div>
-                            <div class="md:col-span-2">
+                            <div>
                                 <label for="customer_email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                                 <input 
                                     type="email" 
@@ -184,7 +184,7 @@
                                         data-price="{{ $service->biaya }}"
                                         {{ old('printing_id') == $service->id ? 'selected' : '' }}
                                     >
-                                        {{ $service->nama_layanan }} - Rp {{ number_format($service->biaya, 0, ',', '.') }}
+                                        {{ $service->nama_layanan }} - Rp {{ number_format($service->biaya, 0, ',', '.') }}/cm²
                                     </option>
                                 @endforeach
                             </select>
@@ -192,7 +192,7 @@
                     </div>
 
                     <!-- Order Details -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                         <div>
                             <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Jumlah *</label>
                             <input 
@@ -200,7 +200,7 @@
                                 id="quantity" 
                                 name="quantity" 
                                 x-model="quantity"
-                                @input="updateTotalPrice()"
+                                @input="calculateTotalPrice()"
                                 min="1" 
                                 value="{{ old('quantity', 1) }}" 
                                 required
@@ -218,45 +218,92 @@
                             >
                         </div>
                         <div x-show="transactionType === 'order'">
-                            <label for="ukuran" class="block text-sm font-medium text-gray-700 mb-1">Ukuran</label>
+                            <label for="tinggi" class="block text-sm font-medium text-gray-700 mb-1">Tinggi (cm) *</label>
                             <input 
-                                type="text" 
-                                id="ukuran" 
-                                name="ukuran" 
-                                value="{{ old('ukuran') }}" 
+                                type="number" 
+                                id="tinggi" 
+                                name="tinggi" 
+                                x-model="tinggi"
+                                @input="calculateTotalPrice()"
+                                min="1" 
+                                step="0.1"
+                                value="{{ old('tinggi') }}" 
+                                :required="transactionType === 'order'"
                                 class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                placeholder="0"
+                            >
+                        </div>
+                        <div x-show="transactionType === 'order'">
+                            <label for="lebar" class="block text-sm font-medium text-gray-700 mb-1">Lebar (cm) *</label>
+                            <input 
+                                type="number" 
+                                id="lebar" 
+                                name="lebar" 
+                                x-model="lebar"
+                                @input="calculateTotalPrice()"
+                                min="1" 
+                                step="0.1"
+                                value="{{ old('lebar') }}" 
+                                :required="transactionType === 'order'"
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                placeholder="0"
                             >
                         </div>
                     </div>
 
-                    <!-- Pricing -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div>
-                            <label for="unit_price" class="block text-sm font-medium text-gray-700 mb-1">Harga Satuan (Rp)</label>
-                            <input 
-                                type="number" 
-                                id="unit_price" 
-                                name="unit_price" 
-                                x-model="unitPrice"
-                                @input="updateTotalPrice()"
-                                min="0" 
-                                value="{{ old('unit_price', 0) }}" 
-                                required
-                                readonly
-                                class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100"
-                            >
-                        </div>
-                        <div>
-                            <label for="total_price" class="block text-sm font-medium text-gray-700 mb-1">Total Harga (Rp) *</label>
-                            <input 
-                                type="number" 
-                                id="total_price" 
-                                name="total_price" 
-                                x-model="totalPrice"
-                                readonly
-                                required
-                                class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100"
-                            >
+                    <!-- Pricing Information -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Harga</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- For Orders - Show calculated price -->
+                            <template x-if="transactionType === 'order'">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Harga per cm²</label>
+                                    <div class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100 px-3 py-2">
+                                        <span x-text="'Rp ' + formatNumber(unitPrice) + '/cm²'"></span>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <!-- For Purchases - Show unit price input -->
+                            <template x-if="transactionType === 'purchase'">
+                                <div>
+                                    <label for="unit_price" class="block text-sm font-medium text-gray-700 mb-1">Harga Satuan (Rp)</label>
+                                    <input 
+                                        type="number" 
+                                        id="unit_price" 
+                                        name="unit_price" 
+                                        x-model="unitPrice"
+                                        @input="calculateTotalPrice()"
+                                        min="0" 
+                                        step="1"
+                                        value="{{ old('unit_price', 0) }}" 
+                                        required
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    >
+                                </div>
+                            </template>
+
+                            <div>
+                                <label for="total_price" class="block text-sm font-medium text-gray-700 mb-1">Total Harga (Rp) *</label>
+                                <input 
+                                    type="number" 
+                                    id="total_price" 
+                                    name="total_price" 
+                                    x-model="totalPrice"
+                                    readonly
+                                    required
+                                    class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100"
+                                >
+                                <!-- Price breakdown for orders -->
+                                <div x-show="transactionType === 'order' && totalPrice > 0" class="mt-1 text-xs text-gray-500">
+                                    <span x-text="'Luas: ' + (tinggi || 0) + 'cm × ' + (lebar || 0) + 'cm = ' + ((tinggi || 0) * (lebar || 0)).toFixed(2) + 'cm²'"></span>
+                                    <br>
+                                    <span x-text="'× Rp ' + formatNumber(unitPrice) + '/cm²'"></span>
+                                    <br>
+                                    <span x-text="'× ' + quantity + ' item = Rp ' + formatNumber(totalPrice)"></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -268,6 +315,7 @@
                             id="file" 
                             name="file" 
                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
                         >
                         <p class="mt-1 text-sm text-gray-500">Format: JPG, PNG, PDF, DOC, DOCX (Maks. 5MB)</p>
                     </div>
@@ -285,10 +333,20 @@
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 >
                                     <option value="">Pilih Metode Pembayaran</option>
-                                    <option value="cash" {{ old('payment_method') == 'cash' ? 'selected' : '' }}>Cash</option>
+                                    <option value="cash" {{ old('payment_method', 'cash') == 'cash' ? 'selected' : '' }}>Cash</option>
                                     <option value="transfer" {{ old('payment_method') == 'transfer' ? 'selected' : '' }}>Transfer</option>
                                     <option value="credit_card" {{ old('payment_method') == 'credit_card' ? 'selected' : '' }}>Kartu Kredit</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label for="paid_at" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Bayar</label>
+                                <input 
+                                    type="datetime-local" 
+                                    id="paid_at" 
+                                    name="paid_at" 
+                                    value="{{ old('paid_at') }}" 
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                >
                             </div>
                             <div>
                                 <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
@@ -299,7 +357,7 @@
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 >
                                     <option value="">Pilih Status</option>
-                                    <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="pending" {{ old('status', 'pending') == 'pending' ? 'selected' : '' }}>Pending</option>
                                     <option value="processing" {{ old('status') == 'processing' ? 'selected' : '' }}>Processing</option>
                                     <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Completed</option>
                                     <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
@@ -316,6 +374,7 @@
                             name="notes" 
                             rows="3"
                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            placeholder="Catatan tambahan untuk transaksi..."
                         >{{ old('notes') }}</textarea>
                     </div>
 
@@ -340,8 +399,8 @@
                 quantity: {{ old('quantity', 1) }},
                 unitPrice: {{ old('unit_price', 0) }},
                 totalPrice: {{ old('total_price', 0) }},
-                totalCost: {{ old('total_cost', 0) }},
-                profit: {{ old('profit', 0) }},
+                tinggi: {{ old('tinggi', 0) }},
+                lebar: {{ old('lebar', 0) }},
                 
                 init() {
                     console.log('Form initialized with type:', this.transactionType);
@@ -353,7 +412,7 @@
                         this.updateServicePrice();
                     }
                     
-                    this.updateTotalPrice();
+                    this.calculateTotalPrice();
                 },
                 
                 setTransactionType(type) {
@@ -361,19 +420,27 @@
                     this.productId = '';
                     this.printingId = '';
                     this.unitPrice = 0;
-                    this.updateTotalPrice();
+                    this.tinggi = 0;
+                    this.lebar = 0;
+                    this.calculateTotalPrice();
                     
                     // Handle required attributes dengan delay
                     setTimeout(() => {
                         const productField = document.getElementById('product_id');
                         const printingField = document.getElementById('printing_id');
+                        const tinggiField = document.getElementById('tinggi');
+                        const lebarField = document.getElementById('lebar');
                         
                         if (type === 'purchase') {
                             if (printingField) printingField.removeAttribute('required');
+                            if (tinggiField) tinggiField.removeAttribute('required');
+                            if (lebarField) lebarField.removeAttribute('required');
                             if (productField) productField.setAttribute('required', 'required');
                         } else {
                             if (productField) productField.removeAttribute('required');
                             if (printingField) printingField.setAttribute('required', 'required');
+                            if (tinggiField) tinggiField.setAttribute('required', 'required');
+                            if (lebarField) lebarField.setAttribute('required', 'required');
                         }
                     }, 50);
                 },
@@ -387,7 +454,7 @@
                     } else {
                         this.unitPrice = 0;
                     }
-                    this.updateTotalPrice();
+                    this.calculateTotalPrice();
                 },
                 
                 updateServicePrice() {
@@ -399,15 +466,25 @@
                     } else {
                         this.unitPrice = 0;
                     }
-                    this.updateTotalPrice();
+                    this.calculateTotalPrice();
                 },
                 
-                updateTotalPrice() {
-                    this.totalPrice = this.quantity * this.unitPrice;
+                calculateTotalPrice() {
+                    if (this.transactionType === 'order') {
+                        // Untuk order: (tinggi × lebar) × harga per cm² × quantity
+                        const luas = (parseFloat(this.tinggi) || 0) * (parseFloat(this.lebar) || 0);
+                        this.totalPrice = luas * (parseFloat(this.unitPrice) || 0) * (parseInt(this.quantity) || 1);
+                    } else {
+                        // Untuk purchase: unit price × quantity
+                        this.totalPrice = (parseFloat(this.unitPrice) || 0) * (parseInt(this.quantity) || 1);
+                    }
+                    
+                    // Round to nearest integer
+                    this.totalPrice = Math.round(this.totalPrice);
                 },
                 
-                updateProfit() {
-                    this.profit = this.totalPrice - this.totalCost;
+                formatNumber(number) {
+                    return new Intl.NumberFormat('id-ID').format(number);
                 }
             }));
         });
@@ -432,12 +509,16 @@
                     
                     if (orderSection && getComputedStyle(orderSection).display === 'none') {
                         const printingField = document.getElementById('printing_id');
+                        const tinggiField = document.getElementById('tinggi');
+                        const lebarField = document.getElementById('lebar');
                         if (printingField) printingField.removeAttribute('required');
+                        if (tinggiField) tinggiField.removeAttribute('required');
+                        if (lebarField) lebarField.removeAttribute('required');
                     }
                     
                     // Validasi basic
                     const quantity = document.getElementById('quantity');
-                    const unitPrice = document.getElementById('unit_price');
+                    const totalPrice = document.getElementById('total_price');
                     
                     if (quantity && parseFloat(quantity.value) <= 0) {
                         e.preventDefault();
@@ -446,10 +527,10 @@
                         return false;
                     }
                     
-                    if (unitPrice && parseFloat(unitPrice.value) < 0) {
+                    if (totalPrice && parseFloat(totalPrice.value) <= 0) {
                         e.preventDefault();
-                        alert('Harga satuan tidak boleh negatif');
-                        unitPrice.focus();
+                        alert('Total harga harus lebih besar dari 0');
+                        totalPrice.focus();
                         return false;
                     }
                     

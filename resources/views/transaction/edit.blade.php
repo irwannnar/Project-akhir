@@ -77,7 +77,7 @@
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 >
                             </div>
-                            <div class="md:col-span-2">
+                            <div>
                                 <label for="customer_email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                                 <input 
                                     type="email" 
@@ -145,7 +145,7 @@
                                         data-price="{{ $service->biaya }}"
                                         {{ old('printing_id', $transaction->printing_id) == $service->id ? 'selected' : '' }}
                                     >
-                                        {{ $service->nama_layanan }} - Rp {{ number_format($service->biaya, 0, ',', '.') }}
+                                        {{ $service->nama_layanan }} - Rp {{ number_format($service->biaya, 0, ',', '.') }}/cm²
                                     </option>
                                 @endforeach
                             </select>
@@ -153,7 +153,7 @@
                     </div>
 
                     <!-- Order Details -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                         <div>
                             <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Jumlah *</label>
                             <input 
@@ -161,8 +161,9 @@
                                 id="quantity" 
                                 name="quantity" 
                                 x-model="quantity"
-                                @input="updateTotalPrice()"
+                                @input="calculateTotalPrice()"
                                 min="1" 
+                                value="{{ old('quantity', $transaction->quantity) }}" 
                                 required
                                 class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             >
@@ -178,57 +179,105 @@
                             >
                         </div>
                         <div x-show="transactionType === 'order'">
-                            <label for="ukuran" class="block text-sm font-medium text-gray-700 mb-1">Ukuran</label>
+                            <label for="tinggi" class="block text-sm font-medium text-gray-700 mb-1">Tinggi (cm) *</label>
                             <input 
-                                type="text" 
-                                id="ukuran" 
-                                name="ukuran" 
-                                value="{{ old('ukuran', $transaction->ukuran) }}" 
+                                type="number" 
+                                id="tinggi" 
+                                name="tinggi" 
+                                x-model="tinggi"
+                                @input="calculateTotalPrice()"
+                                min="1" 
+                                step="0.1"
+                                value="{{ old('tinggi', $transaction->tinggi) }}" 
+                                :required="transactionType === 'order'"
                                 class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                placeholder="0"
+                            >
+                        </div>
+                        <div x-show="transactionType === 'order'">
+                            <label for="lebar" class="block text-sm font-medium text-gray-700 mb-1">Lebar (cm) *</label>
+                            <input 
+                                type="number" 
+                                id="lebar" 
+                                name="lebar" 
+                                x-model="lebar"
+                                @input="calculateTotalPrice()"
+                                min="1" 
+                                step="0.1"
+                                value="{{ old('lebar', $transaction->lebar) }}" 
+                                :required="transactionType === 'order'"
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                placeholder="0"
                             >
                         </div>
                     </div>
 
-                    <!-- Pricing -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <div>
-                            <label for="unit_price" class="block text-sm font-medium text-gray-700 mb-1">Harga Satuan (Rp)</label>
-                            <input 
-                                type="number" 
-                                id="unit_price" 
-                                name="unit_price" 
-                                x-model="unitPrice"
-                                @input="updateTotalPrice()"
-                                min="0" 
-                                required
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            >
-                        </div>
-                        <div>
-                            <label for="total_price" class="block text-sm font-medium text-gray-700 mb-1">Total Harga (Rp) *</label>
-                            <input 
-                                type="number" 
-                                id="total_price" 
-                                name="total_price" 
-                                x-model="totalPrice"
-                                required
-                                readonly
-                                class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100"
-                            >
+                    <!-- Pricing Information -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Harga</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- For Orders - Show calculated price -->
+                            <template x-if="transactionType === 'order'">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Harga per cm²</label>
+                                    <div class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100 px-3 py-2">
+                                        <span x-text="'Rp ' + formatNumber(unitPrice) + '/cm²'"></span>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <!-- For Purchases - Show unit price input -->
+                            <template x-if="transactionType === 'purchase'">
+                                <div>
+                                    <label for="unit_price" class="block text-sm font-medium text-gray-700 mb-1">Harga Satuan (Rp)</label>
+                                    <input 
+                                        type="number" 
+                                        id="unit_price" 
+                                        name="unit_price" 
+                                        x-model="unitPrice"
+                                        @input="calculateTotalPrice()"
+                                        min="0" 
+                                        step="1"
+                                        value="{{ old('unit_price', $transaction->unit_price) }}" 
+                                        required
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    >
+                                </div>
+                            </template>
+
+                            <div>
+                                <label for="total_price" class="block text-sm font-medium text-gray-700 mb-1">Total Harga (Rp) *</label>
+                                <input 
+                                    type="number" 
+                                    id="total_price" 
+                                    name="total_price" 
+                                    x-model="totalPrice"
+                                    readonly
+                                    required
+                                    class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100"
+                                >
+                                <!-- Price breakdown for orders -->
+                                <div x-show="transactionType === 'order' && totalPrice > 0" class="mt-1 text-xs text-gray-500">
+                                    <span x-text="'Luas: ' + (tinggi || 0) + 'cm × ' + (lebar || 0) + 'cm = ' + ((tinggi || 0) * (lebar || 0)).toFixed(2) + 'cm²'"></span>
+                                    <br>
+                                    <span x-text="'× Rp ' + formatNumber(unitPrice) + '/cm²'"></span>
+                                    <br>
+                                    <span x-text="'× ' + quantity + ' item = Rp ' + formatNumber(totalPrice)"></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- File Upload -->
                     <div class="mb-6" x-show="transactionType === 'order'">
                         <label for="file" class="block text-sm font-medium text-gray-700 mb-1">File Desain</label>
-                        <div class="mt-1 flex items-center">
-                            <input 
-                                type="file" 
-                                id="file" 
-                                name="file" 
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            >
-                        </div>
+                        <input 
+                            type="file" 
+                            id="file" 
+                            name="file" 
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+                        >
                         @if($transaction->file_path)
                             <div class="mt-2">
                                 <span class="text-sm text-gray-600">File saat ini: </span>
@@ -249,7 +298,6 @@
                                 <select 
                                     id="payment_method" 
                                     name="payment_method" 
-                                    x-model="paymentMethod"
                                     required
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 >
@@ -260,11 +308,20 @@
                                 </select>
                             </div>
                             <div>
+                                <label for="paid_at" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Bayar</label>
+                                <input 
+                                    type="datetime-local" 
+                                    id="paid_at" 
+                                    name="paid_at" 
+                                    value="{{ old('paid_at', $transaction->paid_at ? $transaction->paid_at->format('Y-m-d\TH:i') : '') }}" 
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                >
+                            </div>
+                            <div>
                                 <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
                                 <select 
                                     id="status" 
                                     name="status" 
-                                    x-model="status"
                                     required
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 >
@@ -276,16 +333,6 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="mt-4" x-show="status === 'completed' && paymentMethod !== 'cash'">
-                            <label for="paid_at" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Pembayaran</label>
-                            <input 
-                                type="datetime-local" 
-                                id="paid_at" 
-                                name="paid_at" 
-                                value="{{ old('paid_at', $transaction->paid_at ? $transaction->paid_at->format('Y-m-d\TH:i') : '') }}" 
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            >
-                        </div>
                     </div>
 
                     <!-- Notes -->
@@ -296,6 +343,7 @@
                             name="notes" 
                             rows="3"
                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            placeholder="Catatan tambahan untuk transaksi..."
                         >{{ old('notes', $transaction->notes) }}</textarea>
                     </div>
 
@@ -312,84 +360,103 @@
 
     <!-- Script Section -->
     <script>
-        function transactionForm() {
-            return {
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('transactionForm', () => ({
                 transactionType: @json($transaction->type),
                 productId: @json(old('product_id', $transaction->product_id)),
                 printingId: @json(old('printing_id', $transaction->printing_id)),
                 quantity: {{ old('quantity', $transaction->quantity) }},
-                unitPrice: {{ old('unit_price', $transaction->unit_price) }},
+                unitPrice: {{ old('unit_price', $transaction->unit_price ?? 0) }},
                 totalPrice: {{ old('total_price', $transaction->total_price) }},
-                totalCost: {{ old('total_cost', $transaction->total_cost ?? 0) }},
-                profit: {{ old('profit', $transaction->profit ?? 0) }},
-                paymentMethod: @json(old('payment_method', $transaction->payment_method)),
-                status: @json(old('status', $transaction->status)),
+                tinggi: {{ old('tinggi', $transaction->tinggi ?? 0) }},
+                lebar: {{ old('lebar', $transaction->lebar ?? 0) }},
                 
                 init() {
-                    console.log('Initializing form...');
-                    console.log('Transaction Type:', this.transactionType);
-                    console.log('Product ID:', this.productId);
-                    console.log('Printing ID:', this.printingId);
-                    console.log('Quantity:', this.quantity);
-                    console.log('Unit Price:', this.unitPrice);
-                    console.log('Payment Method:', this.paymentMethod);
-                    console.log('Status:', this.status);
+                    console.log('Form initialized with type:', this.transactionType);
                     
-                    // Tunggu sebentar untuk memastikan DOM sudah terrender
-                    setTimeout(() => {
-                        // Update harga berdasarkan produk/layanan yang dipilih
-                        if (this.transactionType === 'purchase' && this.productId) {
-                            this.updateProductPrice();
-                        } else if (this.transactionType === 'order' && this.printingId) {
-                            this.updateServicePrice();
-                        }
-                        
-                        // Update total harga dan profit
-                        this.updateTotalPrice();
-                        this.updateProfit();
-                    }, 100);
+                    // Update harga berdasarkan data yang ada
+                    if (this.transactionType === 'purchase' && this.productId) {
+                        this.updateProductPrice();
+                    } else if (this.transactionType === 'order' && this.printingId) {
+                        this.updateServicePrice();
+                    }
+                    
+                    this.calculateTotalPrice();
                 },
                 
                 updateProductPrice() {
                     if (this.productId) {
                         const selectedOption = document.querySelector(`#product_id option[value="${this.productId}"]`);
                         if (selectedOption) {
-                            const price = parseFloat(selectedOption.getAttribute('data-price')) || 0;
-                            this.unitPrice = price;
-                            console.log('Updated product price:', price);
+                            this.unitPrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
                         }
+                    } else {
+                        this.unitPrice = 0;
                     }
-                    this.updateTotalPrice();
+                    this.calculateTotalPrice();
                 },
                 
                 updateServicePrice() {
                     if (this.printingId) {
                         const selectedOption = document.querySelector(`#printing_id option[value="${this.printingId}"]`);
                         if (selectedOption) {
-                            const price = parseFloat(selectedOption.getAttribute('data-price')) || 0;
-                            this.unitPrice = price;
-                            console.log('Updated service price:', price);
+                            this.unitPrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
                         }
+                    } else {
+                        this.unitPrice = 0;
                     }
-                    this.updateTotalPrice();
+                    this.calculateTotalPrice();
                 },
                 
-                updateTotalPrice() {
-                    this.totalPrice = this.quantity * this.unitPrice;
-                    console.log('Updated total price:', this.totalPrice, 'Quantity:', this.quantity, 'Unit Price:', this.unitPrice);
-                    this.updateProfit();
+                calculateTotalPrice() {
+                    if (this.transactionType === 'order') {
+                        // Untuk order: (tinggi × lebar) × harga per cm² × quantity
+                        const luas = (parseFloat(this.tinggi) || 0) * (parseFloat(this.lebar) || 0);
+                        this.totalPrice = luas * (parseFloat(this.unitPrice) || 0) * (parseInt(this.quantity) || 1);
+                    } else {
+                        // Untuk purchase: unit price × quantity
+                        this.totalPrice = (parseFloat(this.unitPrice) || 0) * (parseInt(this.quantity) || 1);
+                    }
+                    
+                    // Round to nearest integer
+                    this.totalPrice = Math.round(this.totalPrice);
                 },
                 
-                updateProfit() {
-                    this.profit = this.totalPrice - this.totalCost;
-                    console.log('Updated profit:', this.profit, 'Total Price:', this.totalPrice, 'Total Cost:', this.totalCost);
+                formatNumber(number) {
+                    return new Intl.NumberFormat('id-ID').format(number);
                 }
+            }));
+        });
+
+        // Custom form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('transactionForm');
+            
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    console.log('Form submitted');
+                    
+                    // Validasi basic
+                    const quantity = document.getElementById('quantity');
+                    const totalPrice = document.getElementById('total_price');
+                    
+                    if (quantity && parseFloat(quantity.value) <= 0) {
+                        e.preventDefault();
+                        alert('Jumlah harus lebih besar dari 0');
+                        quantity.focus();
+                        return false;
+                    }
+                    
+                    if (totalPrice && parseFloat(totalPrice.value) <= 0) {
+                        e.preventDefault();
+                        alert('Total harga harus lebih besar dari 0');
+                        totalPrice.focus();
+                        return false;
+                    }
+                    
+                    return true;
+                });
             }
-        }
-        
-        // Initialize Alpine.js
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('transactionForm', transactionForm);
         });
     </script>
 </x-layout.default>
