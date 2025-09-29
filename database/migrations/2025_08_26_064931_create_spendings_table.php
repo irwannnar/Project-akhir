@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('amount', 15, 2);
             $table->string('category');
             $table->string('payment_method')->default('cash');
+            $table->enum('status', ['pending', 'paid'])->default('pending');
             $table->timestamp('spending_date');
             $table->timestamps();
         });

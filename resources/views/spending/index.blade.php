@@ -15,6 +15,11 @@
             </div>
         </div>
 
+        {{-- filter --}}
+        <div class="bg-white mb-4 mt-2 rounded shadow p-3 ">
+            <div class="">filter</div>
+        </div>
+
         <!-- Tabel Data -->
         <div class="bg-white shadow-lg rounded-xl overflow-hidden">
             <div class="overflow-x-auto">
