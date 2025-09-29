@@ -23,10 +23,7 @@
                                 Layanan
                             </th>
                             <th class="px-6 py-4 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
-                                Biaya Dasar
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
-                                Ukuran Tersedia
+                                Biaya
                             </th>
                             <th class="px-6 py-4 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Perhitungan
@@ -44,38 +41,7 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-gray-900">Rp
-                                        {{ number_format($layanan->biaya, 0, ',', '.') }}</div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900">
-                                        @php
-                                            // Handle both array and JSON string
-                                            $ukuranData = $layanan->ukuran;
-                                            if (is_string($ukuranData)) {
-                                                $ukuranData = json_decode($ukuranData, true) ?: [];
-                                            }
-                                            $ukuranData = is_array($ukuranData) ? $ukuranData : [];
-                                        @endphp
-
-                                        @if (count($ukuranData) > 0)
-                                            <div class="space-y-1">
-                                                @foreach (array_slice($ukuranData, 0, 3) as $ukuran)
-                                                    @if (isset($ukuran['nama']) && isset($ukuran['harga']))
-                                                        <div class="flex justify-between">
-                                                            <span>{{ $ukuran['nama']}}</span>
-                                                        </div>
-                                                    @endif
-                                                @endforeach
-                                                @if (count($ukuranData) > 3)
-                                                    <div class="text-xs text-blue-600 mt-1">
-                                                        +{{ count($ukuranData) - 3 }} ukuran lainnya...
-                                                    </div>
-                                                @endif
-                                            </div>
-                                        @else
-                                            <span class="text-gray-500 text-sm">Tidak ada ukuran tersedia</span>
-                                        @endif
-                                    </div>
+                                        {{ number_format($layanan->biaya, 0, ',', '.') }}/cm</div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-gray-900">

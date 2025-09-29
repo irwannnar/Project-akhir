@@ -15,7 +15,6 @@ return new class extends Migration
         $table->id();
         $table->string('nama_layanan');
         $table->decimal('biaya', 15, 2);
-        $table->json('ukuran')->nullable();
         $table->string('hitungan')->default('per_lembar');
         $table->timestamps();
     });

@@ -22,22 +22,13 @@ class PrintingController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'nama_layanan' => 'required|string|max:255',
             'biaya' => 'required|numeric|min:0',
-            'hitungan' => 'required|in:per_lembar,per_cm2,tetap',
-            'ukuran' => 'required|json',
-            'sizes' => 'sometimes|array'
+            'hitungan' => 'required|max:50',
         ]);
 
-        // Create printing service
-        $printing = Printing::create([
-            'nama_layanan' => $validated['nama_layanan'],
-            'biaya' => $validated['biaya'],
-            'hitungan' => $validated['hitungan'],
-            'ukuran' => $validated['ukuran']
-        ]);
-
+        Printing::create($request->all());
         return redirect()->route('printing.index')
             ->with('success', 'Layanan printing berhasil ditambahkan');
     }
@@ -58,7 +49,6 @@ class PrintingController extends Controller
         $request->validate([
             'nama_layanan'=> 'required|string|max:255',
             'biaya'=>'required|numeric|min:0',
-            'ukuran' => 'required|json',
             'hitungan'=>'required|string|max:50',
         ]);
 
