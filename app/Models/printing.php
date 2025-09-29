@@ -12,7 +12,6 @@ class Printing extends Model
     protected $fillable = [
         'nama_layanan',
         'biaya',
-        'ukuran',
         'hitungan'
         
     ];
