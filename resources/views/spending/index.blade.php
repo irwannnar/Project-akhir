@@ -49,7 +49,7 @@
                     </select>
                 </div>
                 <div>
-                    <label for="date" class="block text-sm font-medium text-gray-600 mb-1">Tanggal</label>
+                    <label for="date" class="block text-sm font-medium text-gray-600 mb-1">Tanggal pembayaran</label>
                     <input type="date" name="date" id="date" value="{{ request('date') }}"
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 </div>
