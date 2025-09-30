@@ -1,6 +1,7 @@
 <x-layout.default>
     <!-- Main Content -->
-    <main class="container mx-auto p-4 md:p-6" x-data="dashboard()" x-init="init()">
+    <main class="container mx-auto p-4 md:p-6" x-data="dashboard()">
+
         <!-- Header dan Statistik Utama -->
         <div class="mb-6">
             <h1 class="text-2xl font-bold text-gray-800">Dashboard Penjualan</h1>
@@ -68,9 +69,9 @@
         </div>
 
         <!-- Grafik Utama -->
-        <div class="mb-6">
+        <div class="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-6">
             <!-- Grafik Perbandingan Pendapatan & Pengeluaran -->
-            <div class="lg:col-span-2 bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-6">
                 <h2 class="text-gray-800 text-xl font-semibold mb-4">Perbandingan Pendapatan & Pengeluaran Tahunan</h2>
                 <div class="h-80">
                     <canvas id="profitExpenseChart"></canvas>
@@ -81,24 +82,17 @@
         <!-- Chart Terpisah untuk Pembelian dan Pesanan -->
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
             <!-- Chart Pembelian vs Pesanan -->
-            <div class="bg-white rounded-lg shadow p-6 col-span-3">
+            <div class="bg-white rounded-lg shadow p-6 lg:col-span-3">
                 <h3 class="text-gray-800 text-xl font-semibold mb-4">Pembelian vs Pesanan</h3>
                 <div class="h-80">
                     <canvas id="purchaseOrderChart"></canvas>
                 </div>
             </div>
 
-            <div class="bg-white rounded-lg shadow p-6 col-span-2">
+            <div class="bg-white rounded-lg shadow p-6 lg:col-span-2">
                 <h3 class="text-gray-800 text-xl font-semibold mb-4">Distribusi Pesanan Layanan</h3>
-                <div class="h-80 relative py-8">
-                    <canvas id="orderDonutChart"></canvas><div class="donut-center">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold text-gray-800" id="orderDonutTotal">
-                                    {{ number_format($totalOrdersCompleted, 0, ',', '.') }}
-                                </div>
-                                <div class="text-sm text-gray-600">Total Pesanan</div>
-                            </div>
-                        </div>
+                <div class="h-80 relative">
+                    <canvas id="orderDonutChart"></canvas>
                 </div>
             </div>
         </div>
@@ -206,175 +200,197 @@
     </main>
 
     <script>
-        function dashboard() {
-            return {
-                init() {
-                    this.initCharts();
-                },
+    function dashboard() {
+        return {
+            init() {
+                this.initCharts();
+            },
 
-                initCharts() {
-                    // Data dari controller
-                    const monthlyProfitData = @json($combinedMonthlyProfit);
-                    const monthlyExpenseData = @json($combinedMonthlyExpenses);
-                    const bestSellingProducts = @json($bestSellingProducts);
-                    const recentTransactions = @json($recentTransactions);
+            initCharts() {
+                // Data dari controller
+                const combinedMonthlyProfit = @json($combinedMonthlyProfit);
+                const combinedMonthlyExpenses = @json($combinedMonthlyExpenses);
+                const bestSellingProducts = @json($bestSellingProducts);
+                const recentTransactions = @json($recentTransactions);
 
-                    // Bulan dalam format Indonesia
-                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-                        'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
-                    ];
+                // Bulan dalam format Indonesia
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+                    'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+                ];
 
-                    // Warna untuk chart
-                    const chartColors = [
-                        '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
-                        '#06B6D4', '#84CC16', '#F97316', '#6366F1', '#EC4899',
-                        '#14B8A6', '#F43F5E', '#8B5CF6', '#06B6D4', '#84CC16'
-                    ];
+                // Chart 1: Perbandingan Pendapatan & Pengeluaran
+                const profitExpenseCtx = document.getElementById('profitExpenseChart');
+                if (profitExpenseCtx) {
+                    // Cek jika chart sudah ada, destroy dulu
+                    if (profitExpenseCtx.chart) {
+                        profitExpenseCtx.chart.destroy();
+                    }
 
-                    // Chart 1: Perbandingan Pendapatan & Pengeluaran
-                    const profitExpenseCtx = document.getElementById('profitExpenseChart').getContext('2d');
-                    if (profitExpenseCtx) {
-                        const incomeData = new Array(12).fill(0);
-                        monthlyProfitData.forEach(item => {
-                            if (item && item.month !== undefined) {
-                                incomeData[item.month - 1] = item.total_profit || 0;
-                            }
-                        });
+                    const incomeData = new Array(12).fill(0);
+                    const expenseData = new Array(12).fill(0);
 
-                        const expenseData = new Array(12).fill(0);
-                        monthlyExpenseData.forEach(item => {
-                            if (item && item.month !== undefined) {
-                                expenseData[item.month - 1] = item.total_expense || 0;
-                            }
-                        });
-
-                        new Chart(profitExpenseCtx, {
-                            type: 'line',
-                            data: {
-                                labels: monthNames,
-                                datasets: [{
-                                        label: 'Pendapatan (Rp)',
-                                        data: incomeData,
-                                        borderColor: '#10B981',
-                                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                                        borderWidth: 2,
-                                        fill: true,
-                                        tension: 0.4
-                                    },
-                                    {
-                                        label: 'Pengeluaran (Rp)',
-                                        data: expenseData,
-                                        borderColor: '#EF4444',
-                                        backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                                        borderWidth: 2,
-                                        fill: true,
-                                        tension: 0.4
-                                    }
-                                ]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: {
-                                        position: 'top',
-                                    },
-                                    tooltip: {
-                                        callbacks: {
-                                            label: function(context) {
-                                                return context.dataset.label + ': Rp ' + context.raw
-                                                    .toLocaleString('id-ID');
-                                            }
-                                        }
-                                    }
-                                },
-                                scales: {
-                                    y: {
-                                        beginAtZero: true,
-                                        ticks: {
-                                            callback: function(value) {
-                                                return 'Rp ' + value.toLocaleString('id-ID');
-                                            }
-                                        }
-                                    }
+                    // Process profit data dari combinedMonthlyProfit
+                    if (combinedMonthlyProfit && Array.isArray(combinedMonthlyProfit)) {
+                        console.log('Profit Data:', combinedMonthlyProfit);
+                        combinedMonthlyProfit.forEach(item => {
+                            if (item && item.month !== undefined && item.month !== null) {
+                                const monthIndex = parseInt(item.month) - 1;
+                                if (monthIndex >= 0 && monthIndex < 12) {
+                                    incomeData[monthIndex] = parseFloat(item.total_profit) || 0;
                                 }
                             }
                         });
                     }
 
-                    // Chart 2: Perbandingan Pembelian vs Pesanan (Bar Chart)
-                    const purchaseOrderCtx = document.getElementById('purchaseOrderChart').getContext('2d');
-                    if (purchaseOrderCtx) {
-                        // Hitung jumlah pembelian (produk) dan pesanan (layanan) per bulan dari recent transactions
-                        const purchaseData = new Array(12).fill(0);
-                        const orderData = new Array(12).fill(0);
+                    // Process expense data dari combinedMonthlyExpenses
+                    if (combinedMonthlyExpenses && Array.isArray(combinedMonthlyExpenses)) {
+                        console.log('Expense Data:', combinedMonthlyExpenses);
+                        combinedMonthlyExpenses.forEach(item => {
+                            if (item && item.month !== undefined && item.month !== null) {
+                                const monthIndex = parseInt(item.month) - 1;
+                                if (monthIndex >= 0 && monthIndex < 12) {
+                                    expenseData[monthIndex] = parseFloat(item.total_expense) || 0;
+                                }
+                            }
+                        });
+                    }
 
+                    console.log('Final Income:', incomeData);
+                    console.log('Final Expense:', expenseData);
+
+                    // Buat chart baru
+                    profitExpenseCtx.chart = new Chart(profitExpenseCtx, {
+                        type: 'line',
+                        data: {
+                            labels: monthNames,
+                            datasets: [{
+                                    label: 'Pendapatan (Rp)',
+                                    data: incomeData,
+                                    borderColor: '#10B981',
+                                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                    borderWidth: 3,
+                                    fill: true,
+                                    tension: 0.4
+                                },
+                                {
+                                    label: 'Pengeluaran (Rp)',
+                                    data: expenseData,
+                                    borderColor: '#EF4444',
+                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                    borderWidth: 3,
+                                    fill: true,
+                                    tension: 0.4
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.dataset.label + ': Rp ' + context.raw
+                                                .toLocaleString('id-ID');
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return 'Rp ' + value.toLocaleString('id-ID');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Chart 2: Purchase vs Order (Bar Chart)
+                const purchaseOrderCtx = document.getElementById('purchaseOrderChart');
+                if (purchaseOrderCtx) {
+                    // Cek jika chart sudah ada, destroy dulu
+                    if (purchaseOrderCtx.chart) {
+                        purchaseOrderCtx.chart.destroy();
+                    }
+
+                    // Hitung jumlah transaksi per bulan berdasarkan type
+                    const purchaseData = new Array(12).fill(0);
+                    const orderData = new Array(12).fill(0);
+
+                    if (recentTransactions && Array.isArray(recentTransactions)) {
                         recentTransactions.forEach(transaction => {
-                            const month = new Date(transaction.created_at).getMonth();
-                            if (transaction.type === 'purchase') {
-                                purchaseData[month] += transaction.quantity;
-                            } else {
-                                orderData[month] += 1; // Untuk layanan, hitung per pesanan
-                            }
-                        });
-
-                        new Chart(purchaseOrderCtx, {
-                            type: 'bar',
-                            data: {
-                                labels: monthNames,
-                                datasets: [{
-                                        label: 'Pembelian (Produk)',
-                                        data: purchaseData,
-                                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                                        borderColor: 'rgba(59, 130, 246, 1)',
-                                        borderWidth: 1
-                                    },
-                                    {
-                                        label: 'Pesanan (Layanan)',
-                                        data: orderData,
-                                        backgroundColor: 'rgba(16, 185, 129, 0.7)',
-                                        borderColor: 'rgba(16, 185, 129, 1)',
-                                        borderWidth: 1
-                                    }
-                                ]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                    y: {
-                                        beginAtZero: true,
-                                        ticks: {
-                                            callback: function(value) {
-                                                return value.toLocaleString('id-ID');
-                                            }
-                                        }
-                                    }
-                                },
-                                plugins: {
-                                    tooltip: {
-                                        callbacks: {
-                                            label: function(context) {
-                                                const label = context.dataset.label;
-                                                const value = context.raw;
-                                                if (label === 'Pembelian (Produk)') {
-                                                    return `${label}: ${value} item`;
-                                                } else {
-                                                    return `${label}: ${value} pesanan`;
-                                                }
-                                            }
-                                        }
-                                    }
+                            if (transaction.created_at) {
+                                const month = new Date(transaction.created_at).getMonth();
+                                if (transaction.type === 'purchase') {
+                                    purchaseData[month] += 1;
+                                } else {
+                                    orderData[month] += 1;
                                 }
                             }
                         });
                     }
 
-                    // Donut Chart 2: Pesanan (Layanan)
-                    const orderDonutCtx = document.getElementById('orderDonutChart');
-                    if (orderDonutCtx) {
-                        // Hitung distribusi layanan dari recent transactions
-                        const serviceDistribution = {};
+                    purchaseOrderCtx.chart = new Chart(purchaseOrderCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: monthNames,
+                            datasets: [{
+                                    label: 'Pembelian Produk',
+                                    data: purchaseData,
+                                    backgroundColor: '#3B82F6',
+                                    borderColor: '#2563EB',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: 'Pesanan Layanan',
+                                    data: orderData,
+                                    backgroundColor: '#10B981',
+                                    borderColor: '#059669',
+                                    borderWidth: 1
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return value + ' transaksi';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Donut Chart: Distribusi Pesanan Layanan
+                const orderDonutCtx = document.getElementById('orderDonutChart');
+                if (orderDonutCtx) {
+                    // Cek jika chart sudah ada, destroy dulu
+                    if (orderDonutCtx.chart) {
+                        orderDonutCtx.chart.destroy();
+                    }
+
+                    // Hitung distribusi layanan dari recent transactions
+                    const serviceDistribution = {};
+                    if (recentTransactions && Array.isArray(recentTransactions)) {
                         recentTransactions.forEach(transaction => {
                             if (transaction.type !== 'purchase') {
                                 const serviceName = transaction.name;
@@ -384,78 +400,70 @@
                                 serviceDistribution[serviceName] += 1;
                             }
                         });
+                    }
 
-                        const serviceNames = Object.keys(serviceDistribution);
-                        const serviceCounts = Object.values(serviceDistribution);
-                        const totalServices = serviceCounts.reduce((sum, count) => sum + count, 0);
+                    const serviceNames = Object.keys(serviceDistribution);
+                    const serviceCounts = Object.values(serviceDistribution);
+                    const totalServices = serviceCounts.reduce((sum, count) => sum + count, 0);
 
-                        // Jika tidak ada data layanan, tampilkan chart kosong
-                        if (serviceNames.length === 0) {
-                            serviceNames.push('Belum ada data');
-                            serviceCounts.push(1);
-                        }
+                    // Jika tidak ada data layanan, tampilkan placeholder
+                    if (serviceNames.length === 0) {
+                        serviceNames.push('Belum ada data');
+                        serviceCounts.push(1);
+                    }
 
-                        new Chart(orderDonutCtx, {
-                            type: 'doughnut',
-                            data: {
-                                labels: serviceNames,
-                                datasets: [{
-                                    data: serviceCounts,
-                                    backgroundColor: ['#10B981', '#059669', '#047857', '#065F46', '#064E3B',
-                                        '#022C22'
-                                    ],
-                                    borderColor: '#ffffff',
-                                    borderWidth: 2,
-                                    hoverOffset: 15
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                cutout: '65%',
-                                plugins: {
-                                    legend: {
-                                        position: 'right',
-                                        labels: {
-                                            boxWidth: 12,
-                                            font: {
-                                                size: 10
-                                            }
+                    orderDonutCtx.chart = new Chart(orderDonutCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: serviceNames,
+                            datasets: [{
+                                data: serviceCounts,
+                                backgroundColor: ['#10B981', '#059669', '#047857', '#065F46', '#064E3B'],
+                                borderColor: '#ffffff',
+                                borderWidth: 2,
+                                hoverOffset: 15
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '65%',
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                    labels: {
+                                        boxWidth: 12,
+                                        font: {
+                                            size: 10
                                         }
-                                    },
-                                    tooltip: {
-                                        callbacks: {
-                                            label: function(context) {
-                                                const label = context.label || '';
-                                                const value = context.raw;
-                                                const percentage = totalServices > 0 ? ((value /
-                                                    totalServices) * 100).toFixed(1) : 0;
-                                                return `${label}: ${value} pesanan (${percentage}%)`;
-                                            }
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.raw;
+                                            const percentage = totalServices > 0 ? ((value /
+                                                totalServices) * 100).toFixed(1) : 0;
+                                            return `${label}: ${value} pesanan (${percentage}%)`;
                                         }
                                     }
                                 }
                             }
-                        });
-                    }
+                        }
+                    });
                 }
             }
         }
+    }
 
-        // Inisialisasi dashboard saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Dashboard initialized with server data');
-        });
-    </script>
-    <style>
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
+    // Inisialisasi dashboard saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+        const dashboardElement = document.querySelector('[x-data="dashboard()"]');
+        if (dashboardElement) {
+            const dashboardInstance = Alpine.evaluate(dashboardElement, 'dashboard()');
+            dashboardInstance.init();
         }
-
-        #donutChartCenter {
-            pointer-events: none;
-        }
-    </style>
+    });
+</script>
 </x-layout.default>

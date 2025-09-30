@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Dashboard;
 use App\Models\Transaction;
 use App\Models\Product;
+use App\Models\Spending;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -27,11 +28,9 @@ class DashboardController extends Controller
             ->orderBy('month')
             ->get();
 
-        // Estimasi pengeluaran berdasarkan 30% dari pendapatan (contoh)
-        // Anda bisa menyesuaikan rumus ini sesuai kebutuhan bisnis
-        $monthlyExpenses = Transaction::selectRaw('
+        $monthlyExpenses = Spending::selectRaw('
                 MONTH(created_at) as month,
-                SUM(total_price * 0.3) as total_expense
+                SUM(amount) as total_expense
             ')
             ->whereYear('created_at', $currentYear)
             ->where('status', 'completed')
@@ -64,8 +63,9 @@ class DashboardController extends Controller
             ->where('status', 'completed')
             ->sum('total_price');
 
-        // Estimasi total pengeluaran (30% dari total pendapatan)
-        $estimatedExpenses = $totalProfit * 0.3;
+        // Data pengeluaran dari Spending
+        $estimatedExpenses = $spendings = Spending::whereYear('created_at', $currentYear)
+        ->sum('amount');
 
         $totalProductsSold = Transaction::whereYear('created_at', $currentYear)
             ->where('status', 'completed')
