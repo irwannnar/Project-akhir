@@ -184,7 +184,7 @@
                                         data-price="{{ $service->biaya }}"
                                         {{ old('printing_id') == $service->id ? 'selected' : '' }}
                                     >
-                                        {{ $service->nama_layanan }} - Rp {{ number_format($service->biaya, 0, ',', '.') }}/cm²
+                                        {{ $service->nama_layanan }} - Rp {{ number_format($service->biaya, 0, ',', '.') }}/cm
                                     </option>
                                 @endforeach
                             </select>
@@ -258,9 +258,9 @@
                             <!-- For Orders - Show calculated price -->
                             <template x-if="transactionType === 'order'">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Harga per cm²</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Harga per cm</label>
                                     <div class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100 px-3 py-2">
-                                        <span x-text="'Rp ' + formatNumber(unitPrice) + '/cm²'"></span>
+                                        <span x-text="'Rp ' + formatNumber(unitPrice) + '/cm'"></span>
                                     </div>
                                 </div>
                             </template>
@@ -297,9 +297,9 @@
                                 >
                                 <!-- Price breakdown for orders -->
                                 <div x-show="transactionType === 'order' && totalPrice > 0" class="mt-1 text-xs text-gray-500">
-                                    <span x-text="'Luas: ' + (tinggi || 0) + 'cm × ' + (lebar || 0) + 'cm = ' + ((tinggi || 0) * (lebar || 0)).toFixed(2) + 'cm²'"></span>
+                                    <span x-text="'Luas: ' + (tinggi || 0) + 'cm × ' + (lebar || 0) + 'cm = ' + ((tinggi || 0) * (lebar || 0)).toFixed(2) + 'cm'"></span>
                                     <br>
-                                    <span x-text="'× Rp ' + formatNumber(unitPrice) + '/cm²'"></span>
+                                    <span x-text="'× Rp ' + formatNumber(unitPrice) + '/cm'"></span>
                                     <br>
                                     <span x-text="'× ' + quantity + ' item = Rp ' + formatNumber(totalPrice)"></span>
                                 </div>
@@ -471,7 +471,7 @@
                 
                 calculateTotalPrice() {
                     if (this.transactionType === 'order') {
-                        // Untuk order: (tinggi × lebar) × harga per cm² × quantity
+                        // Untuk order: (tinggi × lebar) × harga per cm × quantity
                         const luas = (parseFloat(this.tinggi) || 0) * (parseFloat(this.lebar) || 0);
                         this.totalPrice = luas * (parseFloat(this.unitPrice) || 0) * (parseInt(this.quantity) || 1);
                     } else {
