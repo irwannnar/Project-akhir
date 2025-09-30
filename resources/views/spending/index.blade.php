@@ -9,7 +9,7 @@
                         xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg> 
+                    </svg>
                     Tambah Pengeluaran
                 </a>
             </div>
@@ -17,7 +17,48 @@
 
         {{-- filter --}}
         <div class="bg-white mb-4 mt-2 rounded shadow p-3 ">
-            <div class="">filter</div>
+            <form method="GET" action="{{ route('spending.index') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input type="hidden" name="tab" value="spending">
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-600 mb-1">Kategori</label>
+                    <select name="category" id="category"
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ">
+                        <option value="">Semua Kategori</option>
+                        <option value="Bayar gaji" {{ request('category') == 'Bayar gaji' ? 'selected' : '' }}>Bayar
+                            gaji</option>
+                        <option value="Inventory" {{ request('category') == 'Inventory' ? 'selected' : '' }}>Inventory
+                        </option>
+                        <option value="Maintenance" {{ request('category') == 'Maintenance' ? 'selected' : '' }}>
+                            Maintenance</option>
+                        <option value="Lainnya" {{ request('category') == 'Lainnya' ? 'selected' : '' }}>Lainnya
+                        </option>
+                    </select>
+                </div>
+                <div>
+                    <label for="payment_method" class="block text-sm font-medium text-gray-600 mb-1">Metode
+                        Pembayaran</label>
+                    <select name="payment_method" id="payment_method">
+                        <option value="">Metode pembayaran</option>
+                        <option value="cash" {{ request('payment_method') == 'cash' ? 'selected' : '' }}>cash</option>
+                        <option value="credit_card" {{ request('payment_method') == 'credit_card' ? 'selected' : '' }}>
+                            credit_card</option>
+                        <option value="debit_card" {{ request('payment_method') == 'debit_card' ? 'selected' : '' }}>
+                            debit_card</option>
+                        <option value="transfer" {{ request('payment_method') == 'transfer' ? 'selected' : '' }}>
+                            transfer</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="date" class="block text-sm font-medium text-gray-600 mb-1">Tanggal</label>
+                    <input type="date" name="date" id="date" value="{{ request('date') }}"
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                </div>
+                <div class="md:col-span-4 flex justify-end space-x-2 mt-4">
+                    <button type="submit" class="bg-blue-700 text-white hover:bg-blue-900 px-4 py-2 rounded">Terapkan
+                        filter</button>
+
+                </div>
+            </form>
         </div>
 
         <!-- Tabel Data -->
@@ -42,7 +83,7 @@
                                 Metode Pembayaran
                             </th>
                             <th class="px-6 py-4 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
-                                Tanggal
+                                Tanggal dibayar
                             </th>
                             <th class="px-6 py-4 text-left text-xs font-medium text-gray-800 uppercase tracking-wider">
                                 Aksi
@@ -54,21 +95,27 @@
                             <tr>
                                 <td class="px-6 py-4">
                                     <div class="text-sm font-medium text-gray-900">{{ $spending->name }}</div>
-                                    @if($spending->description)
-                                        <div class="text-xs text-gray-500 mt-1">{{ Str::limit($spending->description, 30) }}</div>
+                                    @if ($spending->description)
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            {{ Str::limit($spending->description, 30) }}</div>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full 
-                                        {{ $spending->category == 'Makanan' ? 'bg-red-100 text-red-800' : 
-                                           ($spending->category == 'Transportasi' ? 'bg-yellow-100 text-yellow-800' : 
-                                           ($spending->category == 'Tagihan' ? 'bg-green-100 text-green-800' : 
-                                           'bg-blue-100 text-blue-800')) }}">
+                                    <span
+                                        class="px-2 py-1 text-xs font-semibold rounded-full 
+                                        {{ $spending->category == 'Makanan'
+                                            ? 'bg-red-100 text-red-800'
+                                            : ($spending->category == 'Transportasi'
+                                                ? 'bg-yellow-100 text-yellow-800'
+                                                : ($spending->category == 'Tagihan'
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-blue-100 text-blue-800')) }}">
                                         {{ $spending->category }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900">Rp {{ number_format($spending->amount, 0, ',', '.') }}</div>
+                                    <div class="text-sm font-medium text-gray-900">Rp
+                                        {{ number_format($spending->amount, 0, ',', '.') }}</div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-gray-900">{{ $spending->quantity }}</div>
@@ -77,24 +124,36 @@
                                     <div class="text-sm text-gray-900">
                                         @switch($spending->payment_method)
                                             @case('cash')
-                                                <span class="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-800 rounded-full">Cash</span>
-                                                @break
+                                                <span
+                                                    class="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-800 rounded-full">Cash</span>
+                                            @break
+
                                             @case('credit_card')
-                                                <span class="px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full">Kartu Kredit</span>
-                                                @break
+                                                <span
+                                                    class="px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full">Kartu
+                                                    Kredit</span>
+                                            @break
+
                                             @case('debit_card')
-                                                <span class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">Kartu Debit</span>
-                                                @break
+                                                <span
+                                                    class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">Kartu
+                                                    Debit</span>
+                                            @break
+
                                             @case('transfer')
-                                                <span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Transfer</span>
-                                                @break
+                                                <span
+                                                    class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Transfer</span>
+                                            @break
+
                                             @default
-                                                <span class="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-800 rounded-full">{{ $spending->payment_method }}</span>
+                                                <span
+                                                    class="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-800 rounded-full">{{ $spending->payment_method }}</span>
                                         @endswitch
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900">{{ \Carbon\Carbon::parse($spending->spending_date)->format('d M Y') }}</div>
+                                    <div class="text-sm text-gray-900">
+                                        {{ \Carbon\Carbon::parse($spending->spending_date)->format('d M Y') }}</div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center space-x-3">
@@ -191,14 +250,14 @@
                     // Inisialisasi data atau event listener jika diperlukan
                     console.log('Spending data initialized');
                 },
-                
+
                 // Konfirmasi penghapusan data
                 confirmDelete(id) {
                     if (confirm('Apakah Anda yakin ingin menghapus data pengeluaran ini?')) {
                         document.querySelector(`form[x-ref="deleteForm-${id}"]`).submit();
                     }
                 },
-                
+
                 // Filter data berdasarkan periode
                 filterByPeriod(period) {
                     // Implementasi filter berdasarkan periode
@@ -220,7 +279,7 @@
             }
 
             modalTitle.textContent = `Detail Pengeluaran - ${name}`;
-            
+
             // Format tanggal
             const date = new Date(spendingDate);
             const formattedDate = date.toLocaleDateString('id-ID', {
@@ -229,7 +288,7 @@
                 month: 'long',
                 day: 'numeric'
             });
-            
+
             // Format jumlah uang
             const formattedAmount = new Intl.NumberFormat('id-ID', {
                 style: 'currency',
@@ -262,11 +321,11 @@
                     <span>${formattedDate}</span>
                 </div>
                 ${description ? `
-                <div class="mt-3">
-                    <span class="font-medium">Deskripsi:</span>
-                    <p class="text-gray-700 mt-1">${description}</p>
-                </div>
-                ` : ''}
+                        <div class="mt-3">
+                            <span class="font-medium">Deskripsi:</span>
+                            <p class="text-gray-700 mt-1">${description}</p>
+                        </div>
+                        ` : ''}
             `;
 
             modal.classList.remove('hidden');

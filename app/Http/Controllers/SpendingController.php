@@ -11,10 +11,21 @@ class SpendingController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Ambil data spending dengan pagination
-        $spendings = Spending::orderBy('spending_date', 'desc')
+        // dd($request->all());
+        //filter
+        $spendings = Spending::query()
+            ->when($request->category, function ($query) use ($request) {
+                return $query->where('category', $request->category);
+            })
+            ->when($request->payment_method, function ($query) use ($request) {
+                return $query->where('payment_method', $request->payment_method);
+            })
+            ->when($request->date, function ($query) use ($request) {
+                return $query->whereDate('spending_date', $request->date);
+            })
+            ->orderBy('spending_date', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
