@@ -70,12 +70,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/sale/product', [SaleController::class, 'product'])->name('sale.product');
     Route::resource('transaction', TransactionController::class);
     Route::resource('finance', FinanceController::class);
-    Route::prefix('finance')->group(function () {
-        Route::post('/sync-balance', [FinanceController::class, 'syncBalance'])->name('finance.syncBalance');
-        Route::get('/report', [FinanceController::class, 'report'])->name('finance.report');
-        Route::get('/transactions', [FinanceController::class, 'transactions'])->name('finance.transactions');
-        Route::get('/export-pdf', [FinanceController::class, 'exportPdf'])->name('finance.exportPdf');
-    });
     Route::resource('spending', SpendingController::class);
     Route::resource('invoice', InvoiceController::class);
     Route::resource('product', ProductController::class);

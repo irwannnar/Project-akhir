@@ -247,16 +247,4 @@ class TransactionController extends Controller
 
         return back()->with('success', 'Transaksi berhasil ditandai sebagai dibayar');
     }
-
-    /**
-     * Calculate profit for a transaction.
-     */
-    private function calculateProfit($totalPrice, $totalCost)
-    {
-        if ($totalCost === null) {
-            return null;
-        }
-
-        return $totalPrice - $totalCost;
-    }
 }

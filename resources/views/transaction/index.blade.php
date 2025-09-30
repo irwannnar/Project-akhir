@@ -110,7 +110,7 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pelanggan</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Layanan</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Material & Ukuran</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ukuran</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Harga</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metode Pembayaran</th>
@@ -143,14 +143,6 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $order->quantity }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         Rp {{ number_format($order->total_price, 0, ',', '.') }}
-                                        @if($order->total_cost)
-                                            <div class="text-xs text-gray-400">
-                                                Cost: Rp {{ number_format($order->total_cost, 0, ',', '.') }}
-                                            </div>
-                                            <div class="text-xs text-green-600 font-medium">
-                                                Profit: Rp {{ number_format($order->profit, 0, ',', '.') }}
-                                            </div>
-                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
                                         {{ $order->payment_method }}
@@ -292,7 +284,6 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pelanggan</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produk</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Material & Ukuran</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Harga</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metode Pembayaran</th>
@@ -398,7 +389,6 @@
                     </table>
                 </div>
 
-                <!-- Pagination for Purchases -->
                 @if($purchases->hasPages())
                     <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
                         {{ $purchases->appends(['tab' => 'purchases', 'status' => request('status'), 'payment_method' => request('payment_method'), 'material' => request('material'), 'start_date' => request('start_date'), 'end_date' => request('end_date')])->links() }}
