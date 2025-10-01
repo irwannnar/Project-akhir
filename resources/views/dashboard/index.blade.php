@@ -9,26 +9,8 @@
         </div>
 
         <!-- Statistik Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-            <!-- Total Pendapatan -->
-            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
-                <div class="flex items-center">
-                    <div class="p-3 bg-green-100 rounded-full">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                            </path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <h2 class="text-gray-600 text-sm font-semibold">Total Pendapatan</h2>
-                        <div class="text-xl font-bold text-green-600" id="totalProfit">
-                            RP {{ number_format($totalProfit, 0, ',', '.') }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            
             <!-- Estimasi Pengeluaran -->
             <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
                 <div class="flex items-center">
@@ -48,11 +30,48 @@
                 </div>
             </div>
 
-            <!-- Total Pesanan Selesai -->
-            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+            <!-- Total Pendapatan -->
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
                 <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-blue-100">
+                    <div class="p-3 bg-green-100 rounded-full">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h2 class="text-gray-600 text-sm font-semibold">Total Pendapatan</h2>
+                        <div class="text-xl font-bold text-green-600" id="totalProfit">
+                            RP {{ number_format($totalProfit, 0, ',', '.') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
+                <div class="flex items-center">
+                    <div class="p-3 bg-blue-100 rounded-full">
                         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h2 class="text-gray-600 text-sm font-semibold">Total Saldo</h2>
+                        <div class="text-xl font-bold text-blue-600" id="totalProfit">
+                            RP {{ number_format($totalBalance, 0, ',', '.') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Pesanan Selesai -->
+            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-violet-500">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-violet-100">
+                        <svg class="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z">
                             </path>

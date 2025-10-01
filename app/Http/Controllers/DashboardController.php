@@ -75,6 +75,9 @@ class DashboardController extends Controller
             ->where('status', 'completed')
             ->count();
 
+        //total saldo yang dipunya saat ini
+        $totalBalance = $totalProfit - $estimatedExpenses;
+
         // Transaksi terbaru
         $recentTransactions = Transaction::with(['product', 'printing'])
             ->where('status', 'completed')
@@ -109,6 +112,7 @@ class DashboardController extends Controller
             'estimatedExpenses',
             'totalProductsSold',
             'totalOrdersCompleted',
+            'totalBalance',
             'recentTransactions',
             'bestSellingProducts'
         ));
