@@ -9,7 +9,6 @@ class product extends Model
     protected $fillable = [
         'name',
         'price_per_unit',
-        'cost_per_unit',
         'type',
         'description',
     ];

@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('name');
             $table->string('type');
             $table->decimal('price_per_unit', 10, 2);
-            $table->decimal('cost_per_unit', 10, 2);
             $table->text('description')->nullable();
             $table->timestamps();
         });

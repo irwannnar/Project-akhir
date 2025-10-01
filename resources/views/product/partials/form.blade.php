@@ -38,19 +38,6 @@
                 <p class="text-red-500 text-xs italic">{{ $message }}</p>
             @enderror
         </div>
-
-        <div>
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="cost_per_unit">
-                Biaya per Unit
-            </label>
-            <input
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="cost_per_unit" name="cost_per_unit" type="number" step="0.01" min="0" placeholder="0.00"
-                value="{{ old('cost_per_unit', $product->cost_per_unit ?? '') }}">
-            @error('cost_per_unit')
-                <p class="text-red-500 text-xs italic">{{ $message }}</p>
-            @enderror
-        </div>
     </div>
 
     <div class="mb-4">
