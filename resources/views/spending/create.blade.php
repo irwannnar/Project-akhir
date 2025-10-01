@@ -184,15 +184,6 @@
                     </div>
                 </form>
             </div>
-
-            <!-- Info -->
-            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div class="flex items-start gap-3">
-                    <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -234,57 +225,57 @@
                 console.warn('Element with id "amount" not found');
             }
             
-            // Validasi form sebelum submit
-            // const spendingForm = document.getElementById('spendingForm');
-            // if (spendingForm) {
-            //     spendingForm.addEventListener('submit', function(e) {
-            //         console.log('Form submit event triggered');
+            Validasi form sebelum submit
+            const spendingForm = document.getElementById('spendingForm');
+            if (spendingForm) {
+                spendingForm.addEventListener('submit', function(e) {
+                    console.log('Form submit event triggered');
                     
-            //         const amountElement = document.getElementById('amount');
-            //         const quantityElement = document.getElementById('quantity');
-            //         const spendingDateElement = document.getElementById('spending_date');
+                    const amountElement = document.getElementById('amount');
+                    const quantityElement = document.getElementById('quantity');
+                    const spendingDateElement = document.getElementById('spending_date');
                     
-            //         if (!amountElement || !quantityElement || !spendingDateElement) {
-            //             console.error('Required form elements not found');
-            //             return true; // Biarkan server yang handle validation
-            //         }
+                    if (!amountElement || !quantityElement || !spendingDateElement) {
+                        console.error('Required form elements not found');
+                        return true; // Biarkan server yang handle validation
+                    }
                     
-            //         const amount = amountElement.value;
-            //         const quantity = quantityElement.value;
-            //         const spendingDate = spendingDateElement.value;
+                    const amount = amountElement.value;
+                    const quantity = quantityElement.value;
+                    const spendingDate = spendingDateElement.value;
                     
-            //         console.log('Validating - Amount:', amount, 'Quantity:', quantity, 'Date:', spendingDate);
+                    console.log('Validating - Amount:', amount, 'Quantity:', quantity, 'Date:', spendingDate);
                     
-            //         // Validasi amount
-            //         if (!amount || parseFloat(amount) <= 0) {
-            //             e.preventDefault();
-            //             alert('Jumlah harus lebih besar dari 0');
-            //             amountElement.focus();
-            //             return false;
-            //         }
+                    // Validasi amount
+                    if (!amount || parseFloat(amount) <= 0) {
+                        e.preventDefault();
+                        alert('Jumlah harus lebih besar dari 0');
+                        amountElement.focus();
+                        return false;
+                    }
                     
-            //         // Validasi quantity
-            //         if (!quantity || parseFloat(quantity) <= 0) {
-            //             e.preventDefault();
-            //             alert('Kuantitas harus lebih besar dari 0');
-            //             quantityElement.focus();
-            //             return false;
-            //         }
+                    // Validasi quantity
+                    if (!quantity || parseFloat(quantity) <= 0) {
+                        e.preventDefault();
+                        alert('Kuantitas harus lebih besar dari 0');
+                        quantityElement.focus();
+                        return false;
+                    }
                     
-            //         // Validasi tanggal
-            //         if (!spendingDate) {
-            //             e.preventDefault();
-            //             alert('Tanggal pengeluaran harus diisi');
-            //             spendingDateElement.focus();
-            //             return false;
-            //         }
+                    // Validasi tanggal
+                    if (!spendingDate) {
+                        e.preventDefault();
+                        alert('Tanggal pengeluaran harus diisi');
+                        spendingDateElement.focus();
+                        return false;
+                    }
                     
-            //         console.log('Form validation passed');
-            //         return true;
-            //     });
-            // } else {
-            //     console.warn('Element with id "spendingForm" not found');
-            // }
+                    console.log('Form validation passed');
+                    return true;
+                });
+            } else {
+                console.warn('Element with id "spendingForm" not found');
+            }
         });
     </script>
 </x-layout.default>
