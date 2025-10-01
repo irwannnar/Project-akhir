@@ -24,7 +24,6 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:255',
             'price_per_unit' => 'required|numeric|min:0',
-            'cost_per_unit' => 'required|numeric|min:0',
             'description' => 'nullable|string',
         ]);
 
@@ -50,7 +49,6 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:255',
             'price_per_unit' => 'required|numeric|min:0',
-            'cost_per_unit' => 'required|numeric|min:0',
             'description' => 'nullable|string',
         ]);
 

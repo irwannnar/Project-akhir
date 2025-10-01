@@ -56,9 +56,6 @@
                             <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Harga/Unit
                             </th>
-                            <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Biaya/Unit
-                            </th>
                             <th
                                 class="px-6 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Aksi
@@ -95,9 +92,6 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
                                     Rp {{ number_format($product->price_per_unit, 0, ',', '.') }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                                    Rp {{ number_format($product->cost_per_unit, 0, ',', '.') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center justify-center space-x-2">
