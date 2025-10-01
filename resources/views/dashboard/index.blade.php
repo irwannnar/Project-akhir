@@ -110,7 +110,7 @@
         <!-- Chart Terpisah untuk Pembelian dan Pesanan -->
         <div class="grid grid-cols-1 gap-6 mb-6">
             <!-- Chart Pembelian vs Pesanan -->
-            <div class="bg-white rounded-lg shadow p-6 lg:col-span-3">
+            <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="text-gray-800 text-xl font-semibold mb-4">Pembelian vs Pesanan</h3>
                 <div class="h-80">
                     <canvas id="purchaseOrderChart"></canvas>
