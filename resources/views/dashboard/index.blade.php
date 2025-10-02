@@ -210,170 +210,170 @@
                     ];
 
                     // Chart 1: Grafik Pendapatan
-const incomeCtx = document.getElementById('incomeChart');
-if (incomeCtx) {
-    // Cek jika chart sudah ada, destroy dulu
-    if (incomeCtx.chart) {
-        incomeCtx.chart.destroy();
-    }
-
-    const incomeData = new Array(12).fill(0);
-
-    // Process profit data dari combinedMonthlyProfit
-    if (combinedMonthlyProfit && Array.isArray(combinedMonthlyProfit)) {
-        console.log('Profit Data:', combinedMonthlyProfit);
-        combinedMonthlyProfit.forEach(item => {
-            if (item && item.month !== undefined && item.month !== null) {
-                const monthIndex = parseInt(item.month) - 1;
-                if (monthIndex >= 0 && monthIndex < 12) {
-                    incomeData[monthIndex] = parseFloat(item.total_profit) || 0;
-                }
-            }
-        });
-    }
-
-    console.log('Final Income:', incomeData);
-
-    // Buat chart pendapatan
-    incomeCtx.chart = new Chart(incomeCtx, {
-        type: 'line',
-        data: {
-            labels: monthNames,
-            datasets: [{
-                label: 'Pendapatan (Rp)',
-                data: incomeData,
-                borderColor: '#10B981',
-                backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#10B981',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                pointRadius: 5,
-                pointHoverRadius: 7
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.dataset.label + ': Rp ' + context.raw
-                                .toLocaleString('id-ID');
+                    const incomeCtx = document.getElementById('incomeChart');
+                    if (incomeCtx) {
+                        // Cek jika chart sudah ada, destroy dulu
+                        if (incomeCtx.chart) {
+                            incomeCtx.chart.destroy();
                         }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return 'Rp ' + value.toLocaleString('id-ID');
+
+                        const incomeData = new Array(12).fill(0);
+
+                        // Process profit data dari combinedMonthlyProfit
+                        if (combinedMonthlyProfit && Array.isArray(combinedMonthlyProfit)) {
+                            console.log('Profit Data:', combinedMonthlyProfit);
+                            combinedMonthlyProfit.forEach(item => {
+                                if (item && item.month !== undefined && item.month !== null) {
+                                    const monthIndex = parseInt(item.month) - 1;
+                                    if (monthIndex >= 0 && monthIndex < 12) {
+                                        incomeData[monthIndex] = parseFloat(item.total_profit) || 0;
+                                    }
+                                }
+                            });
                         }
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.1)'
+
+                        console.log('Final Income:', incomeData);
+
+                        // Buat chart pendapatan
+                        incomeCtx.chart = new Chart(incomeCtx, {
+                            type: 'line',
+                            data: {
+                                labels: monthNames,
+                                datasets: [{
+                                    label: 'Pendapatan (Rp)',
+                                    data: incomeData,
+                                    borderColor: '#10B981',
+                                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                                    borderWidth: 3,
+                                    fill: true,
+                                    tension: 0.4,
+                                    pointBackgroundColor: '#10B981',
+                                    pointBorderColor: '#ffffff',
+                                    pointBorderWidth: 2,
+                                    pointRadius: 5,
+                                    pointHoverRadius: 7
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                return context.dataset.label + ': Rp ' + context.raw
+                                                    .toLocaleString('id-ID');
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            callback: function(value) {
+                                                return 'Rp ' + value.toLocaleString('id-ID');
+                                            }
+                                        },
+                                        grid: {
+                                            color: 'rgba(0, 0, 0, 0.1)'
+                                        }
+                                    },
+                                    x: {
+                                        grid: {
+                                            color: 'rgba(0, 0, 0, 0.1)'
+                                        }
+                                    }
+                                }
+                            }
+                        });
                     }
-                },
-                x: {
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.1)'
-                    }
-                }
-            }
-        }
-    });
-}
 
-// Chart 2: Grafik Pengeluaran
-const expenseCtx = document.getElementById('expenseChart');
-if (expenseCtx) {
-    // Cek jika chart sudah ada, destroy dulu
-    if (expenseCtx.chart) {
-        expenseCtx.chart.destroy();
-    }
-
-    const expenseData = new Array(12).fill(0);
-
-    // Process expense data dari combinedMonthlyExpenses
-    if (combinedMonthlyExpenses && Array.isArray(combinedMonthlyExpenses)) {
-        console.log('Expense Data:', combinedMonthlyExpenses);
-        combinedMonthlyExpenses.forEach(item => {
-            if (item && item.month !== undefined && item.month !== null) {
-                const monthIndex = parseInt(item.month) - 1;
-                if (monthIndex >= 0 && monthIndex < 12) {
-                    expenseData[monthIndex] = parseFloat(item.total_expense) || 0;
-                }
-            }
-        });
-    }
-
-    console.log('Final Expense:', expenseData);
-
-    // Buat chart pengeluaran
-    expenseCtx.chart = new Chart(expenseCtx, {
-        type: 'line',
-        data: {
-            labels: monthNames,
-            datasets: [{
-                label: 'Pengeluaran (Rp)',
-                data: expenseData,
-                borderColor: '#EF4444',
-                backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#EF4444',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                pointRadius: 5,
-                pointHoverRadius: 7
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.dataset.label + ': Rp ' + context.raw
-                                .toLocaleString('id-ID');
+                    // Chart 2: Grafik Pengeluaran
+                    const expenseCtx = document.getElementById('expenseChart');
+                    if (expenseCtx) {
+                        // Cek jika chart sudah ada, destroy dulu
+                        if (expenseCtx.chart) {
+                            expenseCtx.chart.destroy();
                         }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return 'Rp ' + value.toLocaleString('id-ID');
+
+                        const expenseData = new Array(12).fill(0);
+
+                        // Process expense data dari combinedMonthlyExpenses
+                        if (combinedMonthlyExpenses && Array.isArray(combinedMonthlyExpenses)) {
+                            console.log('Expense Data:', combinedMonthlyExpenses);
+                            combinedMonthlyExpenses.forEach(item => {
+                                if (item && item.month !== undefined && item.month !== null) {
+                                    const monthIndex = parseInt(item.month) - 1;
+                                    if (monthIndex >= 0 && monthIndex < 12) {
+                                        expenseData[monthIndex] = parseFloat(item.total_expense) || 0;
+                                    }
+                                }
+                            });
                         }
-                    },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.1)'
+
+                        console.log('Final Expense:', expenseData);
+
+                        // Buat chart pengeluaran
+                        expenseCtx.chart = new Chart(expenseCtx, {
+                            type: 'line',
+                            data: {
+                                labels: monthNames,
+                                datasets: [{
+                                    label: 'Pengeluaran (Rp)',
+                                    data: expenseData,
+                                    borderColor: '#EF4444',
+                                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                                    borderWidth: 3,
+                                    fill: true,
+                                    tension: 0.4,
+                                    pointBackgroundColor: '#EF4444',
+                                    pointBorderColor: '#ffffff',
+                                    pointBorderWidth: 2,
+                                    pointRadius: 5,
+                                    pointHoverRadius: 7
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                return context.dataset.label + ': Rp ' + context.raw
+                                                    .toLocaleString('id-ID');
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            callback: function(value) {
+                                                return 'Rp ' + value.toLocaleString('id-ID');
+                                            }
+                                        },
+                                        grid: {
+                                            color: 'rgba(0, 0, 0, 0.1)'
+                                        }
+                                    },
+                                    x: {
+                                        grid: {
+                                            color: 'rgba(0, 0, 0, 0.1)'
+                                        }
+                                    }
+                                }
+                            }
+                        });
                     }
-                },
-                x: {
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.1)'
-                    }
-                }
-            }
-        }
-    });
-}
 
                     // Chart 2: Purchase vs Order (Bar Chart)
                     const purchaseOrderCtx = document.getElementById('purchaseOrderChart');
@@ -481,7 +481,8 @@ if (expenseCtx) {
                                 datasets: [{
                                     data: serviceCounts,
                                     backgroundColor: ['#10B981', '#059669', '#047857', '#065F46',
-                                        '#064E3B'],
+                                        '#064E3B'
+                                    ],
                                     borderColor: '#ffffff',
                                     borderWidth: 2,
                                     hoverOffset: 15
