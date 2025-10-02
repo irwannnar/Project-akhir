@@ -9,7 +9,7 @@
         </div>
 
         <!-- Statistik Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
 
             <!-- Estimasi Pengeluaran -->
             <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
@@ -60,58 +60,82 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <h2 class="text-gray-600 text-sm font-semibold">Total Saldo</h2>
+                        <h2 class="text-gray-600 text-sm font-semibold">Total profit</h2>
                         <div class="text-xl font-bold text-blue-600" id="totalProfit">
                             RP {{ number_format($totalBalance, 0, ',', '.') }}
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Total Pesanan Selesai -->
-            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-violet-500">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-violet-100">
-                        <svg class="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+            <!-- Grafik Pendapatan & Pengeluaran (3 kolom) -->
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-lg shadow p-6 h-full">
+                    <h2 class="text-gray-800 text-xl font-semibold mb-4">Grafik Pendapatan & Pengeluaran Tahunan</h2>
+                    <div class="h-80">
+                        <canvas id="incomeExpenseChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Statistik Pesanan Compact (2 kolom) -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow p-6 h-full">
+                    <h3 class="text-gray-800 font-semibold mb-4 flex items-center">
+                        <svg class="w-5 h-5 text-violet-600 mr-2" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z">
                             </path>
                         </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-gray-600">Total Pesanan</p>
-                        <p class="text-2xl font-bold text-gray-800" id="totalOrdersCompleted">
-                            {{ number_format($totalOrdersCompleted, 0, ',', '.') }} pesanan
-                        </p>
+                        Statistik Pesanan
+                    </h3>
+
+                    <div class="space-y-4">
+                        <!-- Total -->
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <span class="text-gray-600">Tahun ini</span>
+                            <span class="text-lg font-bold text-gray-800">
+                                {{ number_format($totalOrdersCompleted, 0, ',', '.') }}
+                            </span>
+                        </div>
+
+                        <!-- Hari Ini -->
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <span class="text-gray-600">Hari Ini</span>
+                            <span class="text-lg font-semibold text-green-600">
+                                {{ number_format($dailyOrderCompleted, 0, ',', '.') }}
+                            </span>
+                        </div>
+
+                        <!-- Minggu Ini -->
+                        <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                            <span class="text-gray-600">Minggu Ini</span>
+                            <span class="text-lg font-semibold text-blue-600">
+                                {{ number_format($weeklyOrderCompleted, 0, ',', '.') }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between items-center p-3 bg-violet-50 rounded-lg">
+                            <span class="text-gray-600">Bulan Ini</span>
+                            <span class="text-lg font-semibold text-violet-600">
+                                {{ number_format($monthlyOrderCompleted, 0, ',', '.') }}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Grafik Utama -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <!-- Grafik Pendapatan -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-gray-800 text-xl font-semibold mb-4">Grafik Pendapatan Tahunan</h2>
-                <div class="h-80">
-                    <canvas id="incomeChart"></canvas>
-                </div>
-            </div>
 
-            <!-- Grafik Pengeluaran -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-gray-800 text-xl font-semibold mb-4">Grafik Pengeluaran Tahunan</h2>
-                <div class="h-80">
-                    <canvas id="expenseChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chart Terpisah untuk Pembelian dan Pesanan -->
+        <!-- Chart Pembelian dan Pesanan -->
         <div class="grid grid-cols-1 gap-6 mb-6">
             <!-- Chart Pembelian vs Pesanan -->
             <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-gray-800 text-xl font-semibold mb-4">Pembelian vs Pesanan</h3>
+                <h3 class="text-gray-800 text-xl font-semibold mb-4">Pembelian vs Pesanan (Tahun {{ date('Y') }})
+                </h3>
                 <div class="h-80">
                     <canvas id="purchaseOrderChart"></canvas>
                 </div>
@@ -121,7 +145,8 @@
         <!-- Tabel dan Daftar Produk -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-white rounded-lg shadow p-6 lg:col-span-1">
-                <h3 class="text-gray-800 text-xl font-semibold mb-4">Distribusi Pesanan Layanan</h3>
+                <h3 class="text-gray-800 text-xl font-semibold mb-4">Distribusi Pesanan Layanan (Tahun
+                    {{ date('Y') }})</h3>
                 <div class="h-80 relative">
                     <canvas id="orderDonutChart"></canvas>
                 </div>
@@ -132,7 +157,7 @@
                 <h2 class="text-gray-800 text-xl font-semibold mb-4">Produk & Layanan Terpopuler</h2>
 
                 <div class="mb-6">
-                    <h3 class="text-md font-semibold text-gray-700 mb-3">Produk Terlaris</h3>
+                    <h3 class="text-md font-semibold text-gray-700 mb-3">Produk Terlaris (Keseluruhan)</h3>
                     <div class="space-y-3">
                         @foreach ($bestSellingProducts as $product)
                             <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
@@ -146,27 +171,11 @@
                 </div>
 
                 <div>
-                    <h3 class="text-md font-semibold text-gray-700 mb-3">Layanan Terpopuler</h3>
+                    <h3 class="text-md font-semibold text-gray-700 mb-3">Layanan Terpopuler (Tahun {{ date('Y') }})
+                    </h3>
                     <div class="space-y-3">
                         @php
-                            // Data layanan dari recent transactions
-                            $serviceTransactions = array_filter($recentTransactions->toArray(), function (
-                                $transaction,
-                            ) {
-                                return $transaction['type'] !== 'purchase';
-                            });
-
-                            $popularServices = [];
-                            foreach ($serviceTransactions as $transaction) {
-                                $serviceName = $transaction['name'];
-                                if (!isset($popularServices[$serviceName])) {
-                                    $popularServices[$serviceName] = 0;
-                                }
-                                $popularServices[$serviceName] += $transaction['quantity'];
-                            }
-
-                            // Urutkan berdasarkan jumlah terbanyak
-                            arsort($popularServices);
+                            $popularServices = $serviceDistribution;
                             $popularServices = array_slice($popularServices, 0, 4);
                         @endphp
 
@@ -201,23 +210,26 @@
                     // Data dari controller
                     const combinedMonthlyProfit = @json($combinedMonthlyProfit);
                     const combinedMonthlyExpenses = @json($combinedMonthlyExpenses);
+                    const monthlyPurchaseData = @json($monthlyPurchaseData);
+                    const monthlyOrderData = @json($monthlyOrderData);
+                    const serviceDistribution = @json($serviceDistribution);
                     const bestSellingProducts = @json($bestSellingProducts);
-                    const recentTransactions = @json($recentTransactions);
 
                     // Bulan dalam format Indonesia
                     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
                         'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
                     ];
 
-                    // Chart 1: Grafik Pendapatan
-                    const incomeCtx = document.getElementById('incomeChart');
-                    if (incomeCtx) {
+                    // Chart 1: Grafik Pendapatan & Pengeluaran (Digabung)
+                    const incomeExpenseCtx = document.getElementById('incomeExpenseChart');
+                    if (incomeExpenseCtx) {
                         // Cek jika chart sudah ada, destroy dulu
-                        if (incomeCtx.chart) {
-                            incomeCtx.chart.destroy();
+                        if (incomeExpenseCtx.chart) {
+                            incomeExpenseCtx.chart.destroy();
                         }
 
                         const incomeData = new Array(12).fill(0);
+                        const expenseData = new Array(12).fill(0);
 
                         // Process profit data dari combinedMonthlyProfit
                         if (combinedMonthlyProfit && Array.isArray(combinedMonthlyProfit)) {
@@ -232,76 +244,6 @@
                             });
                         }
 
-                        console.log('Final Income:', incomeData);
-
-                        // Buat chart pendapatan
-                        incomeCtx.chart = new Chart(incomeCtx, {
-                            type: 'line',
-                            data: {
-                                labels: monthNames,
-                                datasets: [{
-                                    label: 'Pendapatan (Rp)',
-                                    data: incomeData,
-                                    borderColor: '#10B981',
-                                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                                    borderWidth: 3,
-                                    fill: true,
-                                    tension: 0.4,
-                                    pointBackgroundColor: '#10B981',
-                                    pointBorderColor: '#ffffff',
-                                    pointBorderWidth: 2,
-                                    pointRadius: 5,
-                                    pointHoverRadius: 7
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: {
-                                        position: 'top',
-                                    },
-                                    tooltip: {
-                                        callbacks: {
-                                            label: function(context) {
-                                                return context.dataset.label + ': Rp ' + context.raw
-                                                    .toLocaleString('id-ID');
-                                            }
-                                        }
-                                    }
-                                },
-                                scales: {
-                                    y: {
-                                        beginAtZero: true,
-                                        ticks: {
-                                            callback: function(value) {
-                                                return 'Rp ' + value.toLocaleString('id-ID');
-                                            }
-                                        },
-                                        grid: {
-                                            color: 'rgba(0, 0, 0, 0.1)'
-                                        }
-                                    },
-                                    x: {
-                                        grid: {
-                                            color: 'rgba(0, 0, 0, 0.1)'
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                    }
-
-                    // Chart 2: Grafik Pengeluaran
-                    const expenseCtx = document.getElementById('expenseChart');
-                    if (expenseCtx) {
-                        // Cek jika chart sudah ada, destroy dulu
-                        if (expenseCtx.chart) {
-                            expenseCtx.chart.destroy();
-                        }
-
-                        const expenseData = new Array(12).fill(0);
-
                         // Process expense data dari combinedMonthlyExpenses
                         if (combinedMonthlyExpenses && Array.isArray(combinedMonthlyExpenses)) {
                             console.log('Expense Data:', combinedMonthlyExpenses);
@@ -315,31 +257,53 @@
                             });
                         }
 
+                        console.log('Final Income:', incomeData);
                         console.log('Final Expense:', expenseData);
 
-                        // Buat chart pengeluaran
-                        expenseCtx.chart = new Chart(expenseCtx, {
+                        // Buat chart pendapatan & pengeluaran
+                        incomeExpenseCtx.chart = new Chart(incomeExpenseCtx, {
                             type: 'line',
                             data: {
                                 labels: monthNames,
                                 datasets: [{
-                                    label: 'Pengeluaran (Rp)',
-                                    data: expenseData,
-                                    borderColor: '#EF4444',
-                                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                                    borderWidth: 3,
-                                    fill: true,
-                                    tension: 0.4,
-                                    pointBackgroundColor: '#EF4444',
-                                    pointBorderColor: '#ffffff',
-                                    pointBorderWidth: 2,
-                                    pointRadius: 5,
-                                    pointHoverRadius: 7
-                                }]
+                                        label: 'Pendapatan (Rp)',
+                                        data: incomeData,
+                                        borderColor: '#10B981',
+                                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                        borderWidth: 3,
+                                        fill: true,
+                                        tension: 0.4,
+                                        pointBackgroundColor: '#10B981',
+                                        pointBorderColor: '#ffffff',
+                                        pointBorderWidth: 2,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 7,
+                                        yAxisID: 'y'
+                                    },
+                                    {
+                                        label: 'Pengeluaran (Rp)',
+                                        data: expenseData,
+                                        borderColor: '#EF4444',
+                                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                        borderWidth: 3,
+                                        fill: true,
+                                        tension: 0.4,
+                                        pointBackgroundColor: '#EF4444',
+                                        pointBorderColor: '#ffffff',
+                                        pointBorderWidth: 2,
+                                        pointRadius: 5,
+                                        pointHoverRadius: 7,
+                                        yAxisID: 'y'
+                                    }
+                                ]
                             },
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
+                                interaction: {
+                                    mode: 'index',
+                                    intersect: false,
+                                },
                                 plugins: {
                                     legend: {
                                         position: 'top',
@@ -347,14 +311,34 @@
                                     tooltip: {
                                         callbacks: {
                                             label: function(context) {
-                                                return context.dataset.label + ': Rp ' + context.raw
-                                                    .toLocaleString('id-ID');
+                                                let label = context.dataset.label || '';
+                                                if (label) {
+                                                    label += ': ';
+                                                }
+                                                label += 'Rp ' + context.raw.toLocaleString('id-ID');
+                                                return label;
+                                            }
+                                        }
+                                    },
+                                    // Menambahkan annotation untuk net profit
+                                    annotation: {
+                                        annotations: {
+                                            line1: {
+                                                type: 'line',
+                                                yMin: 0,
+                                                yMax: 0,
+                                                borderColor: 'rgb(75, 85, 99)',
+                                                borderWidth: 2,
+                                                borderDash: [5, 5],
                                             }
                                         }
                                     }
                                 },
                                 scales: {
                                     y: {
+                                        type: 'linear',
+                                        display: true,
+                                        position: 'left',
                                         beginAtZero: true,
                                         ticks: {
                                             callback: function(value) {
@@ -383,22 +367,17 @@
                             purchaseOrderCtx.chart.destroy();
                         }
 
-                        // Hitung jumlah transaksi per bulan berdasarkan type
-                        const purchaseData = new Array(12).fill(0);
-                        const orderData = new Array(12).fill(0);
+                        console.log('Purchase Data:', monthlyPurchaseData);
+                        console.log('Order Data:', monthlyOrderData);
 
-                        if (recentTransactions && Array.isArray(recentTransactions)) {
-                            recentTransactions.forEach(transaction => {
-                                if (transaction.created_at) {
-                                    const month = new Date(transaction.created_at).getMonth();
-                                    if (transaction.type === 'purchase') {
-                                        purchaseData[month] += 1;
-                                    } else {
-                                        orderData[month] += 1;
-                                    }
-                                }
-                            });
-                        }
+                        // Pastikan data adalah array numerik
+                        const purchaseData = Array.isArray(monthlyPurchaseData) ?
+                            monthlyPurchaseData.map(val => parseInt(val) || 0) :
+                            new Array(12).fill(0);
+
+                        const orderData = Array.isArray(monthlyOrderData) ?
+                            monthlyOrderData.map(val => parseInt(val) || 0) :
+                            new Array(12).fill(0);
 
                         purchaseOrderCtx.chart = new Chart(purchaseOrderCtx, {
                             type: 'bar',
@@ -409,14 +388,18 @@
                                         data: purchaseData,
                                         backgroundColor: '#3B82F6',
                                         borderColor: '#2563EB',
-                                        borderWidth: 1
+                                        borderWidth: 2,
+                                        borderRadius: 4,
+                                        borderSkipped: false,
                                     },
                                     {
                                         label: 'Pesanan Layanan',
                                         data: orderData,
                                         backgroundColor: '#10B981',
                                         borderColor: '#059669',
-                                        borderWidth: 1
+                                        borderWidth: 2,
+                                        borderRadius: 4,
+                                        borderSkipped: false,
                                     }
                                 ]
                             },
@@ -426,6 +409,13 @@
                                 plugins: {
                                     legend: {
                                         position: 'top',
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                return `${context.dataset.label}: ${context.raw} transaksi`;
+                                            }
+                                        }
                                     }
                                 },
                                 scales: {
@@ -433,8 +423,20 @@
                                         beginAtZero: true,
                                         ticks: {
                                             callback: function(value) {
-                                                return value + ' transaksi';
-                                            }
+                                                if (value % 1 === 0) {
+                                                    return value + ' transaksi';
+                                                }
+                                                return '';
+                                            },
+                                            stepSize: 1
+                                        },
+                                        grid: {
+                                            color: 'rgba(0, 0, 0, 0.1)'
+                                        }
+                                    },
+                                    x: {
+                                        grid: {
+                                            color: 'rgba(0, 0, 0, 0.1)'
                                         }
                                     }
                                 }
@@ -442,27 +444,14 @@
                         });
                     }
 
-                    // Donut Chart: Distribusi Pesanan Layanan
+                    // Donut Chart: Distribusi Pesanan Layanan - DATA KESELURUHAN
                     const orderDonutCtx = document.getElementById('orderDonutChart');
                     if (orderDonutCtx) {
-                        // Cek jika chart sudah ada, destroy dulu
                         if (orderDonutCtx.chart) {
                             orderDonutCtx.chart.destroy();
                         }
 
-                        // Hitung distribusi layanan dari recent transactions
-                        const serviceDistribution = {};
-                        if (recentTransactions && Array.isArray(recentTransactions)) {
-                            recentTransactions.forEach(transaction => {
-                                if (transaction.type !== 'purchase') {
-                                    const serviceName = transaction.name;
-                                    if (!serviceDistribution[serviceName]) {
-                                        serviceDistribution[serviceName] = 0;
-                                    }
-                                    serviceDistribution[serviceName] += 1;
-                                }
-                            });
-                        }
+                        console.log('Service Distribution:', serviceDistribution);
 
                         const serviceNames = Object.keys(serviceDistribution);
                         const serviceCounts = Object.values(serviceDistribution);
@@ -474,15 +463,20 @@
                             serviceCounts.push(1);
                         }
 
+                        // Warna untuk chart
+                        const backgroundColors = [
+                            '#10B981', '#059669', '#047857', '#065F46', '#064E3B',
+                            '#3B82F6', '#2563EB', '#1D4ED8', '#1E40AF', '#1E3A8A',
+                            '#8B5CF6', '#7C3AED', '#6D28D9', '#5B21B6', '#4C1D95'
+                        ];
+
                         orderDonutCtx.chart = new Chart(orderDonutCtx, {
                             type: 'doughnut',
                             data: {
                                 labels: serviceNames,
                                 datasets: [{
                                     data: serviceCounts,
-                                    backgroundColor: ['#10B981', '#059669', '#047857', '#065F46',
-                                        '#064E3B'
-                                    ],
+                                    backgroundColor: backgroundColors.slice(0, serviceNames.length),
                                     borderColor: '#ffffff',
                                     borderWidth: 2,
                                     hoverOffset: 15
@@ -499,6 +493,26 @@
                                             boxWidth: 12,
                                             font: {
                                                 size: 10
+                                            },
+                                            generateLabels: function(chart) {
+                                                const data = chart.data;
+                                                if (data.labels.length && data.datasets.length) {
+                                                    return data.labels.map((label, i) => {
+                                                        const value = data.datasets[0].data[i];
+                                                        const percentage = totalServices > 0 ?
+                                                            ((value / totalServices) * 100).toFixed(1) :
+                                                            0;
+
+                                                        return {
+                                                            text: `${label} (${percentage}%)`,
+                                                            fillStyle: data.datasets[0].backgroundColor[
+                                                                i],
+                                                            hidden: false,
+                                                            index: i
+                                                        };
+                                                    });
+                                                }
+                                                return [];
                                             }
                                         }
                                     },
@@ -507,8 +521,8 @@
                                             label: function(context) {
                                                 const label = context.label || '';
                                                 const value = context.raw;
-                                                const percentage = totalServices > 0 ? ((value /
-                                                    totalServices) * 100).toFixed(1) : 0;
+                                                const percentage = totalServices > 0 ?
+                                                    ((value / totalServices) * 100).toFixed(1) : 0;
                                                 return `${label}: ${value} pesanan (${percentage}%)`;
                                             }
                                         }
