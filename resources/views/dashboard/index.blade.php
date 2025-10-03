@@ -148,7 +148,7 @@
             <div class="bg-white rounded-lg shadow p-6 lg:col-span-1">
                 <h3 class="text-gray-800 text-xl font-semibold mb-4">Distribusi Pesanan Layanan (Tahun
                     {{ date('Y') }})</h3>
-                <div class="h-80 relative">
+                <div class="h-80 relative top-14">
                     <canvas id="orderDonutChart"></canvas>
                 </div>
             </div>
