@@ -108,8 +108,8 @@
                             <span class="text-lg font-semibold text-violet-600">
                                 {{ number_format($monthlyOrderCompleted, 0, ',', '.') }}
                             </span>
-                        </div> 
-                        
+                        </div>
+
 
                         <!-- Minggu Ini -->
                         <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
@@ -458,18 +458,15 @@
                         const serviceCounts = Object.values(serviceDistribution);
                         const totalServices = serviceCounts.reduce((sum, count) => sum + count, 0);
 
-                        // Jika tidak ada data layanan, tampilkan placeholder
-                        if (serviceNames.length === 0) {
-                            serviceNames.push('Belum ada data');
-                            serviceCounts.push(1);
-                        }
-
-                        // Warna untuk chart
+                        // Warna yang berbeda untuk setiap layanan
                         const backgroundColors = [
-                            '#10B981', '#059669', '#047857', '#065F46', '#064E3B',
-                            '#3B82F6', '#2563EB', '#1D4ED8', '#1E40AF', '#1E3A8A',
-                            '#8B5CF6', '#7C3AED', '#6D28D9', '#5B21B6', '#4C1D95'
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                            '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#36A2EB',
+                            '#FF6384', '#FFCE56', '#9966FF', '#FF9F40', '#C9CBCF'
                         ];
+
+                        // Potong array warna sesuai jumlah layanan
+                        const chartColors = backgroundColors.slice(0, serviceNames.length);
 
                         orderDonutCtx.chart = new Chart(orderDonutCtx, {
                             type: 'doughnut',
@@ -477,39 +474,44 @@
                                 labels: serviceNames,
                                 datasets: [{
                                     data: serviceCounts,
-                                    backgroundColor: backgroundColors.slice(0, serviceNames.length),
+                                    backgroundColor: chartColors,
                                     borderColor: '#ffffff',
-                                    borderWidth: 2,
+                                    borderWidth: 8,
                                     hoverOffset: 15
                                 }]
                             },
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                cutout: '65%',
+                                cutout: '80%',
                                 plugins: {
                                     legend: {
-                                        position: 'right',
+                                        position: 'bottom',
                                         labels: {
                                             boxWidth: 12,
                                             font: {
-                                                size: 10
+                                                size: 11
                                             },
                                             generateLabels: function(chart) {
                                                 const data = chart.data;
                                                 if (data.labels.length && data.datasets.length) {
                                                     return data.labels.map((label, i) => {
-                                                        const value = data.datasets[0].data[i];
-                                                        const percentage = totalServices > 0 ?
-                                                            ((value / totalServices) * 100).toFixed(1) :
-                                                            0;
-
+                                                        const meta = chart.getDatasetMeta(0);
+                                                        const hidden = meta.data[i] ? meta.data[i]
+                                                            .hidden : false;
                                                         return {
-                                                            text: `${label} (${percentage}%)`,
+                                                            text: `${label} (${data.datasets[0].data[i]} pesanan)`,
                                                             fillStyle: data.datasets[0].backgroundColor[
                                                                 i],
-                                                            hidden: false,
-                                                            index: i
+                                                            hidden: hidden,
+                                                            index: i,
+                                                            font: {
+                                                                size: 11,
+                                                                style: hidden ? 'normal' : 'bold',
+                                                                lineHeight: 1.2,
+                                                                textDecoration: hidden ?
+                                                                    'line-through' : 'none'
+                                                            }
                                                         };
                                                     });
                                                 }
@@ -527,9 +529,59 @@
                                                 return `${label}: ${value} pesanan (${percentage}%)`;
                                             }
                                         }
+                                    },
+                                    // Plugin untuk menampilkan total di tengah chart
+                                    centerText: {
+                                        display: true,
+                                        text: `${totalServices}`,
+                                        color: '#374151',
+                                        fontStyle: 'bold',
+                                        sidePadding: 20
                                     }
                                 }
-                            }
+                            },
+                            plugins: [{
+                                id: 'centerText',
+                                beforeDraw: function(chart) {
+                                    if (chart.config.options.plugins.centerText?.display) {
+                                        // Mendapatkan width dan height
+                                        const width = chart.width;
+                                        const height = chart.height;
+                                        const ctx = chart.ctx;
+
+                                        // Reset state
+                                        ctx.restore();
+
+                                        // Font settings
+                                        const fontSize = (height / 200).toFixed(2);
+                                        ctx.font = `bold ${fontSize}em sans-serif`;
+                                        ctx.textBaseline = 'middle';
+                                        ctx.fillStyle = chart.config.options.plugins.centerText.color ||
+                                            '#374151';
+
+                                        // Text
+                                        const text = chart.config.options.plugins.centerText.text;
+                                        const textX = Math.round((width - ctx.measureText(text).width) /
+                                            2);
+                                        const textY = height / 2 - 20;
+
+                                        // Draw text
+                                        ctx.fillText(text, textX, textY);
+
+                                        // Label "Total Pesanan"
+                                        ctx.font = `${(fontSize/1.5).toFixed(2)}em sans-serif`;
+                                        ctx.fillStyle = '#6B7280';
+                                        const labelText = 'Total Pesanan';
+                                        const labelX = Math.round((width - ctx.measureText(labelText)
+                                            .width) / 2);
+                                        const labelY = textY + (fontSize * 16); // Adjust spacing
+
+                                        ctx.fillText(labelText, labelX, labelY);
+
+                                        ctx.save();
+                                    }
+                                }
+                            }]
                         });
                     }
                 }
