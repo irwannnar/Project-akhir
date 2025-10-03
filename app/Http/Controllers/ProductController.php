@@ -23,6 +23,7 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:255',
+            'stock' =>'required|integer|min:0',
             'price_per_unit' => 'required|numeric|min:0',
             'description' => 'nullable|string',
         ]);
@@ -48,6 +49,7 @@ class ProductController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:255',
+            'stock' =>'required|integer|min:0',
             'price_per_unit' => 'required|numeric|min:0',
             'description' => 'nullable|string',
         ]);

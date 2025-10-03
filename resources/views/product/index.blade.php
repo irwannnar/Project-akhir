@@ -53,6 +53,9 @@
                             <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Tipe
                             </th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Stok
+                            </th>
                             <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Harga/Unit
                             </th>
@@ -88,6 +91,11 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
                                         {{ $product->type }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <span class="px-2 py-1 text-gray-400 text-xs font-medium rounded-full">
+                                        {{ $product->stock }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">

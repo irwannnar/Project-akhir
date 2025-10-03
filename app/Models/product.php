@@ -10,6 +10,7 @@ class product extends Model
         'name',
         'price_per_unit',
         'type',
+        'stock',
         'description',
     ];
 
