@@ -158,7 +158,7 @@
                 <h2 class="text-gray-800 text-xl font-semibold mb-4">Produk & Layanan Terpopuler</h2>
 
                 <div class="mb-6">
-                    <h3 class="text-md font-semibold text-gray-700 mb-3">Produk Terlaris (Keseluruhan)</h3>
+                    <h3 class="text-md font-semibold text-gray-700 mb-3">Produk Terlaris</h3>
                     <div class="space-y-3">
                         @foreach ($bestSellingProducts as $product)
                             <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
@@ -177,7 +177,7 @@
                     <div class="space-y-3">
                         @php
                             $popularServices = $serviceDistribution;
-                            $popularServices = array_slice($popularServices, 0, 4);
+                            $popularServices = array_slice($popularServices, 0, 3);
                         @endphp
 
                         @foreach ($popularServices as $serviceName => $count)

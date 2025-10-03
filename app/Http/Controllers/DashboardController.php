@@ -168,7 +168,7 @@ class DashboardController extends Controller
                 ->where('status', 'completed');
         }], 'quantity')
             ->orderBy('total_sold', 'desc')
-            ->take(5)
+            ->take(3)
             ->get();
 
         return view('dashboard.index', compact(
