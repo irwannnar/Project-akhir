@@ -102,13 +102,14 @@
                             </span>
                         </div>
 
-                        <!-- Hari Ini -->
-                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                            <span class="text-gray-600">Hari Ini</span>
-                            <span class="text-lg font-semibold text-green-600">
-                                {{ number_format($dailyOrderCompleted, 0, ',', '.') }}
+                        {{-- bulan ini --}}
+                        <div class="flex justify-between items-center p-3 bg-violet-50 rounded-lg">
+                            <span class="text-gray-600">Bulan Ini</span>
+                            <span class="text-lg font-semibold text-violet-600">
+                                {{ number_format($monthlyOrderCompleted, 0, ',', '.') }}
                             </span>
-                        </div>
+                        </div> 
+                        
 
                         <!-- Minggu Ini -->
                         <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
@@ -117,11 +118,11 @@
                                 {{ number_format($weeklyOrderCompleted, 0, ',', '.') }}
                             </span>
                         </div>
-
-                        <div class="flex justify-between items-center p-3 bg-violet-50 rounded-lg">
-                            <span class="text-gray-600">Bulan Ini</span>
-                            <span class="text-lg font-semibold text-violet-600">
-                                {{ number_format($monthlyOrderCompleted, 0, ',', '.') }}
+                        <!-- Hari Ini -->
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <span class="text-gray-600">Hari Ini</span>
+                            <span class="text-lg font-semibold text-green-600">
+                                {{ number_format($dailyOrderCompleted, 0, ',', '.') }}
                             </span>
                         </div>
                     </div>
