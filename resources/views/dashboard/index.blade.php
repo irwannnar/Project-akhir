@@ -130,25 +130,12 @@
             </div>
         </div>
 
-
-        <!-- Chart Pembelian dan Pesanan -->
-        <div class="grid grid-cols-1 gap-6 mb-6">
-            <!-- Chart Pembelian vs Pesanan -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-gray-800 text-xl font-semibold mb-4">Pembelian vs Pesanan (Tahun {{ date('Y') }})
-                </h3>
-                <div class="h-80">
-                    <canvas id="purchaseOrderChart"></canvas>
-                </div>
-            </div>
-        </div>
-
         <!-- Tabel dan Daftar Produk -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-white rounded-lg shadow p-6 lg:col-span-1">
                 <h3 class="text-gray-800 text-xl font-semibold mb-4">Distribusi Pesanan Layanan (Tahun
                     {{ date('Y') }})</h3>
-                <div class="h-80 relative top-14">
+                <div class="h-80 relative top-4">
                     <canvas id="orderDonutChart"></canvas>
                 </div>
             </div>
@@ -158,7 +145,7 @@
                 <h2 class="text-gray-800 text-xl font-semibold mb-4">Produk & Layanan Terpopuler</h2>
 
                 <div class="mb-6">
-                    <h3 class="text-md font-semibold text-gray-700 mb-3">Produk Terlaris</h3>
+                    <h3 class="text-md font-semibold text-gray-700 mb-3">3 Produk Terlaris (Tahun 2025)</h3>
                     <div class="space-y-3">
                         @foreach ($bestSellingProducts as $product)
                             <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
@@ -172,7 +159,7 @@
                 </div>
 
                 <div>
-                    <h3 class="text-md font-semibold text-gray-700 mb-3">Layanan Terpopuler (Tahun {{ date('Y') }})
+                    <h3 class="text-md font-semibold text-gray-700 mb-3">3 Layanan Terpopuler (Tahun {{ date('Y') }})
                     </h3>
                     <div class="space-y-3">
                         @php
@@ -345,91 +332,6 @@
                                             callback: function(value) {
                                                 return 'Rp ' + value.toLocaleString('id-ID');
                                             }
-                                        },
-                                        grid: {
-                                            color: 'rgba(0, 0, 0, 0.1)'
-                                        }
-                                    },
-                                    x: {
-                                        grid: {
-                                            color: 'rgba(0, 0, 0, 0.1)'
-                                        }
-                                    }
-                                }
-                            }
-                        });
-                    }
-
-                    // Chart 2: Purchase vs Order (Bar Chart)
-                    const purchaseOrderCtx = document.getElementById('purchaseOrderChart');
-                    if (purchaseOrderCtx) {
-                        // Cek jika chart sudah ada, destroy dulu
-                        if (purchaseOrderCtx.chart) {
-                            purchaseOrderCtx.chart.destroy();
-                        }
-
-                        console.log('Purchase Data:', monthlyPurchaseData);
-                        console.log('Order Data:', monthlyOrderData);
-
-                        // Pastikan data adalah array numerik
-                        const purchaseData = Array.isArray(monthlyPurchaseData) ?
-                            monthlyPurchaseData.map(val => parseInt(val) || 0) :
-                            new Array(12).fill(0);
-
-                        const orderData = Array.isArray(monthlyOrderData) ?
-                            monthlyOrderData.map(val => parseInt(val) || 0) :
-                            new Array(12).fill(0);
-
-                        purchaseOrderCtx.chart = new Chart(purchaseOrderCtx, {
-                            type: 'bar',
-                            data: {
-                                labels: monthNames,
-                                datasets: [{
-                                        label: 'Pembelian Produk',
-                                        data: purchaseData,
-                                        backgroundColor: '#3B82F6',
-                                        borderColor: '#2563EB',
-                                        borderWidth: 2,
-                                        borderRadius: 4,
-                                        borderSkipped: false,
-                                    },
-                                    {
-                                        label: 'Pesanan Layanan',
-                                        data: orderData,
-                                        backgroundColor: '#10B981',
-                                        borderColor: '#059669',
-                                        borderWidth: 2,
-                                        borderRadius: 4,
-                                        borderSkipped: false,
-                                    }
-                                ]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: {
-                                        position: 'top',
-                                    },
-                                    tooltip: {
-                                        callbacks: {
-                                            label: function(context) {
-                                                return `${context.dataset.label}: ${context.raw} transaksi`;
-                                            }
-                                        }
-                                    }
-                                },
-                                scales: {
-                                    y: {
-                                        beginAtZero: true,
-                                        ticks: {
-                                            callback: function(value) {
-                                                if (value % 1 === 0) {
-                                                    return value + ' transaksi';
-                                                }
-                                                return '';
-                                            },
-                                            stepSize: 1
                                         },
                                         grid: {
                                             color: 'rgba(0, 0, 0, 0.1)'
