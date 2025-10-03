@@ -33,14 +33,16 @@ class TransactionController extends Controller
                     $request->start_date . ' 00:00:00',
                     $request->end_date . ' 23:59:59'
                 ]);
-            });
+            })
+            ->orderBy('created_at', 'desc');
 
         // Query untuk orders (transaksi dengan type 'order')
         $ordersQuery = Transaction::where('type', 'order')
             ->with('printing')
             ->when($request->status, function ($query, $status) {
                 return $query->where('status', $status);
-            });
+            })
+            ->orderBy('created_at', 'desc');
 
         $purchases = $purchasesQuery->paginate(10, ['*'], 'purchases_page')
             ->appends(['tab' => 'purchases'] + $request->except('purchases_page'));
