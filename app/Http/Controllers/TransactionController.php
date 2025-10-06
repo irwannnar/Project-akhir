@@ -82,8 +82,8 @@ class TransactionController extends Controller
             'customer_address' => 'nullable|string',
             'material' => 'nullable|string|max:255',
             'quantity' => 'required|integer|min:1',
-            'tinggi'=> 'nullable|string|max:100',
-            'lebar'=> 'nullable|string|max:100',
+            'tinggi' => 'nullable|string|max:100',
+            'lebar' => 'nullable|string|max:100',
             'notes' => 'nullable|string',
             'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
             'total_price' => 'required|numeric|min:0',
@@ -91,16 +91,26 @@ class TransactionController extends Controller
             'status' => 'required|in:pending,processing,completed,cancelled',
         ]);
 
-        $transaction = Transaction::create($validated);
-
-        if($validated['type'] === 'purchase' && $validated['product_id']) {
+        
+        if ($validated['type'] === 'purchase' && $validated['product_id']) {
             $product = Product::find($validated['product_id']);
-            if ($product) {
-                $product->stock = max(0, $product->stock - $validated['quantity']);
-                $product->save();
+            
+            if (!$product) {
+                return back()->withInput()->with('error', 'stok produk kurang');
             }
-        }
 
+            if ($product->stock < $validated['quantity']) {
+                return back()->withInput()->with('error', 'stock tidak cukup, stock yang tersedia:' . $product->stock);
+            }
+            
+            $transaction = Transaction::create($validated);
+
+            $product->stock = max(0, $product->stock - $validated['quantity']);
+            $product->save();
+        } else {
+            $transaction = transaction::create($validated);
+        }
+        
         DB::beginTransaction();
 
         try {
@@ -168,8 +178,8 @@ class TransactionController extends Controller
             'customer_address' => 'nullable|string',
             'material' => 'nullable|string|max:255',
             'quantity' => 'required|integer|min:1',
-            'tinggi'=> 'nullable|string|max:100',
-            'lebar'=> 'nullable|string|max:100',
+            'tinggi' => 'nullable|string|max:100',
+            'lebar' => 'nullable|string|max:100',
             'notes' => 'nullable|string',
             'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
             'total_price' => 'required|numeric|min:0',
