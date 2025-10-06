@@ -41,7 +41,7 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-gray-900">Rp
-                                        {{ number_format($layanan->biaya, 0, ',', '.') }}/cm</div>
+                                        {{ number_format($layanan->biaya, 0, ',', '.') }}</div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-gray-900">
