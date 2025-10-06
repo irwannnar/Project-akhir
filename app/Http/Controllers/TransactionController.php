@@ -69,7 +69,7 @@ class TransactionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Transaction $transaction)
     {
         // dd($request->all());
         $validated = $request->validate([
@@ -90,6 +90,16 @@ class TransactionController extends Controller
             'payment_method' => 'required|in:cash,transfer,credit_card',
             'status' => 'required|in:pending,processing,completed,cancelled',
         ]);
+
+        $transaction = Transaction::create($validated);
+
+        if($validated['type'] === 'purchase' && $validated['product_id']) {
+            $product = Product::find($validated['product_id']);
+            if ($product) {
+                $product->stock = max(0, $product->stock - $validated['quantity']);
+                $product->save();
+            }
+        }
 
         DB::beginTransaction();
 
