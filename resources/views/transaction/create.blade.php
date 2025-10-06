@@ -178,7 +178,7 @@
                                     <option value="{{ $service->id }}" data-price="{{ $service->biaya }}"
                                         {{ old('printing_id') == $service->id ? 'selected' : '' }}>
                                         {{ $service->nama_layanan }} - Rp
-                                        {{ number_format($service->biaya, 0, ',', '.') }}/cm
+                                        {{ number_format($service->biaya, 0, ',', '.') }}
                                     </option>
                                 @endforeach
                             </select>
@@ -230,7 +230,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Harga per cm</label>
                                     <div class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100 px-3 py-2">
-                                        <span x-text="'Rp ' + formatNumber(unitPrice) + '/cm'"></span>
+                                        <span x-text="'Rp ' + formatNumber(unitPrice)"></span>
                                     </div>
                                 </div>
                             </template>
@@ -295,26 +295,12 @@
                                 </select>
                             </div>
                             <div>
-                                <label for="paid_at" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
-                                    Bayar</label>
-                                <input type="datetime-local" id="paid_at" name="paid_at"
-                                    value="{{ old('paid_at') }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            </div>
-                            <div>
                                 <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status
                                     *</label>
                                 <select id="status" name="status" required
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    <option value="">Pilih Status</option>
                                     <option value="pending"
                                         {{ old('status', 'pending') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                    <option value="processing" {{ old('status') == 'processing' ? 'selected' : '' }}>
-                                        Processing</option>
-                                    <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>
-                                        Completed</option>
-                                    <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>
-                                        Cancelled</option>
                                 </select>
                             </div>
                         </div>
