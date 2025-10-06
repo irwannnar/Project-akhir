@@ -10,7 +10,7 @@
         .nav-active {
             background-color: oklch(0.872 0.01 258.338);
             /* Biru Tailwind */
-            color: white;
+            color: black;
             border-radius: 0.375rem;
             padding: 0.5rem 1rem;
         }
