@@ -69,6 +69,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('sale', SaleController::class);
     Route::get('/sale/product', [SaleController::class, 'product'])->name('sale.product');
     Route::resource('transaction', TransactionController::class);
+    Route::patch('/transaction/{transaction}/mark-completed', [TransactionController::class, 'markCompleted'])->name('transaction.markCompleted');
     Route::resource('finance', FinanceController::class);
     Route::resource('spending', SpendingController::class);
     Route::resource('invoice', InvoiceController::class);

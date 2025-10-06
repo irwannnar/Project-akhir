@@ -265,4 +265,18 @@ class TransactionController extends Controller
 
         return back()->with('success', 'Transaksi berhasil ditandai sebagai dibayar');
     }
+
+    public function markCompleted(Transaction $transaction)
+    {
+        try {
+            $transaction->update([
+                'status' => 'completed', 
+                'paid_at' => $transaction->paid_at ?? now()
+            ]);
+
+            return redirect()->back()->with('success', 'Transaksi telah selesai');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Transaksi gagal diselesaikan: ' . $e->getMessage());
+        }
+    }
 }

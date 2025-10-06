@@ -185,6 +185,22 @@
                                                     </path>
                                                 </svg>
                                             </a>
+
+                                            <!-- Tombol Mark as Completed -->
+                                            <form action="{{ route('transaction.markCompleted', $order->id) }}" method="POST" class="inline-block">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" 
+                                                    class="text-green-600 hover:text-green-900" 
+                                                    title="Tandai sebagai Selesai"
+                                                    onclick="return confirm('Apakah Anda yakin ingin menandai pesanan ini sebagai selesai?')">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                </button>
+                                            </form>
                                         @else
                                             <span class="text-gray-400 cursor-not-allowed" title="Tidak dapat diedit - Status Completed">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" 
@@ -192,6 +208,14 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
                                                     </path>
+                                                </svg>
+                                            </span>
+
+                                            <span class="text-green-600 cursor-default" title="Sudah Selesai">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M5 13l4 4L19 7"></path>
                                                 </svg>
                                             </span>
                                         @endif
@@ -372,6 +396,22 @@
                                                     </path>
                                                 </svg>
                                             </a>
+
+                                            <!-- Tombol Mark as Completed -->
+                                            <form action="{{ route('transaction.markCompleted', $purchase->id) }}" method="POST" class="inline-block">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" 
+                                                    class="text-green-600 hover:text-green-900" 
+                                                    title="Tandai sebagai Selesai"
+                                                    onclick="return confirm('Apakah Anda yakin ingin menandai pembelian ini sebagai selesai?')">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                </button>
+                                            </form>
                                         @else
                                             <span class="text-gray-400 cursor-not-allowed" title="Tidak dapat diedit - Status Completed">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" 
@@ -379,6 +419,14 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
                                                     </path>
+                                                </svg>
+                                            </span>
+
+                                            <span class="text-green-600 cursor-default" title="Sudah Selesai">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M5 13l4 4L19 7"></path>
                                                 </svg>
                                             </span>
                                         @endif
