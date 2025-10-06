@@ -46,7 +46,7 @@
         <!-- Orders Tab Content -->
         <div x-show="activeTab === 'orders'" class="px-6">
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold">Daftar Pesanan (Orders)</h1>
+                <h1 class="text-3xl font-bold">Daftar Pesanan layanan</h1>
                 <a href="{{ route('transaction.create') }}?type=order" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
                     + Tambah Pesanan Baru
                 </a>
@@ -244,7 +244,7 @@
         <!-- Purchases Tab Content -->
         <div x-show="activeTab === 'purchases'" class="px-6">
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold">Daftar Pembelian (Purchases)</h1>
+                <h1 class="text-3xl font-bold">Daftar Pembelian produk</h1>
                 <a href="{{ route('transaction.create') }}?type=purchase" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
                     + Tambah Pembelian Baru
                 </a>
