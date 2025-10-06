@@ -102,15 +102,11 @@ class TransactionController extends Controller
             if ($product->stock < $validated['quantity']) {
                 return back()->withInput()->with('error', 'stock tidak cukup, stock yang tersedia:' . $product->stock);
             }
-            
-            $transaction = Transaction::create($validated);
 
             $product->stock = max(0, $product->stock - $validated['quantity']);
             $product->save();
-        } else {
-            $transaction = transaction::create($validated);
         }
-        
+
         DB::beginTransaction();
 
         try {

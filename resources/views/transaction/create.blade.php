@@ -124,18 +124,45 @@
                         <div x-show="transactionType === 'purchase'">
                             <label for="product_id" class="block text-sm font-medium text-gray-700 mb-1">Produk
                                 *</label>
-                            <select id="product_id" name="product_id" x-model="productId" @change="updateProductPrice()"
+                            <select id="product_id" name="product_id" x-model="productId"
+                                @change="updateProductPriceAndStock()"
                                 class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 :required="transactionType === 'purchase'">
                                 <option value="">Pilih Produk</option>
                                 @foreach ($products as $product)
                                     <option value="{{ $product->id }}" data-price="{{ $product->price_per_unit }}"
+                                        data-stock="{{ $product->stock }}"
                                         {{ old('product_id') == $product->id ? 'selected' : '' }}>
                                         {{ $product->name }} - Rp
                                         {{ number_format($product->price_per_unit, 0, ',', '.') }}
+                                        (Stok: {{ $product->stock }})
                                     </option>
                                 @endforeach
                             </select>
+
+                            <!-- Notifikasi Stok -->
+                            <div x-show="showStockWarning"
+                                class="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                        </path>
+                                    </svg>
+                                    <span class="text-red-700 text-sm font-medium">
+                                        Stok tidak mencukupi!
+                                        <span
+                                            x-text="'Stok tersedia: ' + availableStock + ', yang diminta: ' + quantity"></span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Info Stok Tersedia -->
+                            <div x-show="availableStock !== null && !showStockWarning" class="mt-2">
+                                <span class="text-sm text-gray-600"
+                                    x-text="'Stok tersedia: ' + availableStock"></span>
+                            </div>
                         </div>
 
                         <!-- Service Selection (for orders) -->
@@ -325,18 +352,21 @@
                 totalPrice: {{ old('total_price', 0) }},
                 tinggi: {{ old('tinggi', 0) }},
                 lebar: {{ old('lebar', 0) }},
+                availableStock: null,
+                showStockWarning: false,
 
                 init() {
                     console.log('Form initialized with type:', this.transactionType);
 
                     // Update harga berdasarkan data old() jika ada
                     if (this.transactionType === 'purchase' && this.productId) {
-                        this.updateProductPrice();
+                        this.updateProductPriceAndStock();
                     } else if (this.transactionType === 'order' && this.printingId) {
                         this.updateServicePrice();
                     }
 
                     this.calculateTotalPrice();
+                    this.checkStock();
                 },
 
                 setTransactionType(type) {
@@ -346,6 +376,8 @@
                     this.unitPrice = 0;
                     this.tinggi = 0;
                     this.lebar = 0;
+                    this.availableStock = null;
+                    this.showStockWarning = false;
                     this.calculateTotalPrice();
 
                     // Handle required attributes dengan delay
@@ -370,17 +402,21 @@
                     }, 50);
                 },
 
-                updateProductPrice() {
+                updateProductPriceAndStock() {
                     if (this.productId) {
                         const selectedOption = document.querySelector(
                             `#product_id option[value="${this.productId}"]`);
                         if (selectedOption) {
                             this.unitPrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
+                            this.availableStock = parseInt(selectedOption.getAttribute('data-stock')) ||
+                                0;
                         }
                     } else {
                         this.unitPrice = 0;
+                        this.availableStock = null;
                     }
                     this.calculateTotalPrice();
+                    this.checkStock();
                 },
 
                 updateServicePrice() {
@@ -410,6 +446,17 @@
 
                     // Round to nearest integer
                     this.totalPrice = Math.round(this.totalPrice);
+
+                    // Check stock setelah calculate
+                    this.checkStock();
+                },
+
+                checkStock() {
+                    if (this.transactionType === 'purchase' && this.availableStock !== null) {
+                        this.showStockWarning = parseInt(this.quantity) > this.availableStock;
+                    } else {
+                        this.showStockWarning = false;
+                    }
                 },
 
                 formatNumber(number) {
@@ -418,7 +465,7 @@
             }));
         });
 
-        // Custom form validation
+        // Custom form validation dengan validasi stok
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('transactionForm');
 
@@ -449,6 +496,7 @@
                     // Validasi basic
                     const quantity = document.getElementById('quantity');
                     const totalPrice = document.getElementById('total_price');
+                    const productId = document.getElementById('product_id');
 
                     if (quantity && parseFloat(quantity.value) <= 0) {
                         e.preventDefault();
@@ -460,11 +508,50 @@
                     if (totalPrice && parseFloat(totalPrice.value) <= 0) {
                         e.preventDefault();
                         alert('Total harga harus lebih besar dari 0');
-                        totalPrice.focus();
                         return false;
                     }
 
+                    // Validasi stok untuk pembelian
+                    if (purchaseSection && getComputedStyle(purchaseSection).display !== 'none' &&
+                        productId) {
+                        const selectedOption = productId.options[productId.selectedIndex];
+                        if (selectedOption && selectedOption.value !== '') {
+                            const availableStock = parseInt(selectedOption.getAttribute('data-stock')) || 0;
+                            const requestedQuantity = parseInt(quantity.value) || 0;
+
+                            if (requestedQuantity > availableStock) {
+                                e.preventDefault();
+                                alert('Stok tidak mencukupi! Stok tersedia: ' + availableStock +
+                                    ', yang diminta: ' + requestedQuantity);
+                                quantity.focus();
+                                return false;
+                            }
+                        }
+                    }
+
                     return true;
+                });
+            }
+
+            // Real-time stock validation on quantity change
+            const quantityInput = document.getElementById('quantity');
+            if (quantityInput) {
+                quantityInput.addEventListener('input', function() {
+                    const productId = document.getElementById('product_id');
+                    if (productId && productId.value) {
+                        const selectedOption = productId.options[productId.selectedIndex];
+                        if (selectedOption) {
+                            const availableStock = parseInt(selectedOption.getAttribute('data-stock')) || 0;
+                            const requestedQuantity = parseInt(this.value) || 0;
+
+                            if (requestedQuantity > availableStock) {
+                                this.setCustomValidity('Stok tidak mencukupi! Stok tersedia: ' +
+                                    availableStock);
+                            } else {
+                                this.setCustomValidity('');
+                            }
+                        }
+                    }
                 });
             }
         });
