@@ -3,7 +3,7 @@
         
         @if (session('success'))
             <div x-data="{ show: true }" x-show="show" x-transition:leave="transition ease-in duration-300"
-                x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" x-init="setTimeout(() => show = false, 3000)"
                 class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6 relative"
                 role="alert">
                 <div class="flex items-center">
