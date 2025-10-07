@@ -8,7 +8,7 @@ class Transaction extends Model
 {
     protected $fillable = [
         'product_id', 'printing_id', 'customer_name', 'customer_phone', 
-        'customer_email', 'customer_address', 'material', 'quantity', 
+        'customer_email', 'customer_address', 'quantity', 
         'tinggi','lebar', 'notes', 'file_path', 'total_price','payment_method',
         'paid_at', 'status', 'type'
     ];

@@ -87,12 +87,6 @@
                         </select>
                     </div>
                     <div>
-                        <label for="material" class="block text-sm font-medium text-gray-700 mb-1">Material</label>
-                        <input type="text" id="material" name="material" value="{{ request('material') }}"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            placeholder="Cari material...">
-                    </div>
-                    <div>
                         <label for="start_date_order" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
                             Mulai</label>
                         <input type="date" id="start_date_order" name="start_date"
@@ -166,7 +160,6 @@
                                             {{ $order->printing->nama_layanan ?? 'Layanan tidak ditemukan' }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $order->material ?? '-' }}</div>
                                         <div class="text-sm text-gray-500">
                                             @if ($order->tinggi && $order->lebar)
                                                 {{ $order->tinggi }} x {{ $order->lebar }}
@@ -307,7 +300,7 @@
                 <!-- Pagination for Orders -->
                 @if ($orders->hasPages())
                     <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                        {{ $orders->appends(['tab' => 'orders', 'status' => request('status'), 'payment_method' => request('payment_method'), 'material' => request('material'), 'start_date' => request('start_date'), 'end_date' => request('end_date')])->links() }}
+                        {{ $orders->appends(['tab' => 'orders', 'status' => request('status'), 'payment_method' => request('payment_method'), 'start_date' => request('start_date'), 'end_date' => request('end_date')])->links() }}
                     </div>
                 @endif
             </div>
@@ -358,14 +351,6 @@
                                 {{ request('payment_method') == 'credit_card' ? 'selected' : '' }}>Kartu Kredit
                             </option>
                         </select>
-                    </div>
-                    <div>
-                        <label for="material_purchase"
-                            class="block text-sm font-medium text-gray-700 mb-1">Material</label>
-                        <input type="text" id="material_purchase" name="material"
-                            value="{{ request('material') }}"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            placeholder="Cari material...">
                     </div>
                     <div>
                         <label for="start_date_purchase" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
@@ -571,7 +556,7 @@
 
                 @if ($purchases->hasPages())
                     <div class="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
-                        {{ $purchases->appends(['tab' => 'purchases', 'status' => request('status'), 'payment_method' => request('payment_method'), 'material' => request('material'), 'start_date' => request('start_date'), 'end_date' => request('end_date')])->links() }}
+                        {{ $purchases->appends(['tab' => 'purchases', 'status' => request('status'), 'payment_method' => request('payment_method'), 'start_date' => request('start_date'), 'end_date' => request('end_date')])->links() }}
                     </div>
                 @endif
             </div>

@@ -102,10 +102,6 @@
                                         {{ $transaction->printing->nama_layanan ?? 'Layanan tidak ditemukan' }}</p>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-500">Material</label>
-                                    <p class="text-gray-800 mt-1">{{ $transaction->material ?? '-' }}</p>
-                                </div>
-                                <div>
                                     <label class="block text-sm font-medium text-gray-500">Ukuran</label>
                                     <p class="text-gray-800 mt-1">{{ $transaction->ukuran ?? '-' }}</p>
                                 </div>

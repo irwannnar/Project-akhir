@@ -196,12 +196,6 @@
                                 class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         </div>
                         <div x-show="transactionType === 'order'">
-                            <label for="material"
-                                class="block text-sm font-medium text-gray-700 mb-1">Material</label>
-                            <input type="text" id="material" name="material" value="{{ old('material') }}"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                        <div x-show="transactionType === 'order'">
                             <label for="tinggi" class="block text-sm font-medium text-gray-700 mb-1">Tinggi
                                 (cm)</label>
                             <input type="number" id="tinggi" name="tinggi" x-model="tinggi"

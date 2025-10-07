@@ -22,7 +22,6 @@ class CreateTransactionsTable extends Migration
             $table->text('customer_address')->nullable();
 
             // Detail pesanan
-            $table->string('material')->nullable();
             $table->integer('quantity');
             $table->string('tinggi')->nullable();
             $table->string('lebar')->nullable();
