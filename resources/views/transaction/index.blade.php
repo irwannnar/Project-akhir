@@ -63,11 +63,7 @@
                             <option value="">Semua Status</option>
                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending
                             </option>
-                            <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>
-                                Processing</option>
                             <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed
-                            </option>
-                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled
                             </option>
                         </select>
                     </div>
@@ -180,9 +176,7 @@
                                         @php
                                             $statusClasses = [
                                                 'pending' => 'bg-yellow-100 text-yellow-800',
-                                                'processing' => 'bg-blue-100 text-blue-800',
                                                 'completed' => 'bg-green-100 text-green-800',
-                                                'cancelled' => 'bg-red-100 text-red-800',
                                             ];
                                         @endphp
                                         <span
@@ -329,12 +323,8 @@
                             <option value="">Semua Status</option>
                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending
                             </option>
-                            <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>
-                                Processing</option>
                             <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>
                                 Completed</option>
-                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>
-                                Cancelled</option>
                         </select>
                     </div>
                     <div>
@@ -437,9 +427,7 @@
                                         @php
                                             $statusClasses = [
                                                 'pending' => 'bg-yellow-100 text-yellow-800',
-                                                'processing' => 'bg-blue-100 text-blue-800',
                                                 'completed' => 'bg-green-100 text-green-800',
-                                                'cancelled' => 'bg-red-100 text-red-800',
                                             ];
                                         @endphp
                                         <span
