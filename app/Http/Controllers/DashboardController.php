@@ -33,7 +33,6 @@ class DashboardController extends Controller
             SUM(amount) as total_expense
         ')
             ->whereYear('created_at', $currentYear)
-            ->where('status', 'completed')
             ->groupBy('month')
             ->orderBy('month')
             ->get();
