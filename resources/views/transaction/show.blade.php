@@ -1,12 +1,27 @@
-<x-layout.default>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <title>Lep Print</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-300">
+
+
     <div class="container mx-auto px-4 py-6">
         <div class="max-w-4xl mx-auto">
-            <!-- Header -->
-            <div class="mb-6">
+            <!-- Header Actions -->
+            <div class="mb-6 print:hidden">
                 <div class="flex justify-between items-center">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-800 mb-2">Detail Transaksi</h1>
-                        <p class="text-gray-600">Informasi lengkap tentang transaksi cetak brosur</p>
+                        <h1 class="text-2xl font-bold text-gray-800 mb-2">Invoice Transaksi</h1>
+                        <p class="text-gray-600">Struk resmi untuk transaksi cetak brosur</p>
                     </div>
                     <div class="flex gap-2">
                         <a href="{{ route('transaction.index') }}"
@@ -23,233 +38,240 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M6 9V2h12v7M6 18h12v-5H6v5zm0 0v2a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
                             </svg>
-                            Print
+                            Print Invoice
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Card Detail -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <!-- Header Card -->
-                <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
+            <!-- Invoice Card -->
+            <div
+                class="bg-white rounded-lg shadow-lg overflow-hidden border-2 border-gray-200 print:shadow-none print:border-0">
+                <!-- Invoice Header -->
+                <div class="bg-white p-8 border-b-2 border-gray-200">
                     <div class="flex justify-between items-start">
-                        <div>
-                            <h2 class="text-xl font-bold">Transaksi #{{ $transaction->id }}</h2>
-                            <p class="text-blue-100 mt-1">
-                                {{ $transaction->type == 'purchase' ? 'Pembelian' : 'Pesanan Cetak' }}
+                        <div class="flex-1">
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h1 class="text-3xl font-bold text-gray-800">INVOICE</h1>
+                                    <p class="text-gray-600 text-sm">Printing Service</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <h2 class="text-2xl font-bold text-blue-600 mb-2">
+                                #INV-{{ str_pad($transaction->id, 6, '0', STR_PAD_LEFT) }}</h2>
+                            <p class="text-gray-600 text-sm">
+                                Tanggal: {{ \Carbon\Carbon::parse($transaction->created_at)->format('d/m/Y') }}
+                            </p>
+                            <p class="text-gray-600 text-sm">
+                                Due: {{ \Carbon\Carbon::parse($transaction->created_at)->addDays(7)->format('d/m/Y') }}
                             </p>
                         </div>
-                        <div class="flex flex-col items-end space-y-2">
-                            <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm font-medium">
-                                {{ \Carbon\Carbon::parse($transaction->created_at)->format('d M Y') }}
-                            </span>
-                            @php
-                                $statusClasses = [
-                                    'pending' => 'bg-yellow-500 bg-opacity-20 text-yellow-100',
-                                    'processing' => 'bg-blue-500 bg-opacity-20 text-blue-100',
-                                    'completed' => 'bg-green-500 bg-opacity-20 text-green-100',
-                                    'cancelled' => 'bg-red-500 bg-opacity-20 text-red-100',
-                                ];
-                            @endphp
-                            <span
-                                class="px-3 py-1 rounded-full text-sm font-medium {{ $statusClasses[$transaction->status] }}">
-                                {{ ucfirst($transaction->status) }}
-                            </span>
+                    </div>
+                </div>
+
+                <!-- Company & Customer Info -->
+                <div class="p-8 border-b-2 border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Company Info -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Dari:</h3>
+                            <div class="space-y-2">
+                                <p class="text-xl font-bold text-gray-900">Lep Print</p>
+                                <p class="text-gray-600">Jl. Printing No. 123, Jakarta</p>
+                                <p class="text-gray-600">Telp: (99) 3009-1965</p>
+                                <p class="text-gray-600">Email: scam@asklasadabak.com</p>
+                            </div>
+                        </div>
+
+                        <!-- Customer Info -->
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Kepada:</h3>
+                            <div class="space-y-2">
+                                <p class="text-xl font-bold text-gray-900">{{ $transaction->customer_name }}</p>
+                                <p class="text-gray-600">{{ $transaction->customer_phone ?? '-' }}</p>
+                                <p class="text-gray-600">{{ $transaction->customer_email ?? '-' }}</p>
+                                <p class="text-gray-600">{{ $transaction->customer_address ?? '-' }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Body Card -->
-                <div class="p-6">
-                    <!-- Informasi Pelanggan -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Pelanggan</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-500">Nama Pelanggan</label>
-                                <p class="text-gray-800 mt-1">{{ $transaction->customer_name }}</p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-500">Telepon</label>
-                                <p class="text-gray-800 mt-1">{{ $transaction->customer_phone ?? '-' }}</p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-500">Email</label>
-                                <p class="text-gray-800 mt-1">{{ $transaction->customer_email ?? '-' }}</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-500">Alamat</label>
-                                <p class="text-gray-800 mt-1">{{ $transaction->customer_address ?? '-' }}</p>
+                <!-- Transaction Details -->
+                <div class="p-8 border-b-2 border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Detail Pesanan</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 border-b">
+                                        Deskripsi</th>
+                                    <th class="py-3 px-4 text-right text-sm font-semibold text-gray-700 border-b">Jumlah
+                                    </th>
+                                    <th class="py-3 px-4 text-right text-sm font-semibold text-gray-700 border-b">Harga
+                                        Satuan</th>
+                                    <th class="py-3 px-4 text-right text-sm font-semibold text-gray-700 border-b">Total
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="py-4 px-4 border-b">
+                                        <div>
+                                            <p class="font-semibold text-gray-800">
+                                                @if ($transaction->type == 'purchase')
+                                                    {{ $transaction->product->name ?? 'Produk' }}
+                                                @else
+                                                    {{ $transaction->printing->nama_layanan ?? 'Layanan Cetak' }}
+                                                @endif
+                                            </p>
+                                            @if ($transaction->type == 'order')
+                                                <p class="text-sm text-gray-600 mt-1">
+                                                    @if ($transaction->tinggi && $transaction->lebar)
+                                                        Ukuran: {{ $transaction->tinggi }} x
+                                                        {{ $transaction->lebar }} cm
+                                                    @endif
+                                                </p>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 text-right border-b text-gray-700">
+                                        {{ $transaction->quantity }}</td>
+                                    <td class="py-4 px-4 text-right border-b text-gray-700">
+                                        Rp {{ number_format($transaction->unit_price, 0, ',', '.') }}
+                                    </td>
+                                    <td class="py-4 px-4 text-right border-b text-gray-700">
+                                        Rp {{ number_format($transaction->total_price, 0, ',', '.') }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Summary -->
+                <div class="p-8">
+                    <div class="flex justify-end">
+                        <div class="w-64">
+                            <div class="space-y-3">
+                                <div class="flex justify-between text-gray-600">
+                                    <span>Subtotal:</span>
+                                    <span>Rp {{ number_format($transaction->total_price, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="border-t border-gray-200 pt-2">
+                                    <div class="flex justify-between text-lg font-bold text-gray-800">
+                                        <span>Total:</span>
+                                        <span>Rp
+                                            {{ number_format($transaction->total_price * 1, 0, ',', '.') }}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Detail Transaksi -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Detail Transaksi</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            @if ($transaction->type == 'purchase')
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-500">Produk</label>
-                                    <p class="text-gray-800 mt-1">
-                                        {{ $transaction->product->name ?? 'Produk tidak ditemukan' }}</p>
-                                </div>
-                            @else
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-500">Layanan Cetak</label>
-                                    <p class="text-gray-800 mt-1">
-                                        {{ $transaction->printing->nama_layanan ?? 'Layanan tidak ditemukan' }}</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-500">Ukuran</label>
-                                    <p class="text-gray-800 mt-1">{{ $transaction->ukuran ?? '-' }}</p>
-                                </div>
-                            @endif
-                            <div>
-                                <label class="block text-sm font-medium text-gray-500">Jumlah</label>
-                                <p class="text-gray-800 mt-1">{{ $transaction->quantity }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Informasi Harga -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Harga</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-500">Harga Satuan</label>
-                                <p class="text-xl font-bold text-gray-800 mt-1">
-                                    Rp {{ number_format($transaction->unit_price, 0, ',', '.') }}
-                                </p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-500">Total Harga</label>
-                                <p class="text-xl font-bold text-gray-800 mt-1">
-                                    Rp {{ number_format($transaction->total_price, 0, ',', '.') }}
-                                </p>
-                            </div>
-                            @if ($transaction->total_cost)
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-500">Total Biaya</label>
-                                    <p class="text-lg text-gray-800 mt-1">
-                                        Rp {{ number_format($transaction->total_cost, 0, ',', '.') }}
-                                    </p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-500">Profit</label>
-                                    <p class="text-lg font-bold text-green-600 mt-1">
-                                        Rp {{ number_format($transaction->profit, 0, ',', '.') }}
-                                    </p>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-
-                    <!-- Informasi Pembayaran -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Pembayaran</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-500">Metode Pembayaran</label>
-                                <p class="text-gray-800 mt-1">
-                                    @switch($transaction->payment_method)
-                                        @case('cash')
-                                            <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">Cash</span>
-                                        @break
-
-                                        @case('credit_card')
-                                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">Kartu
-                                                Kredit</span>
-                                        @break
-
-                                        @case('debit_card')
-                                            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">Kartu
-                                                Debit</span>
-                                        @break
-
-                                        @case('transfer')
-                                            <span
-                                                class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">Transfer</span>
-                                        @break
-                                    @endswitch
-                                </p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-500">Status Pembayaran</label>
-                                <p class="text-gray-800 mt-1">
-                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                                        {{ ucfirst($transaction->status) }}
+                <!-- Payment Information -->
+                <div class="p-8 bg-gray-50 border-t-2 border-gray-200">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Pembayaran</h3>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Metode Pembayaran:</span>
+                                    <span class="font-semibold text-gray-800 capitalize">
+                                        {{ $transaction->payment_method }}
                                     </span>
-                                </p>
-                            </div>
-                            @if ($transaction->paid_at)
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-500">Tanggal Pembayaran</label>
-                                    <p class="text-gray-800 mt-1">{{ $transaction->paid_at }}</p>
                                 </div>
-                            @endif
-                        </div>
-                    </div>
-
-                    <!-- File Attachment -->
-                    @if ($transaction->file_path)
-                        <div class="mb-6">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">File Desain</h3>
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                    </path>
-                                </svg>
-                                <a href="{{ Storage::url($transaction->file_path) }}" target="_blank"
-                                    class="text-blue-600 hover:text-blue-800 font-medium">
-                                    Lihat File Desain
-                                </a>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Status:</span>
+                                    <span class="font-semibold">
+                                        @php
+                                            $statusColors = [
+                                                'pending' => 'text-yellow-600',
+                                                'completed' => 'text-green-600',
+                                            ];
+                                        @endphp
+                                        <span class="{{ $statusColors[$transaction->status] }}">
+                                            {{ ucfirst($transaction->status) }}
+                                        </span>
+                                    </span>
+                                </div>
+                                @if ($transaction->paid_at)
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Tanggal Bayar:</span>
+                                        <span class="font-semibold text-gray-800">
+                                            {{ \Carbon\Carbon::parse($transaction->paid_at)->format('d/m/Y H:i') }}
+                                        </span>
+                                    </div>
+                                @endif
                             </div>
                         </div>
-                    @endif
-
-                    <!-- Catatan -->
-                    @if ($transaction->notes)
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-500 mb-2">Catatan</label>
-                            <div class="bg-gray-50 rounded-lg p-4">
-                                <p class="text-gray-700 whitespace-pre-wrap">{{ $transaction->notes }}</p>
-                            </div>
-                        </div>
-                    @endif
-
-                    <!-- Informasi Sistem -->
-                    <div class="border-t border-gray-200 pt-6">
-                        <h3 class="text-sm font-medium text-gray-500 mb-3">Informasi Sistem</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-                            <div>
-                                <span class="font-medium">Dibuat:</span>
-                                <span>{{ $transaction->created_at->format('d M Y H:i') }}</span>
-                            </div>
-                            <div>
-                                <span class="font-medium">Diupdate:</span>
-                                <span>{{ $transaction->updated_at->format('d M Y H:i') }}</span>
-                            </div>
-                            <div>
-                                <span class="font-medium">ID Transaksi:</span>
-                                <span class="font-mono">{{ $transaction->id }}</span>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Catatan</h3>
+                            <div class="text-sm text-gray-600">
+                                @if ($transaction->notes)
+                                    <p class="whitespace-pre-wrap">{{ $transaction->notes }}</p>
+                                @else
+                                    <p class="text-gray-400">Tidak ada catatan</p>
+                                @endif
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Footer Card -->
-                <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
-                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <div class="text-sm text-gray-500">
-                            Terakhir diupdate {{ $transaction->updated_at->diffForHumans() }}
+                <!-- Footer -->
+                <div class="p-8 bg-white border-t-2 border-gray-200">
+                    <div class="flex justify-center text-center">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700 mb-2">Terima Kasih</p>
+                            <p class="text-xs text-gray-500">Terima kasih atas kepercayaan Anda</p>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Print Notice -->
+            <div class="mt-6 text-center print:hidden">
+                <p class="text-sm text-gray-500">
+                    Invoice ini sah dan dapat digunakan sebagai bukti transaksi
+                </p>
+            </div>
         </div>
     </div>
-</x-layout.default>
+
+    <style>
+        @media print {
+            @page {
+                margin: 0.5cm;
+                size: A4 portrait;
+            }
+
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .print\:break-before-page {
+                break-before: page;
+            }
+
+            .print\:shadow-none {
+                box-shadow: none !important;
+            }
+
+            .print\:border-0 {
+                border: none !important;
+            }
+        }
+    </style>
+</body>
+
+</html>
