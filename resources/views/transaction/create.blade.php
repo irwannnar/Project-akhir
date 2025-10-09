@@ -93,27 +93,27 @@
                                     Pelanggan *</label>
                                 <input type="text" id="customer_name" name="customer_name"
                                     value="{{ old('customer_name') }}" required
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </div>
                             <div>
                                 <label for="customer_phone"
                                     class="block text-sm font-medium text-gray-700 mb-1">Telepon</label>
                                 <input type="text" id="customer_phone" name="customer_phone"
                                     value="{{ old('customer_phone') }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </div>
                             <div>
                                 <label for="customer_email"
                                     class="block text-sm font-medium text-gray-700 mb-1">Email</label>
                                 <input type="email" id="customer_email" name="customer_email"
                                     value="{{ old('customer_email') }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </div>
                             <div class="md:col-span-2">
                                 <label for="customer_address"
                                     class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
                                 <textarea id="customer_address" name="customer_address" rows="2"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('customer_address') }}</textarea>
+                                    class="w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('customer_address') }}</textarea>
                             </div>
                         </div>
                     </div>
@@ -128,7 +128,7 @@
                                 *</label>
                             <select id="product_id" name="product_id" x-model="productId"
                                 @change="updateProductPriceAndStock()"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                class="w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 :required="transactionType === 'purchase'">
                                 <option value="">Pilih Produk</option>
                                 @foreach ($products as $product)
@@ -173,7 +173,7 @@
                                 Cetak *</label>
                             <select id="printing_id" name="printing_id" x-model="printingId"
                                 @change="updateServicePrice()"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                class="w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 :required="transactionType === 'order'">
                                 <option value="">Pilih Layanan Cetak</option>
                                 @foreach ($services as $service)
@@ -196,7 +196,7 @@
                             <input type="number" id="quantity" name="quantity" x-model="quantity"
                                 @input="calculateTotalPrice()" min="1" value="{{ old('quantity', 1) }}"
                                 required
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                class="w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         </div>
                         <div x-show="transactionType === 'order'">
                             <label for="tinggi" class="block text-sm font-medium text-gray-700 mb-1">Tinggi
@@ -204,7 +204,7 @@
                             <input type="number" id="tinggi" name="tinggi" x-model="tinggi"
                                 @input="calculateTotalPrice()" min="0" step="0.1"
                                 value="{{ old('tinggi') }}"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                class="w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 placeholder="0">
                         </div>
                         <div x-show="transactionType === 'order'">
@@ -213,7 +213,7 @@
                             <input type="number" id="lebar" name="lebar" x-model="lebar"
                                 @input="calculateTotalPrice()" min="0" step="0.1"
                                 value="{{ old('lebar') }}"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                class="w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 placeholder="0">
                         </div>
                     </div>
@@ -227,7 +227,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Harga per
                                         satuan</label>
-                                    <div class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100 px-3 py-2">
+                                    <div class="w-full rounded-md border shadow-sm bg-gray-100 py-2">
                                         <span x-text="'Rp ' + formatNumber(unitPrice)"></span>
                                     </div>
                                 </div>
@@ -241,7 +241,7 @@
                                     <input type="number" id="unit_price" name="unit_price" x-model="unitPrice"
                                         @input="calculateTotalPrice()" min="0" step="1"
                                         value="{{ old('unit_price', 0) }}" required
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        class="w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                 </div>
                             </template>
 
@@ -249,7 +249,7 @@
                                 <label for="total_price" class="block text-sm font-medium text-gray-700 mb-1">Total
                                     Harga (Rp) *</label>
                                 <input type="number" id="total_price" name="total_price" x-model="totalPrice"
-                                    readonly required class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100">
+                                    readonly required class="w-full rounded-md border shadow-sm bg-gray-100">
                                 <!-- Price breakdown for orders -->
                                 <div x-show="transactionType === 'order' && totalPrice > 0"
                                     class="mt-1 text-xs text-gray-500">
@@ -268,7 +268,7 @@
                     <div class="mb-6" x-show="transactionType === 'order'">
                         <label for="file" class="block text-sm font-medium text-gray-700 mb-1">File Desain</label>
                         <input type="file" id="file" name="file"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            class="w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
                         <p class="mt-1 text-sm text-gray-500">Format: JPG, PNG, PDF, DOC, DOCX (Maks. 5MB)</p>
                     </div>
@@ -281,7 +281,7 @@
                                 <label for="payment_method"
                                     class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran *</label>
                                 <select id="payment_method" name="payment_method" required
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                     <option value="">Pilih Metode Pembayaran</option>
                                     <option value="cash"
                                         {{ old('payment_method', 'cash') == 'cash' ? 'selected' : '' }}>Cash</option>
@@ -296,7 +296,7 @@
                                 <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status
                                     *</label>
                                 <select id="status" name="status" required
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    class="w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                     <option value="pending"
                                         {{ old('status', 'pending') == 'pending' ? 'selected' : '' }}>Pending</option>
                                 </select>
@@ -308,7 +308,7 @@
                     <div class="mb-6">
                         <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
                         <textarea id="notes" name="notes" rows="3"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            class="w-full rounded-md border shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             placeholder="Catatan tambahan untuk transaksi...">{{ old('notes') }}</textarea>
                     </div>
 

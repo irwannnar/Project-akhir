@@ -41,7 +41,7 @@
 
         {{-- filter --}}
         <div class="bg-white mb-4 mt-2 rounded shadow p-3 ">
-            <form method="GET" action="{{ route('spending.index') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <form method="GET" action="{{ route('spending.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <input type="hidden" name="tab" value="spending">
                 <div>
                     <label for="category" class="block text-sm font-medium text-gray-600 mb-1">Kategori</label>
@@ -77,7 +77,7 @@
                     <input type="date" name="date" id="date" value="{{ request('date') }}"
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 </div>
-                <div class="md:col-span-4 flex justify-end space-x-2 mt-4">
+                <div class="flex justify-end space-x-2 mt-4">
                     <button type="submit" class="bg-blue-700 text-white hover:bg-blue-900 px-4 py-2 rounded">Terapkan
                         filter</button>
 
