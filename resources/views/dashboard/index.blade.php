@@ -464,7 +464,7 @@
                                         const text = chart.config.options.plugins.centerText.text;
                                         const textX = Math.round((width - ctx.measureText(text).width) /
                                             2);
-                                        const textY = height / 2 - 20;
+                                        const textY = height / 2 - 35;
 
                                         // Draw text
                                         ctx.fillText(text, textX, textY);
