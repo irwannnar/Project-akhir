@@ -48,36 +48,38 @@
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Transaksi</label>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div @click="setTransactionType('purchase')"
-                                :class="transactionType === 'purchase' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'"
-                                class="border-2 rounded-lg p-4 cursor-pointer transition-colors">
+                            <div :class="transactionType === 'purchase' ? 'border-blue-500 bg-blue-50' :
+                                'border-green-500 bg-green-50'"
+                                class="border-2 rounded-lg p-4 transition-colors">
                                 <div class="flex items-center">
                                     <input type="radio" name="transaction_type" value="purchase"
                                         class="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                                        :checked="transactionType === 'purchase'">
+                                        :checked="transactionType === 'purchase'" disabled>
                                     <label class="ml-3 block text-sm font-medium text-gray-700">
-                                        Pembelian
+                                        <span x-show="transactionType === 'purchase'">Pembelian</span>
+                                        <span x-show="transactionType === 'order'">Pesanan Layanan</span>
                                     </label>
                                 </div>
-                                <p class="mt-1 text-sm text-gray-500">
-                                    Transaksi pembelian produk fisik
+                                <p class="mt-1 text-sm text-gray-500"
+                                    x-text="transactionType === 'purchase' ? 
+                'Transaksi pembelian produk fisik' : 'Transaksi pemesanan layanan cetak'">
                                 </p>
+                                <div class="mt-2 flex items-center text-sm text-blue-600">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Tipe transaksi tidak dapat diubah
+                                </div>
                             </div>
 
-                            <div @click="setTransactionType('order')"
-                                :class="transactionType === 'order' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'"
-                                class="border-2 rounded-lg p-4 cursor-pointer transition-colors">
+                            <!-- Hidden empty div untuk menjaga layout -->
+                            <div class="border-2 border-transparent rounded-lg p-4 opacity-0">
                                 <div class="flex items-center">
-                                    <input type="radio" name="transaction_type" value="order"
-                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                                        :checked="transactionType === 'order'">
-                                    <label class="ml-3 block text-sm font-medium text-gray-700">
-                                        Pesanan Layanan
-                                    </label>
+                                    <input type="radio" class="h-4 w-4">
+                                    <label class="ml-3 block text-sm font-medium">Placeholder</label>
                                 </div>
-                                <p class="mt-1 text-sm text-gray-500">
-                                    Transaksi pemesanan layanan cetak
-                                </p>
+                                <p class="mt-1 text-sm">Placeholder description</p>
                             </div>
                         </div>
                     </div>
@@ -179,6 +181,7 @@
                                         {{ old('printing_id') == $service->id ? 'selected' : '' }}>
                                         {{ $service->nama_layanan }} - Rp
                                         {{ number_format($service->biaya, 0, ',', '.') }}
+                                        {{ $service->hitungan }}
                                     </option>
                                 @endforeach
                             </select>
@@ -197,7 +200,7 @@
                         </div>
                         <div x-show="transactionType === 'order'">
                             <label for="tinggi" class="block text-sm font-medium text-gray-700 mb-1">Tinggi
-                                (cm)</label>
+                                (opsional)</label>
                             <input type="number" id="tinggi" name="tinggi" x-model="tinggi"
                                 @input="calculateTotalPrice()" min="0" step="0.1"
                                 value="{{ old('tinggi') }}"
@@ -206,7 +209,7 @@
                         </div>
                         <div x-show="transactionType === 'order'">
                             <label for="lebar" class="block text-sm font-medium text-gray-700 mb-1">Lebar
-                                (cm)</label>
+                                (opsional)</label>
                             <input type="number" id="lebar" name="lebar" x-model="lebar"
                                 @input="calculateTotalPrice()" min="0" step="0.1"
                                 value="{{ old('lebar') }}"
@@ -222,7 +225,8 @@
                             <!-- For Orders - Show calculated price -->
                             <template x-if="transactionType === 'order'">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Harga per cm</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Harga per
+                                        satuan</label>
                                     <div class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100 px-3 py-2">
                                         <span x-text="'Rp ' + formatNumber(unitPrice)"></span>
                                     </div>
@@ -250,9 +254,9 @@
                                 <div x-show="transactionType === 'order' && totalPrice > 0"
                                     class="mt-1 text-xs text-gray-500">
                                     <span
-                                        x-text="'Luas: ' + (tinggi || 0) + 'cm × ' + (lebar || 0) + 'cm = ' + ((tinggi || 0) * (lebar || 0)).toFixed(2) + 'cm'"></span>
+                                        x-text="'Luas: ' + (tinggi || 0) + 'satuan × ' + (lebar || 0) + ' satuan = ' + ((tinggi || 0) * (lebar || 0)).toFixed(2) + ' satuan'"></span>
                                     <br>
-                                    <span x-text="'× Rp ' + formatNumber(unitPrice) + '/cm'"></span>
+                                    <span x-text="'× Rp ' + formatNumber(unitPrice) + '/satuan'"></span>
                                     <br>
                                     <span x-text="'× ' + quantity + ' item = Rp ' + formatNumber(totalPrice)"></span>
                                 </div>
@@ -414,8 +418,16 @@
 
                 calculateTotalPrice() {
                     if (this.transactionType === 'order') {
-                        // Untuk order: (tinggi × lebar) × harga per cm × quantity
-                        const luas = (parseFloat(this.tinggi) || 0) * (parseFloat(this.lebar) || 0);
+                        // Untuk order: (tinggi × lebar) × harga per ukuran × quantity
+                        let tinggi = parseFloat(this.tinggi) || 0;
+                        let lebar = parseFloat(this.lebar) || 0;
+                        let luas = tinggi * lebar;
+
+                        // Jika tinggi/lebar 0, anggap 1 agar totalPrice = unitPrice * quantity
+                        if (tinggi === 0 || lebar === 0) {
+                            luas = 1;
+                        }
+
                         this.totalPrice = luas * (parseFloat(this.unitPrice) || 0) * (parseInt(this
                             .quantity) || 1);
                     } else {
@@ -510,6 +522,23 @@
                     }
 
                     return true;
+
+                    const tinggi = document.getElementById('tinggi');
+                    const lebar = document.getElementById('lebar');
+                    if (orderSection && getComputedStyle(orderSection).display !== 'none') {
+                        if (tinggi && parseFloat(tinggi.value) < 1) {
+                            e.preventDefault();
+                            alert('Tinggi minimal 1');
+                            tinggi.focus();
+                            return false;
+                        }
+                        if (lebar && parseFloat(lebar.value) < 1) {
+                            e.preventDefault();
+                            alert('Lebar minimal 1');
+                            lebar.focus();
+                            return false;
+                        }
+                    }
                 });
             }
 
