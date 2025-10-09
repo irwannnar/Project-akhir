@@ -42,6 +42,15 @@ class TransactionController extends Controller
             ->when($request->status, function ($query, $status) {
                 return $query->where('status', $status);
             })
+            ->when($request->payment_method, function ($query, $paymentMethod) {
+                return $query->where('payment_method', $paymentMethod);
+            })
+            ->when($request->start_date && $request->end_date, function ($query) use ($request) {
+                return $query->whereBetween('created_at', [
+                    $request->start_date . ' 00:00:00',
+                    $request->end_date . ' 23:59:59'
+                ]);
+            })
             ->orderBy('created_at', 'desc');
 
         $purchases = $purchasesQuery->paginate(10, ['*'], 'purchases_page')
