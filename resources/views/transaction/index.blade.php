@@ -95,7 +95,7 @@
                         <input type="date" id="end_date_order" name="end_date" value="{{ request('end_date') }}"
                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     </div>
-                    <div class="md:col-span-5 flex justify-end space-x-2 mt-4">
+                    <div>
                         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
                             Terapkan Filter
                         </button>
@@ -350,7 +350,7 @@
                             value="{{ request('end_date') }}"
                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     </div>
-                    <div class="md:col-span-5 flex justify-end space-x-2 mt-4">
+                    <div>
                         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
                             Terapkan Filter
                         </button>
