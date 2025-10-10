@@ -84,7 +84,7 @@
 
                                             @case('tetap')
                                                 <span
-                                                    class="px-2 py-1 text-xs font-semibold bg-purple-100 text-blue-800 rounded-full">Harga
+                                                    class="px-2 py-1 text-xs font-semibold bg-red-100 text-red-800 rounded-full">Harga
                                                     Tetap</span>
                                             @break
 
@@ -96,7 +96,7 @@
 
                                             @case('pcs')
                                                 <span
-                                                    class="px-2 py-1 text-xs font-semibold bg-purple-100 text-orange-800 rounded-full">pcs
+                                                    class="px-2 py-1 text-xs font-semibold bg-orange-100 text-orange-800 rounded-full">pcs
                                                 </span>
                                             @break
 
