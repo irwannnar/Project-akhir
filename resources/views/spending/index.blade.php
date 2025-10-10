@@ -23,7 +23,7 @@
                 </button>
             </div>
         @endif
-        
+
         <div>
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
                 <h1 class="text-2xl font-bold text-gray-800">Manajemen Pengeluaran</h1>
@@ -73,14 +73,19 @@
                     </select>
                 </div>
                 <div>
-                    <label for="date" class="block text-sm font-medium text-gray-600 mb-1">Tanggal pembayaran</label>
+                    <label for="date" class="block text-sm font-medium text-gray-600 mb-1">Tanggal
+                        pembayaran</label>
                     <input type="date" name="date" id="date" value="{{ request('date') }}"
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 </div>
                 <div class="flex justify-end space-x-2 mt-4">
-                    <button type="submit" class="bg-blue-700 text-white hover:bg-blue-900 px-4 py-2 rounded">Terapkan
-                        filter</button>
-
+                    <button type="submit" class="bg-blue-700 text-white hover:bg-blue-900 px-4 py-2 rounded">
+                        Terapkan filter
+                    </button>
+                    <a href="{{ route('spending.index') }}"
+                        class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">
+                        Reset
+                    </a>
                 </div>
             </form>
         </div>
@@ -345,11 +350,11 @@
                     <span>${formattedDate}</span>
                 </div>
                 ${description ? `
-                        <div class="mt-3">
-                            <span class="font-medium">Deskripsi:</span>
-                            <p class="text-gray-700 mt-1">${description}</p>
-                        </div>
-                        ` : ''}
+                            <div class="mt-3">
+                                <span class="font-medium">Deskripsi:</span>
+                                <p class="text-gray-700 mt-1">${description}</p>
+                            </div>
+                            ` : ''}
             `;
 
             modal.classList.remove('hidden');
