@@ -362,8 +362,8 @@
                         // Warna yang berbeda untuk setiap layanan
                         const backgroundColors = [
                             '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-                            '#FF9F40', '#126654', '#C9CBCF', '#4BC0C0', '#36A2EB',
-                            '#FF6384', '#FFCE56', '#9966FF', '#FF9F40', '#C9CBCF'
+                            '#FF9F40', '#126654', '#C9CBCF', '#7BD7F7', '#47D2FC',
+                            '#FF7245', '#FFHE76', '#9977FA', '#HH9F47', '#C4CBDH'
                         ];
 
                         // Potong array warna sesuai jumlah layanan
