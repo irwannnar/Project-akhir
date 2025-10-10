@@ -1,6 +1,6 @@
 <x-layout.default>
     <div class="container mx-auto px-4 py-6" x-data="printingData()" x-init="init()">
-        
+
         @if (session('success'))
             <div x-data="{ show: true }" x-show="show" x-transition:leave="transition ease-in duration-300"
                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" x-init="setTimeout(() => show = false, 3000)"
@@ -26,7 +26,7 @@
 
         <div>
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
-                <h1>jasa Printing</h1>
+                <h1 class="font-bold text-2xl text-gray-800">jasa Printing</h1>
                 <a href="{{ route('printing.create') }}"
                     class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center gap-2 active:scale-95">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -76,16 +76,28 @@
                                                     Lembar</span>
                                             @break
 
-                                            @case('per_cm2')
+                                            @case('per_cm')
                                                 <span
                                                     class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Per
-                                                    cm²</span>
+                                                    cm</span>
                                             @break
 
                                             @case('tetap')
                                                 <span
-                                                    class="px-2 py-1 text-xs font-semibold bg-purple-100 text-purple-800 rounded-full">Harga
+                                                    class="px-2 py-1 text-xs font-semibold bg-purple-100 text-blue-800 rounded-full">Harga
                                                     Tetap</span>
+                                            @break
+
+                                            @case('per_meter')
+                                                <span
+                                                    class="px-2 py-1 text-xs font-semibold bg-purple-100 text-purple-800 rounded-full">Per
+                                                    Meter</span>
+                                            @break
+
+                                            @case('pcs')
+                                                <span
+                                                    class="px-2 py-1 text-xs font-semibold bg-purple-100 text-orange-800 rounded-full">pcs
+                                                </span>
                                             @break
 
                                             @default
@@ -122,19 +134,6 @@
                                                 </svg>
                                             </button>
                                         </form>
-                                        <button type="button"
-                                            onclick='showSizes({{ $layanan->id }}, {!! json_encode($layanan->ukuran) !!})'
-                                            class="text-green-600 hover:text-green-900 transition duration-200"
-                                            title="Lihat Detail Ukuran">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                                                </path>
-                                            </svg>
-                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -151,106 +150,4 @@
             </div>
         @endif
     </div>
-
-    <!-- Modal untuk menampilkan detail ukuran -->
-    <div id="sizesModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
-        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
-            <div class="mt-3">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-medium text-gray-900" id="modalTitle">Detail Ukuran</h3>
-                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-
-                <div class="mt-2">
-                    <div id="sizesList" class="space-y-2 max-h-60 overflow-y-auto">
-                        <!-- Daftar ukuran akan diisi oleh JavaScript -->
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <button onclick="closeModal()"
-                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition duration-200">
-                        Tutup
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Fungsi untuk menampilkan modal detail ukuran
-        function showSizes(layananId, sizes) {
-            try {
-                const modal = document.getElementById('sizesModal');
-                const sizesList = document.getElementById('sizesList');
-                const modalTitle = document.getElementById('modalTitle');
-
-                if (!modal || !sizesList || !modalTitle) {
-                    console.error('Element modal tidak ditemukan');
-                    return;
-                }
-
-                // Handle both array and JSON string
-                let sizesArray = [];
-                if (typeof sizes === 'string') {
-                    try {
-                        sizesArray = JSON.parse(sizes) || [];
-                    } catch (e) {
-                        console.error('Error parsing JSON:', e);
-                        sizesArray = [];
-                    }
-                } else if (Array.isArray(sizes)) {
-                    sizesArray = sizes;
-                }
-
-                modalTitle.textContent = `Detail Ukuran - Layanan #${layananId}`;
-                sizesList.innerHTML = '';
-
-                if (sizesArray.length > 0) {
-                    sizesArray.forEach((size) => {
-                        if (size && size.nama && size.harga) {
-                            const sizeItem = document.createElement('div');
-                            sizeItem.className = 'flex justify-between items-center p-2 bg-gray-50 rounded';
-                            sizeItem.innerHTML = `
-                        <span class="font-medium">${size.nama}</span>
-                        <span class="text-green-600 font-semibold">Rp ${new Intl.NumberFormat('id-ID').format(size.harga)}</span>
-                    `;
-                            sizesList.appendChild(sizeItem);
-                        }
-                    });
-                } else {
-                    sizesList.innerHTML = '<p class="text-gray-500 text-center">Tidak ada ukuran tersedia</p>';
-                }
-
-                modal.classList.remove('hidden');
-            } catch (error) {
-                console.error('Error dalam showSizes:', error);
-            }
-        }
-
-        // Fungsi untuk menutup modal
-        function closeModal() {
-            document.getElementById('sizesModal').classList.add('hidden');
-        }
-
-        // Fungsi untuk konfirmasi delete (jika menggunakan Alpine.js)
-        function confirmDelete(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus layanan ini?')) {
-                document.querySelector(`form[x-ref="deleteForm-${id}"]`).submit();
-            }
-        }
-
-        // Close modal ketika klik di luar area modal
-        window.onclick = function(event) {
-            const modal = document.getElementById('sizesModal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        }
-    </script>
 </x-layout.default>
