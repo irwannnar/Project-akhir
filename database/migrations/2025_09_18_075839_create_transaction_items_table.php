@@ -11,13 +11,17 @@ return new class extends Migration
         Schema::create('transaction_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('transaction_id')->constrained()->onDelete('cascade');
-            $table->foreignId('product_id')->nullable()->constrained();
-            $table->foreignId('printing_id')->nullable()->constrained();
+            $table->foreignId('product_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('printing_id')->nullable()->constrained()->onDelete('cascade');
+            $table->enum('item_type', ['product', 'service']);
+            $table->string('item_name');
             $table->integer('quantity');
-            $table->decimal('unit_price', 15, 2);
-            $table->decimal('subtotal', 15, 2);
-            $table->string('size')->nullable();
-            $table->string('material')->nullable();
+            $table->decimal('unit_price', 15, 2)->default(0);
+            $table->decimal('total_price', 15, 2);
+            $table->text('notes')->nullable(); // Catatan umum untuk transaksi
+            $table->decimal('tinggi', 8, 2)->nullable();
+            $table->decimal('lebar', 8, 2)->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }

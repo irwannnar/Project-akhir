@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Dashboard;
 use App\Models\Transaction;
+use App\Models\TransactionItem;
 use App\Models\Product;
 use App\Models\Spending;
 use Illuminate\Http\Request;
@@ -66,73 +66,101 @@ class DashboardController extends Controller
         $estimatedExpenses = Spending::whereYear('created_at', $currentYear)
             ->sum('amount');
 
-        $totalProductsSold = Transaction::whereYear('created_at', $currentYear)
-            ->where('status', 'completed')
+        // Total produk terjual dari TransactionItem
+        $totalProductsSold = TransactionItem::whereHas('transaction', function($query) use ($currentYear) {
+                $query->whereYear('created_at', $currentYear)
+                      ->where('status', 'completed');
+            })
             ->sum('quantity');
 
+        // Total transaksi completed
         $totalOrdersCompleted = Transaction::whereYear('created_at', $currentYear)
             ->where('status', 'completed')
             ->count();
 
-        //total saldo yang dipunya saat ini
+        // Total saldo (profit - expenses)
         $totalBalance = $totalProfit - $estimatedExpenses;
 
-        //total transaksi hari ini 
+        // Transaksi hari ini
         $dailyOrderCompleted = Transaction::whereDate('created_at', now()->toDateString())
             ->where('status', 'completed')
             ->count();
 
-        //total transaksi minggu ini
-        $weeklyOrderCompleted = Transaction::WhereBetween('created_at', [
-            now()->startOfWeek(),
-            now()->endOfWeek()
-        ])
+        // Transaksi minggu ini
+        $weeklyOrderCompleted = Transaction::whereBetween('created_at', [
+                now()->startOfWeek(),
+                now()->endOfWeek()
+            ])
             ->where('status', 'completed')
             ->count();
 
-        //total transaksi bulan ini
-        $monthlyOrderCompleted = Transaction::WhereBetween('created_at', [
-            now()->startOfMonth(),
-            now()->endOfMonth()
-        ])
+        // Transaksi bulan ini
+        $monthlyOrderCompleted = Transaction::whereBetween('created_at', [
+                now()->startOfMonth(),
+                now()->endOfMonth()
+            ])
             ->where('status', 'completed')
             ->count();
 
-        // Transaksi terbaru
-        $recentTransactions = Transaction::with(['product', 'printing'])
-            ->where('status', 'completed')
-            ->orderBy('created_at', 'desc')
-            ->take(5)
+        // Data untuk distribusi layanan dari TransactionItem - PERBAIKAN
+        $serviceDistribution = TransactionItem::selectRaw('
+                printings.nama_layanan as service_name,
+                COUNT(*) as total_orders
+            ')
+            ->join('printings', 'transaction_items.printing_id', '=', 'printings.id')
+            ->join('transactions', 'transaction_items.transaction_id', '=', 'transactions.id')
+            ->whereYear('transactions.created_at', $currentYear)
+            ->where('transactions.status', 'completed')
+            ->whereNotNull('transaction_items.printing_id')
+            ->groupBy('printings.nama_layanan')
+            ->orderBy('total_orders', 'desc')
             ->get()
-            ->map(function ($trx) {
-                return [
-                    'type' => $trx->type,
-                    'name' => $trx->product->name
-                        ?? $trx->printing->nama_layanan
-                        ?? 'Item',
-                    'quantity' => $trx->quantity,
-                    'total_price' => $trx->total_price,
-                    'created_at' => $trx->created_at
-                ];
-            });
+            ->pluck('total_orders', 'service_name')
+            ->toArray();
 
-        // Data untuk chart pembelian vs pesanan - PERBAIKAN DI SINI
-        $monthlyPurchaseData = array_fill(0, 12, 0);
-        $monthlyOrderData = array_fill(0, 12, 0);
+        // Produk terlaris - QUERY YANG DIPERBAIKI
+        $bestSellingProducts = Product::selectRaw('
+                products.id,
+                products.name,
+                COALESCE(SUM(transaction_items.quantity), 0) as total_sold
+            ')
+            ->leftJoin('transaction_items', 'products.id', '=', 'transaction_items.product_id')
+            ->leftJoin('transactions', function($join) use ($currentYear) {
+                $join->on('transaction_items.transaction_id', '=', 'transactions.id')
+                     ->whereYear('transactions.created_at', $currentYear)
+                     ->where('transactions.status', 'completed');
+            })
+            ->groupBy('products.id', 'products.name')
+            ->orderBy('total_sold', 'desc')
+            ->take(3)
+            ->get();
 
-        // Query untuk mendapatkan data transaksi per bulan
-        $transactionStats = Transaction::selectRaw('
-            MONTH(created_at) as month,
-            type,
-            COUNT(*) as count
-        ')
+        // Alternatif 2: Jika cara di atas masih error, gunakan cara ini
+        // $bestSellingProducts = Product::withSum(['transactionItems as total_sold' => function($query) use ($currentYear) {
+        //     $query->whereHas('transaction', function($q) use ($currentYear) {
+        //         $q->whereYear('created_at', $currentYear)
+        //           ->where('status', 'completed');
+        //     });
+        // }], 'quantity')
+        // ->orderBy('total_sold', 'desc')
+        // ->take(3)
+        // ->get();
+
+        // Data untuk chart pembelian vs pesanan per bulan
+        $monthlyTransactionStats = Transaction::selectRaw('
+                MONTH(created_at) as month,
+                type,
+                COUNT(*) as count
+            ')
             ->whereYear('created_at', $currentYear)
             ->where('status', 'completed')
             ->groupBy('month', 'type')
             ->get();
 
-        // Isi data ke array
-        foreach ($transactionStats as $stat) {
+        $monthlyPurchaseData = array_fill(0, 12, 0);
+        $monthlyOrderData = array_fill(0, 12, 0);
+
+        foreach ($monthlyTransactionStats as $stat) {
             $monthIndex = $stat->month - 1;
             if ($stat->type === 'purchase') {
                 $monthlyPurchaseData[$monthIndex] = $stat->count;
@@ -140,35 +168,6 @@ class DashboardController extends Controller
                 $monthlyOrderData[$monthIndex] = $stat->count;
             }
         }
-
-        // Data distribusi layanan
-        $allServiceTransaction = Transaction::with('printing')
-            ->where('type', 'order')
-            ->whereYear('created_at', $currentYear)
-            ->where('status', 'completed')
-            ->get();
-
-        $serviceDistribution = [];
-        foreach ($allServiceTransaction as $transaction) {
-            if ($transaction->printing) {
-                $serviceName = $transaction->printing->nama_layanan;
-                if (!isset($serviceDistribution[$serviceName])) {
-                    $serviceDistribution[$serviceName] = 0;
-                }
-                $serviceDistribution[$serviceName]++;
-            }
-        }
-
-        arsort($serviceDistribution);
-
-        // Produk terlaris
-        $bestSellingProducts = Product::withSum(['transactions as total_sold' => function ($query) use ($currentYear) {
-            $query->whereYear('created_at', $currentYear)
-                ->where('status', 'completed');
-        }], 'quantity')
-            ->orderBy('total_sold', 'desc')
-            ->take(3)
-            ->get();
 
         return view('dashboard.index', compact(
             'combinedMonthlyProfit',
@@ -178,14 +177,13 @@ class DashboardController extends Controller
             'totalProductsSold',
             'totalOrdersCompleted',
             'totalBalance',
-            'recentTransactions',
             'bestSellingProducts',
             'dailyOrderCompleted',
             'weeklyOrderCompleted',
             'monthlyOrderCompleted',
             'monthlyPurchaseData',
             'monthlyOrderData',
-            'serviceDistribution',
+            'serviceDistribution'
         ));
     }
 
@@ -208,7 +206,7 @@ class DashboardController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(dashboard $dashboard)
+    public function show($id)
     {
         //
     }
@@ -216,7 +214,7 @@ class DashboardController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(dashboard $dashboard)
+    public function edit($id)
     {
         //
     }
@@ -224,7 +222,7 @@ class DashboardController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, dashboard $dashboard)
+    public function update(Request $request, $id)
     {
         //
     }
@@ -232,7 +230,7 @@ class DashboardController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(dashboard $dashboard)
+    public function destroy($id)
     {
         //
     }

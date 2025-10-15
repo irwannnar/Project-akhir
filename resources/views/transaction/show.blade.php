@@ -13,7 +13,6 @@
 
 <body class="bg-gray-300">
 
-
     <div class="container mx-auto px-4 py-6">
         <div class="max-w-4xl mx-auto">
             <!-- Header Actions -->
@@ -67,7 +66,8 @@
                         </div>
                         <div class="text-right">
                             <h2 class="text-2xl font-bold text-blue-600 mb-2">
-                                #INV-{{ str_pad($transaction->id, 6, '0', STR_PAD_LEFT) }}</h2>
+                                {{ $transaction->transaction_number }}
+                            </h2>
                             <p class="text-gray-600 text-sm">
                                 Tanggal: {{ \Carbon\Carbon::parse($transaction->created_at)->format('d/m/Y') }}
                             </p>
@@ -123,35 +123,42 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @foreach($transaction->items as $item)
                                 <tr>
                                     <td class="py-4 px-4 border-b">
                                         <div>
                                             <p class="font-semibold text-gray-800">
                                                 @if ($transaction->type == 'purchase')
-                                                    {{ $transaction->product->name ?? 'Produk' }}
+                                                    {{ $item->product->name ?? 'Produk tidak ditemukan' }}
                                                 @else
-                                                    {{ $transaction->printing->nama_layanan ?? 'Layanan Cetak' }}
+                                                    {{ $item->printing->nama_layanan ?? 'Layanan tidak ditemukan' }}
                                                 @endif
                                             </p>
                                             @if ($transaction->type == 'order')
+                                                @if ($item->tinggi && $item->lebar)
                                                 <p class="text-sm text-gray-600 mt-1">
-                                                    @if ($transaction->tinggi && $transaction->lebar)
-                                                        Ukuran: {{ $transaction->tinggi }} x
-                                                        {{ $transaction->lebar }} cm
-                                                    @endif
+                                                    Ukuran: {{ $item->tinggi }} x {{ $item->lebar }} cm
                                                 </p>
+                                                @endif
+                                            @endif
+                                            @if($item->notes)
+                                            <p class="text-sm text-gray-600 mt-1">
+                                                Catatan: {{ $item->notes }}
+                                            </p>
                                             @endif
                                         </div>
                                     </td>
                                     <td class="py-4 px-4 text-right border-b text-gray-700">
-                                        {{ $transaction->quantity }}</td>
-                                    <td class="py-4 px-4 text-right border-b text-gray-700">
-                                        Rp {{ number_format($transaction->unit_price, 0, ',', '.') }}
+                                        {{ $item->quantity }}
                                     </td>
                                     <td class="py-4 px-4 text-right border-b text-gray-700">
-                                        Rp {{ number_format($transaction->total_price, 0, ',', '.') }}
+                                        Rp {{ number_format($item->unit_price, 0, ',', '.') }}
+                                    </td>
+                                    <td class="py-4 px-4 text-right border-b text-gray-700">
+                                        Rp {{ number_format($item->total_price, 0, ',', '.') }}
                                     </td>
                                 </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -169,8 +176,7 @@
                                 <div class="border-t border-gray-200 pt-2">
                                     <div class="flex justify-between text-lg font-bold text-gray-800">
                                         <span>Total:</span>
-                                        <span>Rp
-                                            {{ number_format($transaction->total_price * 1, 0, ',', '.') }}</span>
+                                        <span>Rp {{ number_format($transaction->total_price, 0, ',', '.') }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -185,6 +191,12 @@
                             <h3 class="text-lg font-semibold text-gray-800 mb-4">Informasi Pembayaran</h3>
                             <div class="space-y-2 text-sm">
                                 <div class="flex justify-between">
+                                    <span class="text-gray-600">Tipe Transaksi:</span>
+                                    <span class="font-semibold text-gray-800 capitalize">
+                                        {{ $transaction->type == 'order' ? 'Pesanan Layanan' : 'Pembelian Produk' }}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between">
                                     <span class="text-gray-600">Metode Pembayaran:</span>
                                     <span class="font-semibold text-gray-800 capitalize">
                                         {{ $transaction->payment_method }}
@@ -197,9 +209,10 @@
                                             $statusColors = [
                                                 'pending' => 'text-yellow-600',
                                                 'completed' => 'text-green-600',
+                                                'cancelled' => 'text-red-600',
                                             ];
                                         @endphp
-                                        <span class="{{ $statusColors[$transaction->status] }}">
+                                        <span class="{{ $statusColors[$transaction->status] ?? 'text-gray-600' }}">
                                             {{ ucfirst($transaction->status) }}
                                         </span>
                                     </span>

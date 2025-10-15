@@ -70,6 +70,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/sale/product', [SaleController::class, 'product'])->name('sale.product');
     Route::resource('transaction', TransactionController::class);
     Route::patch('/transaction/{transaction}/mark-completed', [TransactionController::class, 'markCompleted'])->name('transaction.markCompleted');
+    Route::post('/transaction/{transaction}/update-status', [TransactionController::class, 'updateStatus'])
+        ->name('transaction.update-status');
+    Route::patch('/transaction/{id}/mark-completed', [TransactionController::class, 'markCompleted'])
+        ->name('transaction.mark-completed');
+    Route::get('/transactions/export', [TransactionController::class, 'export'])->name('transaction.export');
     Route::resource('finance', FinanceController::class);
     Route::resource('spending', SpendingController::class);
     Route::resource('invoice', InvoiceController::class);
