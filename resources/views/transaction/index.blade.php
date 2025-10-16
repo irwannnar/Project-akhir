@@ -82,20 +82,7 @@
                             <option value="cancelled">Cancelled</option>
                         </select>
                     </div>
-                    
-                    <div>
-                        <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-1">
-                            Metode Pembayaran
-                        </label>
-                        <select id="payment_method" name="payment_method" x-model="filters.payment_method"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="">Semua Metode</option>
-                            <option value="cash">Cash</option>
-                            <option value="transfer">Transfer</option>
-                            <option value="credit_card">Kartu Kredit</option>
-                        </select>
-                    </div>
-                    
+
                     <div>
                         <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">
                             Tanggal Mulai
@@ -112,7 +99,7 @@
                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     </div>
                     
-                    <div class="md:col-span-4 flex justify-end space-x-3">
+                    <div class="flex justify-end space-x-3">
                         <button type="submit"
                             class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                             Terapkan Filter
