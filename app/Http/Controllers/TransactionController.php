@@ -220,60 +220,142 @@ class TransactionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+     public function update(Request $request, $id)
     {
         DB::beginTransaction();
 
         try {
             $transaction = Transaction::findOrFail($id);
-            $transactionItem = $transaction->items->first();
 
+            // Validasi: gunakan cart_items (JSON) bukan field item tunggal
             $validated = $request->validate([
-                'customer_name' => 'required|string|max:255',
-                'customer_phone' => 'required|string|max:20',
+                'customer_name'  => 'required|string|max:255',
+                'customer_phone' => 'nullable|string|max:20',
                 'customer_email' => 'nullable|email|max:255',
                 'customer_address' => 'nullable|string',
                 'payment_method' => 'required|string',
                 'paid_at' => 'nullable|date',
                 'status' => 'required|string',
-                'quantity' => 'required|integer|min:1',
-                'unit_price' => 'required|numeric|min:0',
-                'total_price' => 'required|numeric|min:0',
+                'cart_items' => 'required|json',
             ]);
 
-            // Update transaction
+            $cartItems = json_decode($request->cart_items, true);
+            if (empty($cartItems) || !is_array($cartItems)) {
+                DB::rollBack();
+                return back()->with('error', 'Keranjang kosong atau format tidak valid!');
+            }
+
+            // Validasi stok untuk produk jika transaksi bertipe purchase
+            if ($transaction->type === 'purchase') {
+                foreach ($cartItems as $item) {
+                    if (($item['type'] ?? '') === 'product') {
+                        $product = Product::find($item['product_id']);
+                        if (!$product) {
+                            DB::rollBack();
+                            return back()->with('error', 'Produk tidak ditemukan!');
+                        }
+                        $qty = (int) ($item['quantity'] ?? 0);
+                        if ($qty < 1) {
+                            DB::rollBack();
+                            return back()->with('error', 'Jumlah produk harus minimal 1!');
+                        }
+                        // Note: nanti akan sesuaikan stok (restore old, kurangi new)
+                    }
+                }
+            }
+
+            // Hitung total harga dari cart_items
+            $totalPrice = array_reduce($cartItems, function ($sum, $it) {
+                return $sum + (float)($it['total_price'] ?? 0);
+            }, 0);
+
+            if ($totalPrice <= 0) {
+                DB::rollBack();
+                return back()->with('error', 'Total harga tidak valid!');
+            }
+
+            // Restore stok dari item lama (untuk purchase) sebelum mengganti
+            if ($transaction->type === 'purchase') {
+                foreach ($transaction->items as $oldItem) {
+                    if ($oldItem->product_id) {
+                        $prod = Product::find($oldItem->product_id);
+                        if ($prod) {
+                            $prod->increment('stock', $oldItem->quantity);
+                        }
+                    }
+                }
+            }
+
+            // Hapus item lama
+            $transaction->items()->delete();
+
+            // Update header transaksi
             $transaction->update([
                 'customer_name' => $validated['customer_name'],
-                'customer_phone' => $validated['customer_phone'],
+                'customer_phone' => $validated['customer_phone'] ?? null,
                 'customer_email' => $validated['customer_email'] ?? null,
                 'customer_address' => $validated['customer_address'] ?? null,
                 'payment_method' => $validated['payment_method'],
                 'paid_at' => $validated['paid_at'] ?? null,
                 'status' => $validated['status'],
-                'total_price' => $validated['total_price'],
+                'subtotal' => $totalPrice,
+                'total_price' => $totalPrice,
                 'notes' => $request->notes ?? null,
             ]);
 
-            // Update transaction item
-            if ($transactionItem) {
-                $transactionItem->update([
-                    'quantity' => $validated['quantity'],
-                    'unit_price' => $validated['unit_price'],
-                    'total_price' => $validated['total_price'],
-                    'tinggi' => $request->tinggi ?? null,
-                    'lebar' => $request->lebar ?? null,
-                    'notes' => $request->notes ?? null,
-                ]);
+            // Simpan item baru dan sesuaikan stok (jika purchase)
+            foreach ($cartItems as $item) {
+                $quantity = (int) ($item['quantity'] ?? 1);
+                $price = (float) ($item['price'] ?? 0);
+                $itemTotalPrice = (float) ($item['total_price'] ?? ($price * $quantity));
+
+                if (($item['type'] ?? '') === 'product') {
+                    $product = Product::find($item['product_id']);
+                    if ($product) {
+                        // Kurangi stok sesuai item baru
+                        $product->decrement('stock', $quantity);
+
+                        $unitCost = $product->cost_price ?? 0;
+                        $totalCost = $unitCost * $quantity;
+                        $profit = $itemTotalPrice - $totalCost;
+                    } else {
+                        $unitCost = 0;
+                        $profit = 0;
+                    }
+
+                    $transaction->items()->create([
+                        'product_id' => $item['product_id'],
+                        'printing_id' => null,
+                        'quantity' => $quantity,
+                        'unit_price' => $price,
+                        'total_price' => $itemTotalPrice,
+                        'unit_cost' => $unitCost ?? 0,
+                        'profit' => $profit ?? 0,
+                        'notes' => $item['notes'] ?? null,
+                    ]);
+                } else {
+                    $transaction->items()->create([
+                        'product_id' => null,
+                        'printing_id' => $item['printing_id'] ?? null,
+                        'quantity' => $quantity,
+                        'tinggi' => isset($item['tinggi']) ? $item['tinggi'] : null,
+                        'lebar' => isset($item['lebar']) ? $item['lebar'] : null,
+                        'unit_price' => $price,
+                        'total_price' => $itemTotalPrice,
+                        'notes' => $item['notes'] ?? null,
+                    ]);
+                }
             }
 
-            // Handle file upload for services
+            // Handle file upload for services (update last item file if provided)
             if ($transaction->type === 'order' && $request->hasFile('file')) {
                 $file = $request->file('file');
                 $filename = time() . '_' . $file->getClientOriginalName();
                 $path = $file->storeAs('transaction_files', $filename, 'public');
-
-                if ($transactionItem) {
-                    $transactionItem->update(['file_path' => $path]);
+                // set file_path ke item terakhir sebagai contoh
+                $lastItem = $transaction->items()->latest()->first();
+                if ($lastItem) {
+                    $lastItem->update(['file_path' => $path]);
                 }
             }
 
