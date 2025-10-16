@@ -87,7 +87,7 @@
                                     <select id="printing_id" x-model="form.printing_id" required
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                         <option value="">Pilih Layanan</option>
-                                        @foreach ($printings as $printing)
+                                        @foreach ($services as $printing)
                                             <option value="{{ $printing->id }}" data-price="{{ $printing->biaya }}"
                                                 data-hitungan="{{ $printing->hitungan }}"
                                                 {{ old('printing_id', optional($transaction->items->first())->printing_id) == $printing->id ? 'selected' : '' }}>

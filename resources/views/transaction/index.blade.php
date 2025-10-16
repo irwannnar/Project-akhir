@@ -79,7 +79,6 @@
                             <option value="">Semua Status</option>
                             <option value="pending">Pending</option>
                             <option value="completed">Completed</option>
-                            <option value="cancelled">Cancelled</option>
                         </select>
                     </div>
 
@@ -127,9 +126,6 @@
                                         Pelanggan
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Item Layanan
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Jumlah Item
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -156,20 +152,6 @@
                                             @if($order->customer_email)
                                             <div class="text-sm text-gray-500">{{ $order->customer_email }}</div>
                                             @endif
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <div class="space-y-2">
-                                                @foreach($order->items as $item)
-                                                    <div class="text-sm text-gray-900">
-                                                        <div class="font-medium">
-                                                            {{ $item->printing->nama_layanan ?? 'Layanan tidak ditemukan' }}
-                                                        </div>
-                                                        <div class="text-xs text-gray-600">
-                                                            {{ $item->quantity }} x Rp {{ number_format($item->total_price, 0, ',', '.') }}
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                            </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $order->items->sum('quantity') }} item
@@ -286,9 +268,6 @@
                                         Pelanggan
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Item Produk
-                                    </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Jumlah Item
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -316,25 +295,6 @@
                                             <div class="text-sm text-gray-500">{{ $purchase->customer_email }}</div>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4">
-                                            <div class="space-y-2">
-                                                @foreach($purchase->items as $item)
-                                                    <div class="text-sm text-gray-900">
-                                                        <div class="font-medium">
-                                                            {{ $item->product->name ?? 'Produk tidak ditemukan' }}
-                                                        </div>
-                                                        @if($item->notes)
-                                                            <div class="text-xs text-gray-500">
-                                                                Catatan: {{ Str::limit($item->notes, 30) }}
-                                                            </div>
-                                                        @endif
-                                                        <div class="text-xs text-gray-600">
-                                                            {{ $item->quantity }} x Rp {{ number_format($item->total_price, 0, ',', '.') }}
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $purchase->items->sum('quantity') }} item
                                         </td>
@@ -346,7 +306,6 @@
                                                 $statusConfig = [
                                                     'pending' => ['class' => 'bg-yellow-100 text-yellow-800', 'label' => 'Pending'],
                                                     'completed' => ['class' => 'bg-green-100 text-green-800', 'label' => 'Completed'],
-                                                    'cancelled' => ['class' => 'bg-red-100 text-red-800', 'label' => 'Cancelled'],
                                                 ];
                                                 $config = $statusConfig[$purchase->status] ?? ['class' => 'bg-gray-100 text-gray-800', 'label' => $purchase->status];
                                             @endphp
