@@ -1,272 +1,350 @@
+<!-- edit.blade.php -->
 <x-layout.default>
-    <div class="min-h-screen">
-        <!-- Header -->
-        <header class="mt-4">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-gray-900">Edit Transaksi</h1>
-                    <a href="{{ route('transaction.index') }}"
-                        class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">
-                        Kembali
-                    </a>
-                </div>
+    <div class="py-6" x-data="transactionApp()">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Header -->
+            <div class="mb-6">
+                <h1 class="text-3xl font-bold text-gray-900">Edit Transaksi</h1>
+                <p class="mt-2 text-sm text-gray-600">
+                    {{ $transaction->type == 'purchase' ? 'Pembelian Produk' : 'Pesanan Layanan' }}
+                </p>
             </div>
-        </header>
 
-        <!-- Main Content -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            @if ($errors->any())
+            @if (session('error'))
                 <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6" role="alert">
-                    <div class="flex">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                            </path>
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        <div>
-                            <span class="font-medium">Terdapat kesalahan:</span>
-                            <ul class="mt-1 list-disc list-inside text-sm">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
+                        <span>{{ session('error') }}</span>
                     </div>
                 </div>
             @endif
 
-            <div class="bg-white shadow-md rounded-lg overflow-hidden p-6" x-data="transactionForm()"
-                x-init="init()">
-                <form action="{{ route('transaction.update', $transaction->id) }}" method="POST"
-                    enctype="multipart/form-data" id="transactionForm">
-                    @csrf
-                    @method('PUT')
+            @if (session('success'))
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6" role="alert">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                </div>
+            @endif
 
-                    <input type="hidden" name="type" value="{{ $transaction->type }}">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Form Input Produk/Layanan -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                            Tambah Item
+                        </h2>
 
-                    <!-- Transaction Type Display -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Transaksi</label>
-                        <div class="p-3 bg-gray-100 rounded-md">
-                            <span class="font-medium">
-                                {{ $transaction->type == 'purchase' ? 'Pembelian' : 'Pesanan Layanan' }}
+                        <form id="addItemForm" @submit.prevent="addToCart()">
+                            @csrf
+
+                            <!-- Tipe Transaksi -->
+                            <input type="hidden" name="type" value="{{ $transaction->type }}">
+
+                            @if ($transaction->type == 'purchase')
+                                <!-- Form untuk Pembelian Produk -->
+                                <div class="mb-4">
+                                    <label for="product_id" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Pilih Produk *
+                                    </label>
+                                    <select id="product_id" x-model="form.product_id" required
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <option value="">Pilih Produk</option>
+                                        @foreach ($products as $product)
+                                            <<option value="{{ $product->id }}"
+                                                data-price="{{ $product->price_per_unit }}"
+                                                data-stock="{{ $product->stock }}"
+                                                {{ old('product_id', optional($transaction->items->first())->product_id) == $product->id ? 'selected' : '' }}>
+                                                {{ $product->name }} - Rp
+                                                {{ number_format($product->price_per_unit, 0, ',', '.') }}
+                                                </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Jumlah *
+                                    </label>
+                                    <input type="number" id="quantity" x-model="form.quantity" min="1"
+                                        value="1" required
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <p id="stockInfo" class="text-xs text-gray-500 mt-1" x-text="stockInfo"></p>
+                                </div>
+                            @else
+                                <!-- Form untuk Pesanan Layanan -->
+                                <div class="mb-4">
+                                    <label for="printing_id" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Pilih Layanan *
+                                    </label>
+                                    <select id="printing_id" x-model="form.printing_id" required
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <option value="">Pilih Layanan</option>
+                                        @foreach ($printings as $printing)
+                                            <option value="{{ $printing->id }}" data-price="{{ $printing->biaya }}"
+                                                data-hitungan="{{ $printing->hitungan }}"
+                                                {{ old('printing_id', optional($transaction->items->first())->printing_id) == $printing->id ? 'selected' : '' }}>
+                                                {{ $printing->nama_layanan }} - Rp
+                                                {{ number_format($printing->biaya, 0, ',', '.') }}
+                                                {{ $printing->hitungan }}
+                                            </option>
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label for="tinggi" class="block text-sm font-medium text-gray-700 mb-1">
+                                            Tinggi (cm)
+                                        </label>
+                                        <input type="number" id="tinggi" x-model="form.tinggi" min="1"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            placeholder="Tinggi dalam cm">
+                                    </div>
+                                    <div>
+                                        <label for="lebar" class="block text-sm font-medium text-gray-700 mb-1">
+                                            Lebar (cm)
+                                        </label>
+                                        <input type="number" id="lebar" x-model="form.lebar" min="1"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            placeholder="Lebar dalam cm">
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        Perhitungan Harga
+                                    </label>
+                                    <div class="text-sm text-gray-600 p-2 bg-gray-50 rounded">
+                                        <template x-if="form.tinggi && form.lebar">
+                                            <div>
+                                                Luas: <span x-text="calculateArea()"></span> cm²
+                                            </div>
+                                        </template>
+                                        <div>
+                                            Biaya per cm²: Rp <span x-text="formatCurrency(getBasePrice())"></span>
+                                        </div>
+                                        <template x-if="form.tinggi && form.lebar">
+                                            <div>
+                                                Harga per item: Rp <span
+                                                    x-text="formatCurrency(calculateUnitPrice())"></span>
+                                            </div>
+                                        </template>
+                                        <div class="font-semibold mt-1">
+                                            Total Harga: Rp <span x-text="formatCurrency(calculateTotalPrice())"></span>
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1">
+                                            Rumus: Biaya × Tinggi × Lebar × Jumlah
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="service_quantity" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Jumlah *
+                                    </label>
+                                    <input type="number" id="service_quantity" x-model="form.quantity" min="1"
+                                        value="1" required
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="file" class="block text-sm font-medium text-gray-700 mb-1">
+                                        File Desain (Opsional)
+                                    </label>
+                                    <input type="file" id="file"
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        accept=".jpg,.jpeg,.png,.pdf,.ai,.psd,.cdr">
+                                </div>
+                            @endif
+
+                            <div class="mb-4">
+                                <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Catatan (Opsional)
+                                </label>
+                                <textarea id="notes" x-model="form.notes" rows="3"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    placeholder="Tambahkan catatan khusus..."></textarea>
+                            </div>
+
+                            <button type="submit"
+                                class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                Tambah ke Keranjang
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Keranjang dan Form Transaksi -->
+                <div class="lg:col-span-2">
+                    <!-- Keranjang -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold text-gray-900">Keranjang</h2>
+                            <span x-text="`${cart.length} item${cart.length !== 1 ? 's' : ''}`"
+                                class="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded">
                             </span>
                         </div>
-                    </div>
 
-                    <!-- Customer Information -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Pelanggan</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-1">Nama
-                                    Pelanggan *</label>
-                                <input type="text" id="customer_name" name="customer_name"
-                                    value="{{ old('customer_name', $transaction->customer_name) }}" required
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label for="customer_phone"
-                                    class="block text-sm font-medium text-gray-700 mb-1">Telepon</label>
-                                <input type="text" id="customer_phone" name="customer_phone"
-                                    value="{{ old('customer_phone', $transaction->customer_phone) }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label for="customer_email"
-                                    class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                <input type="email" id="customer_email" name="customer_email"
-                                    value="{{ old('customer_email', $transaction->customer_email) }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label for="customer_address"
-                                    class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
-                                <textarea id="customer_address" name="customer_address" rows="2"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('customer_address', $transaction->customer_address) }}</textarea>
-                            </div>
-                        </div>
-                    </div>
+                        <div class="space-y-4">
+                            <template x-if="cart.length === 0">
+                                <p class="text-gray-500 text-center py-8">
+                                    Keranjang masih kosong. Tambahkan item terlebih dahulu.
+                                </p>
+                            </template>
 
-                    <!-- Product/Service Selection -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Detail Transaksi</h3>
-
-                        <!-- Product Selection (for purchases) -->
-                        <div x-show="transactionType === 'purchase'">
-                            <label for="product_id" class="block text-sm font-medium text-gray-700 mb-1">Produk
-                                *</label>
-                            <select id="product_id" name="product_id" x-model="productId" @change="updateProductPrice()"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                @if ($transaction->type == 'purchase') required @endif>
-                                <option value="">Pilih Produk</option>
-                                @foreach ($products as $product)
-                                    <option value="{{ $product->id }}" data-price="{{ $product->price_per_unit }}"
-                                        {{ old('product_id', $transaction->product_id) == $product->id ? 'selected' : '' }}>
-                                        {{ $product->name }} - Rp
-                                        {{ number_format($product->price_per_unit, 0, ',', '.') }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Service Selection (for orders) -->
-                        <div x-show="transactionType === 'order'">
-                            <label for="printing_id" class="block text-sm font-medium text-gray-700 mb-1">Layanan Cetak
-                                *</label>
-                            <select id="printing_id" name="printing_id" x-model="printingId"
-                                @change="updateServicePrice()"
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                @if ($transaction->type == 'order') required @endif>
-                                <option value="">Pilih Layanan Cetak</option>
-                                @foreach ($services as $service)
-                                    <option value="{{ $service->id }}" data-price="{{ $service->biaya }}"
-                                        {{ old('printing_id', $transaction->printing_id) == $service->id ? 'selected' : '' }}>
-                                        {{ $service->nama_layanan }} - Rp
-                                        {{ number_format($service->biaya, 0, ',', '.') }}/cm²
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Order Details -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div>
-                            <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Jumlah *</label>
-                            <input type="number" id="quantity" name="quantity" x-model="quantity"
-                                @input="calculateTotalPrice()" min="1"
-                                value="{{ old('quantity', $transaction->quantity) }}" required
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                        <template x-if="transactionType === 'order'">
-                            <div>
-                                <label for="tinggi" class="block text-sm font-medium text-gray-700 mb-1">Tinggi (cm)
-                                    *</label>
-                                <input type="number" id="tinggi" name="tinggi" x-model="tinggi"
-                                    @input="calculateTotalPrice()" min="1" step="0.1"
-                                    value="{{ old('tinggi', $transaction->tinggi) }}" required
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    placeholder="0">
-                            </div>
-                        </template>
-                        <template x-if="transactionType === 'order'">
-                            <div>
-                                <label for="lebar" class="block text-sm font-medium text-gray-700 mb-1">Lebar (cm)
-                                    *</label>
-                                <input type="number" id="lebar" name="lebar" x-model="lebar"
-                                    @input="calculateTotalPrice()" min="1" step="0.1"
-                                    value="{{ old('lebar', $transaction->lebar) }}" required
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    placeholder="0">
-                            </div>
-                        </template>
-                    </div>
-
-                    <!-- Pricing Information -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Harga</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- For Orders - Show calculated price -->
-                            <template x-if="transactionType === 'order'">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Harga per cm²</label>
-                                    <div class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100 px-3 py-2">
-                                        <span x-text="'Rp ' + formatNumber(unitPrice) + '/cm²'"></span>
+                            <template x-for="(item, index) in cart" :key="item.id">
+                                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                    <div class="flex-1">
+                                        <div class="font-medium text-gray-900"
+                                            x-text="item.type === 'product' ? item.product_name : item.service_name">
+                                        </div>
+                                        <div class="text-sm text-gray-600">
+                                            <template x-if="item.type === 'service' && item.tinggi && item.lebar">
+                                                <span x-text="`${item.tinggi} x ${item.lebar} cm | `"></span>
+                                            </template>
+                                            <span
+                                                x-text="`${item.quantity} x Rp ${safeFormatCurrency(item.price)}`"></span>
+                                        </div>
+                                        <template x-if="item.notes">
+                                            <div class="text-xs text-gray-500 mt-1" x-text="item.notes"></div>
+                                        </template>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="font-semibold text-gray-900"
+                                            x-text="`Rp ${safeFormatCurrency(item.total_price)}`"></span>
+                                        <button @click="removeFromCart(index)"
+                                            class="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
                                     </div>
                                 </div>
                             </template>
-
-                            <!-- For Purchases - Show unit price input -->
-                            <template x-if="transactionType === 'purchase'">
-                                <div>
-                                    <label for="unit_price" class="block text-sm font-medium text-gray-700 mb-1">Harga
-                                        Satuan (Rp)</label>
-                                    <input type="number" id="unit_price" name="unit_price" x-model="unitPrice"
-                                        @input="calculateTotalPrice()" min="0" step="1"
-                                        value="{{ old('unit_price', $transaction->unit_price) }}" required
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                </div>
-                            </template>
-
-                            <div>
-                                <label for="total_price" class="block text-sm font-medium text-gray-700 mb-1">Total
-                                    Harga (Rp) *</label>
-                                <input type="number" id="total_price" name="total_price" x-model="totalPrice"
-                                    readonly required class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100">
-                                <!-- Price breakdown for orders -->
-                                <div x-show="transactionType === 'order' && totalPrice > 0"
-                                    class="mt-1 text-xs text-gray-500">
-                                    <span
-                                        x-text="'Luas: ' + (tinggi || 0) + 'cm × ' + (lebar || 0) + 'cm = ' + ((tinggi || 0) * (lebar || 0)).toFixed(2) + 'cm²'"></span>
-                                    <br>
-                                    <span x-text="'× Rp ' + formatNumber(unitPrice) + '/cm²'"></span>
-                                    <br>
-                                    <span x-text="'× ' + quantity + ' item = Rp ' + formatNumber(totalPrice)"></span>
-                                </div>
-                            </div>
                         </div>
+
+                        <template x-if="cart.length > 0">
+                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-600">Subtotal:</span>
+                                    <span class="text-sm font-medium text-gray-900"
+                                        x-text="`Rp ${safeFormatCurrency(cartSubtotal)}`"></span>
+                                </div>
+                                <div class="flex justify-between items-center text-lg font-semibold">
+                                    <span>Total:</span>
+                                    <span class="text-blue-600"
+                                        x-text="`Rp ${safeFormatCurrency(cartSubtotal)}`"></span>
+                                </div>
+                            </div>
+                        </template>
                     </div>
 
-                    <!-- File Upload -->
-                    <div class="mb-6" x-show="transactionType === 'order'">
-                        <label for="file" class="block text-sm font-medium text-gray-700 mb-1">File Desain</label>
-                        <input type="file" id="file" name="file"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
-                        @if ($transaction->file_path)
-                            <div class="mt-2">
-                                <span class="text-sm text-gray-600">File saat ini: </span>
-                                <a href="{{ Storage::url($transaction->file_path) }}" target="_blank"
-                                    class="text-blue-600 hover:text-blue-800 text-sm">
-                                    Lihat File
-                                </a>
-                            </div>
-                        @endif
-                        <p class="mt-1 text-sm text-gray-500">Format: JPG, PNG, PDF, DOC, DOCX (Maks. 5MB)</p>
-                    </div>
+                    <!-- Form Data Pelanggan dan Pembayaran -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-4">Data Transaksi</h2>
 
-                    <!-- Payment Information -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Pembayaran</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="payment_method"
-                                    class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran *</label>
-                                <select id="payment_method" name="payment_method" required
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    <option value="">Pilih Metode Pembayaran</option>
-                                    <option value="cash"
-                                        {{ old('payment_method', $transaction->payment_method) == 'cash' ? 'selected' : '' }}>
-                                        Cash</option>
-                                    <option value="transfer"
-                                        {{ old('payment_method', $transaction->payment_method) == 'transfer' ? 'selected' : '' }}>
-                                        Transfer</option>
-                                    <option value="credit_card"
-                                        {{ old('payment_method', $transaction->payment_method) == 'credit_card' ? 'selected' : '' }}>
-                                        Kartu Kredit</option>
-                                </select>
+                        <form id="transactionForm" action="{{ route('transaction.update', $transaction->id) }}"
+                            method="POST" enctype="multipart/form-data">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="type" value="{{ $transaction->type }}">
+                            <input type="hidden" name="cart_items" :value="JSON.stringify(cart)">
+
+                            <!-- Data Pelanggan -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div>
+                                    <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Nama Pelanggan *
+                                    </label>
+                                    <input type="text" id="customer_name" name="customer_name" required
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        value="{{ old('customer_name', $transaction->customer_name) }}">
+                                </div>
+                                <div>
+                                    <label for="customer_phone" class="block text-sm font-medium text-gray-700 mb-1">
+                                        No. Telepon *
+                                    </label>
+                                    <input type="tel" id="customer_phone" name="customer_phone"
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        value="{{ old('customer_phone', $transaction->customer_phone) }}">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label for="customer_email" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Email (Opsional)
+                                    </label>
+                                    <input type="email" id="customer_email" name="customer_email"
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        value="{{ old('customer_email', $transaction->customer_email) }}">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label for="customer_address"
+                                        class="block text-sm font-medium text-gray-700 mb-1">
+                                        Alamat (Opsional)
+                                    </label>
+                                    <textarea id="customer_address" name="customer_address" rows="2"
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('customer_address', $transaction->customer_address) }}</textarea>
+                                </div>
                             </div>
-                            <div>
-                                <label for="paid_at" class="block text-sm font-medium text-gray-700 mb-1">Tanggal
-                                    Bayar</label>
-                                <input type="datetime-local" id="paid_at" name="paid_at"
-                                    value="{{ old('paid_at', $transaction->paid_at ? $transaction->paid_at->format('Y-m-d\TH:i') : '') }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+
+                            <!-- Informasi Pembayaran -->
+                            <div class="border-t border-gray-200 pt-6 mb-6">
+                                <h3 class="text-md font-medium text-gray-900 mb-4">Informasi Pembayaran</h3>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="payment_method"
+                                            class="block text-sm font-medium text-gray-700 mb-1">
+                                            Metode Pembayaran *
+                                        </label>
+                                        <select id="payment_method" name="payment_method" required
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                            <option value="">Pilih Metode</option>
+                                            <option value="cash"
+                                                {{ old('payment_method', $transaction->payment_method) == 'cash' ? 'selected' : '' }}>
+                                                Cash</option>
+                                            <option value="transfer"
+                                                {{ old('payment_method', $transaction->payment_method) == 'transfer' ? 'selected' : '' }}>
+                                                Transfer
+                                            </option>
+                                            <option value="credit_card"
+                                                {{ old('payment_method', $transaction->payment_method) == 'credit_card' ? 'selected' : '' }}>
+                                                Kartu
+                                                Kredit</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="paid_at" class="block text-sm font-medium text-gray-700 mb-1">
+                                            Tanggal Pembayaran
+                                        </label>
+                                        <input type="datetime-local" id="paid_at" name="paid_at"
+                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                            value="{{ old('paid_at', $transaction->paid_at ? \Carbon\Carbon::parse($transaction->paid_at)->format('Y-m-d\TH:i') : '') }}">
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status
-                                    *</label>
+
+                            <!-- Status -->
+                            <div class="mb-6">
+                                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Status *
+                                </label>
                                 <select id="status" name="status" required
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    <option value="">Pilih Status</option>
                                     <option value="pending"
                                         {{ old('status', $transaction->status) == 'pending' ? 'selected' : '' }}>
-                                        Pending</option>
-                                    <option value="processing"
-                                        {{ old('status', $transaction->status) == 'processing' ? 'selected' : '' }}>
-                                        Processing</option>
+                                        Pending
+                                    </option>
                                     <option value="completed"
                                         {{ old('status', $transaction->status) == 'completed' ? 'selected' : '' }}>
                                         Completed</option>
@@ -275,132 +353,290 @@
                                         Cancelled</option>
                                 </select>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- Notes -->
-                    <div class="mb-6">
-                        <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
-                        <textarea id="notes" name="notes" rows="3"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            placeholder="Catatan tambahan untuk transaksi...">{{ old('notes', $transaction->notes) }}</textarea>
-                    </div>
+                            <!-- Tombol Aksi -->
+                            <div class="flex justify-between space-x-3 pt-6 border-t border-gray-200">
+                                <div>
+                                    <button type="button" @click="confirmDelete()"
+                                        class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                                        Hapus Transaksi
+                                    </button>
+                                </div>
+                                <div class="flex space-x-3">
+                                    <a href="{{ route('transaction.index') }}?tab={{ $transaction->type == 'purchase' ? 'purchases' : 'orders' }}"
+                                        class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                                        Batal
+                                    </a>
+                                    <button type="submit" :disabled="cart.length === 0"
+                                        class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        Update Transaksi
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
 
-                    <!-- Submit Button -->
-                    <div class="flex justify-end">
-                        <button type="submit"
-                            class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                            Perbarui Transaksi
-                        </button>
+                        <!-- Form Hapus Transaksi (Hidden) -->
+                        <form id="deleteForm" action="{{ route('transaction.destroy', $transaction->id) }}"
+                            method="POST" class="hidden">
+                            @csrf
+                            @method('DELETE')
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
-        </main>
+        </div>
     </div>
 
-    <!-- Script Section -->
     <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('transactionForm', () => ({
-                transactionType: @json($transaction->type),
-                productId: @json(old('product_id', $transaction->product_id)),
-                printingId: @json(old('printing_id', $transaction->printing_id)),
-                quantity: {{ old('quantity', $transaction->quantity) }},
-                unitPrice: {{ old('unit_price', $transaction->unit_price ?? 0) }},
-                totalPrice: {{ old('total_price', $transaction->total_price) }},
-                tinggi: {{ old('tinggi', $transaction->tinggi ?? 0) }},
-                lebar: {{ old('lebar', $transaction->lebar ?? 0) }},
+        function transactionApp() {
+            return {
+                cart: {!! json_encode(
+                    $transaction->items->map(function ($item) use ($transaction) {
+                            return [
+                                'id' => $item->id,
+                                'type' => $transaction->type == 'purchase' ? 'product' : 'service',
+                                'product_id' => $item->product_id,
+                                'printing_id' => $item->printing_id,
+                                'product_name' => optional($item->product)->name,
+                                'service_name' => optional($item->printing)->nama_layanan,
+                                'quantity' => $item->quantity,
+                                'tinggi' => $item->tinggi,
+                                'lebar' => $item->lebar,
+                                'price' => $item->unit_price,
+                                'total_price' => $item->total_price,
+                                'notes' => $item->notes,
+                            ];
+                        })->toArray(),
+                    JSON_UNESCAPED_UNICODE,
+                ) !!},
+                form: {
+                    product_id: '',
+                    printing_id: '',
+                    quantity: 1,
+                    tinggi: '',
+                    lebar: '',
+                    notes: '',
+                    file: null
+                },
+                stockInfo: '',
 
                 init() {
-                    console.log('Form initialized with type:', this.transactionType);
-
-                    // Update harga berdasarkan data yang ada
-                    if (this.transactionType === 'purchase' && this.productId) {
-                        this.updateProductPrice();
-                    } else if (this.transactionType === 'order' && this.printingId) {
-                        this.updateServicePrice();
-                    }
-
-                    this.calculateTotalPrice();
+                    this.setupEventListeners();
+                    // Pastikan semua nilai numerik dalam cart sudah benar
+                    this.normalizeCartData();
                 },
 
-                updateProductPrice() {
-                    if (this.productId) {
-                        const selectedOption = document.querySelector(
-                            `#product_id option[value="${this.productId}"]`);
-                        if (selectedOption) {
-                            this.unitPrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
-                        }
-                    } else {
-                        this.unitPrice = 0;
-                    }
-                    this.calculateTotalPrice();
+                normalizeCartData() {
+                    // Normalisasi data cart untuk memastikan tipe data numerik
+                    this.cart = this.cart.map(item => {
+                        return {
+                            ...item,
+                            quantity: parseInt(item.quantity) || 1,
+                            price: parseFloat(item.price) || 0,
+                            total_price: parseFloat(item.total_price) || 0,
+                            tinggi: item.tinggi ? parseInt(item.tinggi) : null,
+                            lebar: item.lebar ? parseInt(item.lebar) : null
+                        };
+                    });
                 },
 
-                updateServicePrice() {
-                    if (this.printingId) {
-                        const selectedOption = document.querySelector(
-                            `#printing_id option[value="${this.printingId}"]`);
-                        if (selectedOption) {
-                            this.unitPrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
-                        }
-                    } else {
-                        this.unitPrice = 0;
+                setupEventListeners() {
+                    const productSelect = document.getElementById('product_id');
+                    if (productSelect) {
+                        productSelect.addEventListener('change', (e) => {
+                            const selectedOption = e.target.options[e.target.selectedIndex];
+                            const stock = selectedOption.getAttribute('data-stock');
+                            this.stockInfo = stock ? `Stok tersedia: ${stock}` : '';
+                        });
                     }
-                    this.calculateTotalPrice();
+
+                    const transactionForm = document.getElementById('transactionForm');
+                    if (transactionForm) {
+                        transactionForm.addEventListener('submit', (e) => {
+                            if (this.cart.length === 0) {
+                                e.preventDefault();
+                                alert('Tambahkan minimal satu item ke keranjang!');
+                                return;
+                            }
+                        });
+                    }
+                },
+
+                getBasePrice() {
+                    if (!this.form.printing_id) return 0;
+                    const printingSelect = document.getElementById('printing_id');
+                    const selectedOption = printingSelect.options[printingSelect.selectedIndex];
+                    return parseFloat(selectedOption.getAttribute('data-price')) || 0;
+                },
+
+                calculateArea() {
+                    if (!this.form.tinggi || !this.form.lebar) return 0;
+                    const area = parseFloat(this.form.tinggi) * parseFloat(this.form.lebar);
+                    return area.toFixed(2);
+                },
+
+                calculateUnitPrice() {
+                    const basePrice = this.getBasePrice();
+                    if (this.form.tinggi && this.form.lebar) {
+                        const area = this.calculateArea();
+                        return basePrice * parseFloat(area);
+                    }
+                    return basePrice;
                 },
 
                 calculateTotalPrice() {
-                    if (this.transactionType === 'order') {
-                        // Untuk order: (tinggi × lebar) × harga per cm² × quantity
-                        const luas = (parseFloat(this.tinggi) || 0) * (parseFloat(this.lebar) || 0);
-                        this.totalPrice = luas * (parseFloat(this.unitPrice) || 0) * (parseInt(this
-                            .quantity) || 1);
-                    } else {
-                        // Untuk purchase: unit price × quantity
-                        this.totalPrice = (parseFloat(this.unitPrice) || 0) * (parseInt(this
-                            .quantity) || 1);
-                    }
-
-                    // Round to nearest integer
-                    this.totalPrice = Math.round(this.totalPrice);
+                    const unitPrice = this.calculateUnitPrice();
+                    return unitPrice * parseInt(this.form.quantity || 1);
                 },
 
-                formatNumber(number) {
-                    return new Intl.NumberFormat('id-ID').format(number);
+                addToCart() {
+                    const type = "{{ $transaction->type }}";
+                    let item = {};
+
+                    if (type === 'purchase') {
+                        if (!this.form.product_id) {
+                            alert('Pilih produk terlebih dahulu!');
+                            return;
+                        }
+
+                        const productSelect = document.getElementById('product_id');
+                        const selectedOption = productSelect.options[productSelect.selectedIndex];
+                        const stock = parseInt(selectedOption.getAttribute('data-stock')) || 0;
+
+                        if (this.form.quantity > stock) {
+                            alert(`Stok tidak mencukupi! Stok tersedia: ${stock}`);
+                            return;
+                        }
+
+                        const price = parseFloat(selectedOption.getAttribute('data-price')) || 0;
+                        const quantity = parseInt(this.form.quantity);
+                        const totalPrice = price * quantity;
+
+                        item = {
+                            id: `prod_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                            type: 'product',
+                            product_id: this.form.product_id,
+                            product_name: selectedOption.text.split(' - ')[0],
+                            quantity: quantity,
+                            price: price,
+                            total_price: totalPrice,
+                            notes: this.form.notes ? this.form.notes.trim() : null,
+                        };
+
+                    } else {
+                        if (!this.form.printing_id) {
+                            alert('Pilih layanan terlebih dahulu!');
+                            return;
+                        }
+
+                        const printingSelect = document.getElementById('printing_id');
+                        const selectedOption = printingSelect.options[printingSelect.selectedIndex];
+
+                        const basePrice = this.getBasePrice();
+                        let unitPrice = basePrice;
+
+                        if (this.form.tinggi && this.form.lebar) {
+                            unitPrice = basePrice * parseFloat(this.form.tinggi) * parseFloat(this.form.lebar);
+                        }
+
+                        const quantity = parseInt(this.form.quantity);
+                        const totalPrice = unitPrice * quantity;
+
+                        item = {
+                            id: `serv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                            type: 'service',
+                            printing_id: this.form.printing_id,
+                            service_name: selectedOption.text.split(' - ')[0],
+                            quantity: quantity,
+                            tinggi: this.form.tinggi ? parseInt(this.form.tinggi) : null,
+                            lebar: this.form.lebar ? parseInt(this.form.lebar) : null,
+                            price: unitPrice,
+                            total_price: totalPrice,
+                            notes: this.form.notes ? this.form.notes.trim() : null,
+                        };
+                    }
+
+                    // Validasi data sebelum masuk cart
+                    if (item.total_price <= 0) {
+                        alert('Harga item tidak valid! Silakan periksa input Anda.');
+                        return;
+                    }
+
+                    // Pastikan tipe data numerik
+                    item.quantity = parseInt(item.quantity);
+                    item.price = parseFloat(item.price);
+                    item.total_price = parseFloat(item.total_price);
+
+                    this.cart.push(item);
+                    this.resetForm();
+                    this.showToast('Item berhasil ditambahkan ke keranjang', 'success');
+                },
+
+                removeFromCart(index) {
+                    this.cart.splice(index, 1);
+                    this.showToast('Item berhasil dihapus dari keranjang', 'info');
+                },
+
+                resetForm() {
+                    this.form = {
+                        product_id: '',
+                        printing_id: '',
+                        quantity: 1,
+                        tinggi: '',
+                        lebar: '',
+                        notes: '',
+                        file: null
+                    };
+                    this.stockInfo = '';
+                },
+
+                confirmDelete() {
+                    if (confirm('Apakah Anda yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan.')) {
+                        document.getElementById('deleteForm').submit();
+                    }
+                },
+
+                showToast(message, type = 'info') {
+                    const toast = document.createElement('div');
+                    toast.className = `fixed top-4 right-4 p-4 rounded-md shadow-lg text-white ${
+                    type === 'success' ? 'bg-green-500' : 
+                    type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+                }`;
+                    toast.textContent = message;
+
+                    document.body.appendChild(toast);
+
+                    setTimeout(() => {
+                        document.body.removeChild(toast);
+                    }, 3000);
+                },
+
+                // Fungsi formatCurrency yang aman
+                formatCurrency(amount) {
+                    if (typeof amount !== 'number' || isNaN(amount)) {
+                        return '0';
+                    }
+                    return new Intl.NumberFormat('id-ID').format(amount.toFixed(0));
+                },
+
+                // Fungsi formatCurrency yang lebih aman untuk template
+                safeFormatCurrency(amount) {
+                    try {
+                        const num = parseFloat(amount);
+                        if (isNaN(num)) return '0';
+                        return new Intl.NumberFormat('id-ID').format(num.toFixed(0));
+                    } catch (error) {
+                        return '0';
+                    }
+                },
+
+                get cartSubtotal() {
+                    return this.cart.reduce((total, item) => {
+                        const itemTotal = parseFloat(item.total_price) || 0;
+                        return total + itemTotal;
+                    }, 0);
                 }
-            }));
-        });
-
-        // Custom form validation
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('transactionForm');
-
-            if (form) {
-                form.addEventListener('submit', function(e) {
-                    console.log('Form submitted');
-
-                    // Validasi basic
-                    const quantity = document.getElementById('quantity');
-                    const totalPrice = document.getElementById('total_price');
-
-                    if (quantity && parseFloat(quantity.value) <= 0) {
-                        e.preventDefault();
-                        alert('Jumlah harus lebih besar dari 0');
-                        quantity.focus();
-                        return false;
-                    }
-
-                    if (totalPrice && parseFloat(totalPrice.value) <= 0) {
-                        e.preventDefault();
-                        alert('Total harga harus lebih besar dari 0');
-                        totalPrice.focus();
-                        return false;
-                    }
-
-                    return true;
-                });
             }
-        });
+        }
     </script>
 </x-layout.default>

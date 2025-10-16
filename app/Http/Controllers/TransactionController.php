@@ -207,9 +207,9 @@ class TransactionController extends Controller
      */
     public function edit($id)
     {
-        $transaction = Transaction::with(['transactionItems'])->findOrFail($id);
+        $transaction = Transaction::with(['items'])->findOrFail($id);
 
-        $transactionItem = $transaction->transactionItems->first();
+        $transactionItem = $transaction->items->first();
 
         $products = Product::all();
         $services = Printing::all();
@@ -226,7 +226,7 @@ class TransactionController extends Controller
 
         try {
             $transaction = Transaction::findOrFail($id);
-            $transactionItem = $transaction->transactionItems->first();
+            $transactionItem = $transaction->items->first();
 
             $validated = $request->validate([
                 'customer_name' => 'required|string|max:255',
