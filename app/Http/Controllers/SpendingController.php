@@ -48,8 +48,6 @@ class SpendingController extends Controller
         // Data untuk metode pembayaran
         $paymentMethods = [
             'cash' => 'Cash',
-            'credit_card' => 'Kartu Kredit',
-            'debit_card' => 'Kartu Debit',
             'transfer' => 'Transfer'
         ];
 
@@ -67,7 +65,7 @@ class SpendingController extends Controller
             'quantity' => 'required|numeric|min:1',
             'amount' => 'required|numeric|min:1',
             'category' => 'required|string|max:255',
-            'payment_method' => 'required|in:cash,credit_card,debit_card,transfer',
+            'payment_method' => 'required|in:cash,transfer',
             'spending_date' => 'required|date'
         ]);
             Spending::create($request->all());
@@ -100,8 +98,6 @@ class SpendingController extends Controller
         // Data untuk metode pembayaran
         $paymentMethods = [
             'cash' => 'Cash',
-            'credit_card' => 'Kartu Kredit',
-            'debit_card' => 'Kartu Debit',
             'transfer' => 'Transfer'
         ];
 
@@ -119,7 +115,7 @@ class SpendingController extends Controller
             'quantity' => 'required|numeric|min:1',
             'amount' => 'required|numeric|min:1',
             'category' => 'required|string|max:255',
-            'payment_method' => 'required|in:cash,credit_card,debit_card,transfer',
+            'payment_method' => 'required|in:cash,transfer',
             'spending_date' => 'required|date'
         ]);
 
