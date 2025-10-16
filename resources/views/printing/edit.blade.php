@@ -15,17 +15,17 @@
                             value="{{ $printing->nama_layanan }}" required>
                     </div>
                     <div>
-                        <label for="biaya">biaya</label>
-                        <input type="number" name="biaya" id="biaya" placeholder="biaya"
+                        <label for="hitungan">Perhitungan</label>
+                        <input type="text" name="hitungan" id="hitungan" placeholder="hitungan"
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            value="{{ $printing->biaya }}" required>
+                            value="{{ $printing->hitungan }}" required>
                     </div>
                 </div>
                 <div>
-                    <label for="hitungan">Perhitungan</label>
-                    <input type="text" name="hitungan" id="hitungan" placeholder="hitungan"
+                    <label for="biaya">biaya</label>
+                    <input type="number" name="biaya" id="biaya" placeholder="biaya"
                         class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        value="{{ $printing->hitungan }}" required>
+                        value="{{ $printing->biaya }}" required>
                 </div>
                 <div class="flex justify-between mt-8">
                     <a href="{{ route('printing.index') }}"
