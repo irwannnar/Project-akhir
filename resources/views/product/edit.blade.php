@@ -31,11 +31,11 @@
                 <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
                     <div class="flex flex-col sm:flex-row justify-end gap-3">
                         <a href="{{ route('product.index') }}"
-                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-600 hover:text-white transition duration-200 font-medium text-center active:scale-95">
+                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-600 hover:text-white transition duration-200 font-medium text-center focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 active:scale-95">
                             Batal
                         </a>
                         <button type="submit"
-                            class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-200 font-medium flex items-center justify-center gap-2  active:scale-95">
+                            class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition duration-200 font-medium flex items-center justify-center gap-2 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

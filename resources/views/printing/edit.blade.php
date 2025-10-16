@@ -29,9 +29,9 @@
                 </div>
                 <div class="flex justify-between mt-8">
                     <a href="{{ route('printing.index') }}"
-                        class="border border-gray-600 bg-gray-600 hover:bg-gray-800 text-white px-2 py-1 rounded active:scale-95">batal</a>
+                        class="border border-gray-600 bg-gray-600 hover:bg-gray-800 text-white px-2 py-1 rounded focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 active:scale-95">batal</a>
                     <button type="submit"
-                        class="border border-blue-600 bg-blue-600 hover:bg-blue-800 text-white px-2 py-1 rounded active:scale-95">Simpan
+                        class="border border-blue-600 bg-blue-600 hover:bg-blue-800 text-white px-2 py-1 rounded focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95">Simpan
                         perubahan</button>
                 </div>
             </form>

@@ -161,7 +161,7 @@
                             </div>
 
                             <button type="submit"
-                                class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95">
                                 Tambah ke Keranjang
                             </button>
                         </form>
@@ -331,11 +331,11 @@
                             <!-- Tombol Aksi -->
                             <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
                                 <a href="{{ route('transaction.index') }}?tab={{ request('type') == 'purchase' ? 'purchases' : 'orders' }}"
-                                    class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                                    class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 active:scale-95">
                                     Batal
                                 </a>
                                 <button type="submit" :disabled="cart.length === 0"
-                                    class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95">
                                     Buat Transaksi
                                 </button>
                             </div>

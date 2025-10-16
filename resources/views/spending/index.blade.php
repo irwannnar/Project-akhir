@@ -28,7 +28,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
                 <h1 class="text-2xl font-bold text-gray-800">Manajemen Pengeluaran</h1>
                 <a href="{{ route('spending.create') }}"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center gap-2 active:scale-95">
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center gap-2 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -79,11 +79,11 @@
                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 </div>
                 <div class="flex justify-end space-x-2 mt-4">
-                    <button type="submit" class="bg-blue-700 text-white hover:bg-blue-900 px-4 py-2 rounded">
+                    <button type="submit" class="bg-blue-700 text-white px-4 py-2 rounded focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-95">
                         Terapkan filter
                     </button>
                     <a href="{{ route('spending.index') }}"
-                        class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">
+                        class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md  focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 active:scale-95">
                         Reset
                     </a>
                 </div>
