@@ -256,7 +256,7 @@
                                 </div>
                                 <div>
                                     <label for="customer_phone" class="block text-sm font-medium text-gray-700 mb-1">
-                                        No. Telepon *
+                                        No. Telepon (Opsional)
                                     </label>
                                     <input type="tel" id="customer_phone" name="customer_phone"
                                         class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
@@ -323,8 +323,6 @@
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                     <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending
                                     </option>
-                                    <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>
-                                        Completed</option>
                                 </select>
                             </div>
 

@@ -180,7 +180,7 @@ class TransactionController extends Controller
 
             DB::commit();
 
-            return redirect()->route('transaction.show', $transaction->id)
+            return redirect()->route('transaction.index', $transaction->id)
                 ->with('success', 'Transaksi berhasil dibuat!');
         } catch (\Exception $e) {
             DB::rollBack();
