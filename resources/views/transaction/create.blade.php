@@ -1,4 +1,3 @@
-<!-- create.blade.php -->
 <x-layout.default>
     <div class="py-6" x-data="transactionApp()">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -358,7 +357,7 @@
                     file: null
                 },
                 stockInfo: '',
-                productsStock: {}, // <- map stok produk
+                productsStock: {},
 
                 init() {
                     this.setupEventListeners();
@@ -381,7 +380,6 @@
                         productSelect.addEventListener('change', (e) => {
                             const selectedOption = e.target.options[e.target.selectedIndex];
                             const stock = selectedOption.getAttribute('data-stock');
-                            // gunakan productsStock agar sinkron dengan cart
                             const id = selectedOption.value;
                             this.stockInfo = id ? `Stok tersedia: ${this.productsStock[id] ?? 0}` : '';
                         });
@@ -400,7 +398,6 @@
                 },
 
                 updateProductStockDisplay(productId) {
-                    // update atribut data-stock pada option agar select selalu menampilkan stok terbaru
                     const productSelect = document.getElementById('product_id');
                     if (!productSelect || !productId) return;
                     for (let i = 0; i < productSelect.options.length; i++) {
@@ -410,7 +407,6 @@
                             break;
                         }
                     }
-                    // update stockInfo bila produk yang dipilih sama
                     const sel = productSelect.options[productSelect.selectedIndex];
                     if (sel && sel.value == productId) {
                         this.stockInfo = `Stok tersedia: ${this.productsStock[productId] ?? 0}`;
@@ -444,9 +440,32 @@
                     return unitPrice * parseInt(this.form.quantity || 1);
                 },
 
+                // Fungsi untuk mencari item yang sama di keranjang
+                findExistingCartItem(newItem) {
+                    const type = "{{ request('type') }}";
+                    
+                    if (type === 'purchase') {
+                        // Untuk produk: cari berdasarkan product_id dan notes yang sama
+                        return this.cart.find(item => 
+                            item.type === 'product' && 
+                            item.product_id === newItem.product_id && 
+                            item.notes === newItem.notes
+                        );
+                    } else {
+                        // Untuk layanan: cari berdasarkan printing_id, tinggi, lebar, dan notes yang sama
+                        return this.cart.find(item => 
+                            item.type === 'service' && 
+                            item.printing_id === newItem.printing_id && 
+                            item.tinggi === newItem.tinggi && 
+                            item.lebar === newItem.lebar && 
+                            item.notes === newItem.notes
+                        );
+                    }
+                },
+
                 addToCart() {
                     const type = "{{ request('type') }}";
-                    let item = {};
+                    let newItem = {};
 
                     if (type === 'purchase') {
                         if (!this.form.product_id) {
@@ -467,7 +486,7 @@
                         const price = parseFloat(selectedOption.getAttribute('data-price')) || 0;
                         const totalPrice = price * quantity;
 
-                        item = {
+                        newItem = {
                             id: `prod_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                             type: 'product',
                             product_id: this.form.product_id,
@@ -477,10 +496,6 @@
                             total_price: totalPrice,
                             notes: this.form.notes ? this.form.notes.trim() : null,
                         };
-
-                        this.productsStock[this.form.product_id] = Math.max(0, (this.productsStock[this.form.product_id] ||
-                            0) - quantity);
-                        this.updateProductStockDisplay(this.form.product_id);
 
                     } else {
                         if (!this.form.printing_id) {
@@ -501,7 +516,7 @@
                         const quantity = parseInt(this.form.quantity);
                         const totalPrice = unitPrice * quantity;
 
-                        item = {
+                        newItem = {
                             id: `serv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                             type: 'service',
                             printing_id: this.form.printing_id,
@@ -516,22 +531,55 @@
                     }
 
                     // Validasi data sebelum masuk cart
-                    if (item.total_price <= 0) {
+                    if (newItem.total_price <= 0) {
                         alert('Harga item tidak valid! Silakan periksa input Anda.');
                         return;
                     }
 
-                    this.cart.push(item);
+                    // Cek apakah item sudah ada di keranjang
+                    const existingItem = this.findExistingCartItem(newItem);
+                    
+                    if (existingItem) {
+                        // Jika item sudah ada, update quantity dan total price
+                        const newQuantity = existingItem.quantity + newItem.quantity;
+                        
+                        if (type === 'purchase') {
+                            // Cek stok untuk produk
+                            const stock = parseInt(this.productsStock[newItem.product_id] || 0);
+                            if (newQuantity > stock) {
+                                alert(`Stok tidak mencukupi! Stok tersedia: ${stock}`);
+                                return;
+                            }
+                            
+                            // Update stok
+                            const additionalQuantity = newItem.quantity;
+                            this.productsStock[newItem.product_id] = Math.max(0, (this.productsStock[newItem.product_id] || 0) - additionalQuantity);
+                            this.updateProductStockDisplay(newItem.product_id);
+                        }
+                        
+                        existingItem.quantity = newQuantity;
+                        existingItem.total_price = existingItem.price * newQuantity;
+                        this.showToast('Quantity item berhasil ditambahkan', 'success');
+                    } else {
+                        // Jika item belum ada, tambahkan sebagai item baru
+                        if (type === 'purchase') {
+                            // Update stok untuk produk baru
+                            this.productsStock[newItem.product_id] = Math.max(0, (this.productsStock[newItem.product_id] || 0) - newItem.quantity);
+                            this.updateProductStockDisplay(newItem.product_id);
+                        }
+                        
+                        this.cart.push(newItem);
+                        this.showToast('Item berhasil ditambahkan ke keranjang', 'success');
+                    }
+
                     this.resetForm();
-                    this.showToast('Item berhasil ditambahkan ke keranjang', 'success');
                 },
 
                 removeFromCart(index) {
                     const item = this.cart[index];
                     // kembalikan stok pada UI jika item produk
                     if (item && item.type === 'product' && item.product_id) {
-                        this.productsStock[item.product_id] = (this.productsStock[item.product_id] || 0) + (item.quantity ||
-                            0);
+                        this.productsStock[item.product_id] = (this.productsStock[item.product_id] || 0) + (item.quantity || 0);
                         this.updateProductStockDisplay(item.product_id);
                     }
 
