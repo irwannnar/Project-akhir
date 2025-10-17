@@ -358,9 +358,21 @@
                     file: null
                 },
                 stockInfo: '',
+                productsStock: {}, // <- map stok produk
 
                 init() {
                     this.setupEventListeners();
+                    // Inisialisasi productsStock dari option <select>
+                    const productSelect = document.getElementById('product_id');
+                    if (productSelect) {
+                        for (let i = 0; i < productSelect.options.length; i++) {
+                            const opt = productSelect.options[i];
+                            const id = opt.value;
+                            if (!id) continue;
+                            const stock = parseInt(opt.getAttribute('data-stock')) || 0;
+                            this.productsStock[id] = stock;
+                        }
+                    }
                 },
 
                 setupEventListeners() {
@@ -369,7 +381,9 @@
                         productSelect.addEventListener('change', (e) => {
                             const selectedOption = e.target.options[e.target.selectedIndex];
                             const stock = selectedOption.getAttribute('data-stock');
-                            this.stockInfo = stock ? `Stok tersedia: ${stock}` : '';
+                            // gunakan productsStock agar sinkron dengan cart
+                            const id = selectedOption.value;
+                            this.stockInfo = id ? `Stok tersedia: ${this.productsStock[id] ?? 0}` : '';
                         });
                     }
 
@@ -382,6 +396,24 @@
                                 return;
                             }
                         });
+                    }
+                },
+
+                updateProductStockDisplay(productId) {
+                    // update atribut data-stock pada option agar select selalu menampilkan stok terbaru
+                    const productSelect = document.getElementById('product_id');
+                    if (!productSelect || !productId) return;
+                    for (let i = 0; i < productSelect.options.length; i++) {
+                        const opt = productSelect.options[i];
+                        if (opt.value == productId) {
+                            opt.setAttribute('data-stock', this.productsStock[productId]);
+                            break;
+                        }
+                    }
+                    // update stockInfo bila produk yang dipilih sama
+                    const sel = productSelect.options[productSelect.selectedIndex];
+                    if (sel && sel.value == productId) {
+                        this.stockInfo = `Stok tersedia: ${this.productsStock[productId] ?? 0}`;
                     }
                 },
 
@@ -424,15 +456,15 @@
 
                         const productSelect = document.getElementById('product_id');
                         const selectedOption = productSelect.options[productSelect.selectedIndex];
-                        const stock = parseInt(selectedOption.getAttribute('data-stock')) || 0;
+                        const stock = parseInt(this.productsStock[this.form.product_id] || 0);
 
-                        if (this.form.quantity > stock) {
+                        const quantity = parseInt(this.form.quantity);
+                        if (quantity > stock) {
                             alert(`Stok tidak mencukupi! Stok tersedia: ${stock}`);
                             return;
                         }
 
                         const price = parseFloat(selectedOption.getAttribute('data-price')) || 0;
-                        const quantity = parseInt(this.form.quantity);
                         const totalPrice = price * quantity;
 
                         item = {
@@ -441,10 +473,14 @@
                             product_id: this.form.product_id,
                             product_name: selectedOption.text.split(' - ')[0],
                             quantity: quantity,
-                            price: price, // ini untuk unit_price
-                            total_price: totalPrice, // ini untuk total_price
+                            price: price,
+                            total_price: totalPrice,
                             notes: this.form.notes ? this.form.notes.trim() : null,
                         };
+
+                        this.productsStock[this.form.product_id] = Math.max(0, (this.productsStock[this.form.product_id] ||
+                            0) - quantity);
+                        this.updateProductStockDisplay(this.form.product_id);
 
                     } else {
                         if (!this.form.printing_id) {
@@ -473,8 +509,8 @@
                             quantity: quantity,
                             tinggi: this.form.tinggi ? parseInt(this.form.tinggi) : null,
                             lebar: this.form.lebar ? parseInt(this.form.lebar) : null,
-                            price: unitPrice, // ini untuk unit_price
-                            total_price: totalPrice, // ini untuk total_price
+                            price: unitPrice,
+                            total_price: totalPrice,
                             notes: this.form.notes ? this.form.notes.trim() : null,
                         };
                     }
@@ -490,29 +526,15 @@
                     this.showToast('Item berhasil ditambahkan ke keranjang', 'success');
                 },
 
-                // Validasi item sebelum dimasukkan ke cart
-                validateCartItem(item) {
-                    // Validasi notes tidak empty string
-                    if (item.notes === '') {
-                        item.notes = null;
-                    }
-
-                    // Validasi tinggi dan lebar untuk service
-                    if (item.type === 'service') {
-                        if (item.tinggi !== null && (isNaN(item.tinggi) || item.tinggi <= 0)) {
-                            alert('Tinggi harus berupa angka positif!');
-                            return false;
-                        }
-                        if (item.lebar !== null && (isNaN(item.lebar) || item.lebar <= 0)) {
-                            alert('Lebar harus berupa angka positif!');
-                            return false;
-                        }
-                    }
-
-                    return true;
-                },
-
                 removeFromCart(index) {
+                    const item = this.cart[index];
+                    // kembalikan stok pada UI jika item produk
+                    if (item && item.type === 'product' && item.product_id) {
+                        this.productsStock[item.product_id] = (this.productsStock[item.product_id] || 0) + (item.quantity ||
+                            0);
+                        this.updateProductStockDisplay(item.product_id);
+                    }
+
                     this.cart.splice(index, 1);
                     this.showToast('Item berhasil dihapus dari keranjang', 'info');
                 },
