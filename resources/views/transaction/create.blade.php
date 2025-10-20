@@ -87,19 +87,19 @@
                                 <div class="grid grid-cols-2 gap-4 mb-4">
                                     <div>
                                         <label for="tinggi" class="block text-sm font-medium text-gray-700 mb-1">
-                                            Tinggi (cm)
+                                            Tinggi
                                         </label>
                                         <input type="number" id="tinggi" x-model="form.tinggi" min="1"
                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                            placeholder="Tinggi dalam cm">
+                                            placeholder="Tinggi">
                                     </div>
                                     <div>
                                         <label for="lebar" class="block text-sm font-medium text-gray-700 mb-1">
-                                            Lebar (cm)
+                                            Lebar
                                         </label>
                                         <input type="number" id="lebar" x-model="form.lebar" min="1"
                                             class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                            placeholder="Lebar dalam cm">
+                                            placeholder="Lebar">
                                     </div>
                                 </div>
 
@@ -110,11 +110,11 @@
                                     <div class="text-sm text-gray-600 p-2 bg-gray-50 rounded">
                                         <template x-if="form.tinggi && form.lebar">
                                             <div>
-                                                Luas: <span x-text="calculateArea()"></span> cm²
+                                                Luas: <span x-text="calculateArea()"></span>
                                             </div>
                                         </template>
                                         <div>
-                                            Biaya per cm²: Rp <span x-text="formatCurrency(getBasePrice())"></span>
+                                            Biaya: Rp <span x-text="formatCurrency(getBasePrice())"></span>
                                         </div>
                                         <template x-if="form.tinggi && form.lebar">
                                             <div>
