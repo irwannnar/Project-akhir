@@ -42,7 +42,7 @@
                                         Pilih Produk *
                                     </label>
                                     <select id="product_id" x-model="form.product_id" required
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
                                         <option value="">Pilih Produk</option>
                                         @foreach ($products as $product)
                                             <option value="{{ $product->id }}"
@@ -61,7 +61,7 @@
                                     </label>
                                     <input type="number" id="quantity" x-model="form.quantity" min="1"
                                         value="1" required
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
                                     <p id="stockInfo" class="text-xs text-gray-500 mt-1" x-text="stockInfo"></p>
                                 </div>
                             @else
@@ -71,7 +71,7 @@
                                         Pilih Layanan *
                                     </label>
                                     <select id="printing_id" x-model="form.printing_id" required
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
                                         <option value="">Pilih Layanan</option>
                                         @foreach ($printings as $printing)
                                             <option value="{{ $printing->id }}" data-price="{{ $printing->biaya }}"
@@ -90,7 +90,7 @@
                                             Tinggi
                                         </label>
                                         <input type="number" id="tinggi" x-model="form.tinggi" min="1"
-                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                                             placeholder="Tinggi">
                                     </div>
                                     <div>
@@ -98,7 +98,7 @@
                                             Lebar
                                         </label>
                                         <input type="number" id="lebar" x-model="form.lebar" min="1"
-                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                                             placeholder="Lebar">
                                     </div>
                                 </div>
@@ -137,7 +137,7 @@
                                     </label>
                                     <input type="number" id="service_quantity" x-model="form.quantity" min="1"
                                         value="1" required
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
                                 </div>
 
                                 <div class="mb-4">
@@ -145,7 +145,7 @@
                                         File Desain (Opsional)
                                     </label>
                                     <input type="file" id="file"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                                         accept=".jpg,.jpeg,.png,.pdf,.ai,.psd,.cdr">
                                 </div>
                             @endif
@@ -155,7 +155,7 @@
                                     Catatan (Opsional)
                                 </label>
                                 <textarea id="notes" x-model="form.notes" rows="3"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                                     placeholder="Tambahkan catatan khusus..."></textarea>
                             </div>
 
@@ -250,7 +250,7 @@
                                         Nama Pelanggan *
                                     </label>
                                     <input type="text" id="customer_name" name="customer_name" required
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                                         value="{{ old('customer_name') }}">
                                 </div>
                                 <div>
@@ -258,7 +258,7 @@
                                         No. Telepon (Opsional)
                                     </label>
                                     <input type="tel" id="customer_phone" name="customer_phone"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                                         value="{{ old('customer_phone') }}">
                                 </div>
                                 <div class="md:col-span-2">
@@ -266,7 +266,7 @@
                                         Email (Opsional)
                                     </label>
                                     <input type="email" id="customer_email" name="customer_email"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                                         value="{{ old('customer_email') }}">
                                 </div>
                                 <div class="md:col-span-2">
@@ -275,7 +275,7 @@
                                         Alamat (Opsional)
                                     </label>
                                     <textarea id="customer_address" name="customer_address" rows="2"
-                                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('customer_address') }}</textarea>
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">{{ old('customer_address') }}</textarea>
                                 </div>
                             </div>
 
@@ -290,7 +290,7 @@
                                             Metode Pembayaran *
                                         </label>
                                         <select id="payment_method" name="payment_method" required
-                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
                                             <option value="">Pilih Metode</option>
                                             <option value="cash"
                                                 {{ old('payment_method') == 'cash' ? 'selected' : '' }}>Cash</option>
@@ -307,7 +307,7 @@
                                             Tanggal Pembayaran
                                         </label>
                                         <input type="datetime-local" id="paid_at" name="paid_at"
-                                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                                             value="{{ old('paid_at') }}">
                                     </div>
                                 </div>
@@ -319,7 +319,7 @@
                                     Status *
                                 </label>
                                 <select id="status" name="status" required
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200">
                                     <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Pending
                                     </option>
                                 </select>
